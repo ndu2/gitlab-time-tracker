@@ -22,9 +22,11 @@ class hasTimes extends Base {
      * @param time
      * @returns {*}
      */
-    createTime(time) {
-        return this.post(`projects/${this.data.project_id}/${this._type}/${this.iid}/add_spent_time`, {
-            duration: Time.toHumanReadable(time, this.config.get('hoursPerDay'), '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]')
+    createTime(time, created_at) {
+        var date = new Date(created_at);
+        var spentAt = date.getUTCFullYear()+"-"+date.getUTCMonth()+"-"+date.getUTCDate();
+        return this.post(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`, {
+            body: '/spend '+Time.toHumanReadable(time, this.config.get('hoursPerDay'), '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]'+' '+spentAt),
         });
     }
 

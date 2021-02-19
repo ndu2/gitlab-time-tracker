@@ -117,7 +117,7 @@ class tasks {
         return new Promise((resolve, reject) => {
             let resource = this.sync.resources[frame.resource.type][frame.resource.id];
 
-            resource.createTime(Math.ceil(time))
+            resource.createTime(Math.ceil(time), frame._stop)
                 .then(() => resource.getNotes())
                 .then(() => {
                     if (frame.resource.new) {
