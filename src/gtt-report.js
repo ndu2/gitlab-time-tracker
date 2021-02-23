@@ -131,8 +131,6 @@ config
     .set('type', program.opts().type)
     .set('subgroups', program.opts().subgroups)
     .set('_verbose', program.opts().verbose)
-<<<<<<< Updated upstream
-=======
     .set('invoiceTitle', program.opts().invoiceTitle)
     .set('invoiceAddress', program.opts().invoiceAddress)
     .set('invoiceCurrency', program.opts().invoiceCurrency)
@@ -140,7 +138,6 @@ config
     .set('invoiceVAT', program.opts().invoiceVAT)
     .set('invoiceDate', program.opts().invoiceDate)
     .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
->>>>>>> Stashed changes
     .set('_createDump', program.opts().output === 'dump');
 
 // date shortcuts
