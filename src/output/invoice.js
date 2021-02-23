@@ -9,7 +9,7 @@ const format = {
 };
 
 /**
- * stdout table output
+ * invoice, code heavily based on markdown.js
  */
 class invoice extends Base {
     constructor(config, report) {
@@ -75,7 +75,7 @@ ${opening}
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceExkl.toFixed(2)}</div>
 <div class="positionDesc">MWST (${this.invoiceVAT*100}%)</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceMwst.toFixed(2)}</div>
-<div class="positionDescTot">Rechnungsbetrag</div>
+<div class="positionDescTot">Rechnungsbetrag inkl. MWST</div>
 <div class="positionValueTot">${this.invoiceCurrency} ${this.totalForInvoice.toFixed(2)}</div>
 </div>
 
