@@ -273,9 +273,19 @@ gtt report --output=markdown
 gtt report --output=csv
 gtt report --output=pdf --file=filename.pdf
 gtt report --output=xlsx --file=filename.xlsx
+gtt report --output=invoice --file=invoice.md
+```
+Defaults to `table`. `csv` and `markdown` can be printed to stdout, `pdf` and `xlsx` need the file parameter.
+
+#### Invoice Output
+
+There are additional options for the invoice output as given in the following example:
+
+```shell
+gtt report --output=invoice --file=invoice.md --from 2021-02-01 --to 2021-02-28 --closed  --invoiceCurrencyMaxUnit 1 --invoiceTitle "Rechnung" --invoiceAddress "Firma" "Mr. X" "Strasse" "10000 Ort" "Land" --invoiceCurrency "EUR" --invoiceCurrencyPerHour "50" --invoiceVAT "0.15" --invoiceDate "1.03.2021"
 ```
 
-Defaults to `table`. `csv` and `markdown` can be printed to stdout, `pdf` and `xlsx` need the file parameter.
+For paper invoice, further process the output with a css, see the folder preview (styles.css, invoice.pdf)
 
 #### Print the output to a file
 
@@ -629,6 +639,26 @@ _checkToken: false
 
 # Skip parsing the issue/merge_request description for time records
 _skipDescriptionParsing: false
+
+# settings for invoice output
+invoiceSettings:
+ from:
+ - Absender FA
+ - Name
+ - Strasse
+ - PLZ ORT
+ - 
+ - Weitere Infos
+ fromShort: absender fenstercouvert
+ opening:
+ - Satz 1.
+ - Satz 2.
+ positionText: Positionstext
+ closing:
+ - Grussformel
+ - 
+ - Name
+ bankAccount: "Bitte den Betrag auf unser Konto... IBAN .."
 ```
 
 ### Time format
