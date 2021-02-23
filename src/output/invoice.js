@@ -33,9 +33,11 @@ class invoice extends Base {
             return "";
         }
         if(!Array.isArray(data)) {
-            return data;
+            return data.replace(/_/g, " ");
         }
-        return data.join(separator);
+        let data2 = [];
+        data.forEach(el => data2.push(this.concat(el, separator)));
+        return data2.join(separator);
     }
 
     makeStats() {
