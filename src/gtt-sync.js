@@ -14,13 +14,13 @@ program
     .option('--verbose', 'show verbose output')
     .parse(process.argv);
 
-Cli.verbose = program.verbose;
+Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd())
-        .set('url', program.url)
-        .set('token', program.token)
-        .set('insecure', program.insecure)
-        .set('proxy', program.proxy);
+        .set('url', program.opts().url)
+        .set('token', program.opts().token)
+        .set('insecure', program.opts().insecure)
+        .set('proxy', program.opts().proxy);
     tasks = new Tasks(config),
     owner = new Owner(config);
 
