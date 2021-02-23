@@ -14,6 +14,7 @@ const Output = {
     csv: require('./output/csv'),
     pdf: require('./output/pdf'),
     markdown: require('./output/markdown'),
+    invoice: require('./output/invoice'),
     dump: require('./output/dump'),
     xlsx: require('./output/xlsx')
 };
@@ -64,6 +65,13 @@ program
     .option('--verbose', 'show verbose output')
     .option('--show_without_times', 'show issues/merge requests without time records')
     .option('--from_dump <file>', 'instead of querying gitlab, use data from the given dump file')
+    .option('--invoiceTitle <title>', 'title on invoice')
+    .option('--invoiceAddress [address...]', 'address')
+    .option('--invoiceCurrency <currency>', 'currecnty on invoice')
+    .option('--invoiceCurrencyPerHour <number>', 'hourly wage rate on invoice')
+    .option('--invoiceVAT <number>', 'vat decimal (20% = 0.2)')
+    .option('--invoiceDate <number>', 'date string')
+    .option('--invoiceCurrencyMaxUnit <number>', 'rouning invoice total, e.g. 0.01, 0.05 or 1')
     .parse(process.argv);
 
 // init helpers
@@ -123,6 +131,16 @@ config
     .set('type', program.opts().type)
     .set('subgroups', program.opts().subgroups)
     .set('_verbose', program.opts().verbose)
+<<<<<<< Updated upstream
+=======
+    .set('invoiceTitle', program.opts().invoiceTitle)
+    .set('invoiceAddress', program.opts().invoiceAddress)
+    .set('invoiceCurrency', program.opts().invoiceCurrency)
+    .set('invoiceCurrencyPerHour', program.opts().invoiceCurrencyPerHour)
+    .set('invoiceVAT', program.opts().invoiceVAT)
+    .set('invoiceDate', program.opts().invoiceDate)
+    .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
+>>>>>>> Stashed changes
     .set('_createDump', program.opts().output === 'dump');
 
 // date shortcuts
@@ -150,10 +168,10 @@ let reports = new ReportCollection(config),
     output;
 
 // warnings
-if (config.get('iids').length > 1 && config.get('query').length > 1) {
+if (config.get('iids').length >= 1 && config.get('query').length > 1) {
     Cli.warn(`The ids argument is ignored when querying issues and merge requests`);
 }
-if (config.get('iids').length > 1 && (config.get('type') !== 'project' || projects.length > 1)) {
+if (config.get('iids').length >= 1 && (config.get('type') !== 'project' || projects.length > 1)) {
     Cli.warn(`The ids argument is ignored when querying multiple projects`);
 }
 if ((config.get('report').includes('issues') && !config.get('query').includes('issues'))) {

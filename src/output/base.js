@@ -143,6 +143,9 @@ class base {
             'total spent': this.config.toHumanReadable(totalSpent, 'stats'),
             'spent': this.config.toHumanReadable(spent, 'stats')
         };
+        this.totalEstimate = totalEstimate;
+        this.spent = spent;
+        this.totalSpent = totalSpent;
     }
 
     /**
