@@ -1,0 +1,89 @@
+body {
+  font-family: "Source Sans Pro";
+  font-size: 10pt;
+  margin-top: 70px;
+  margin-bottom: 120px;
+  margin-left: 100px;
+  margin-right: 100px;
+}
+
+.h1 {
+  font-family: "Source Serif Pro";
+  font-size: 14.3pt;
+}
+
+.h2 {
+  font-family: "Source Serif Pro";
+  font-size: 12.6pt;
+}
+.h3 {
+  font-family: "Source Serif Pro";
+  font-size: 11.1pt;
+}
+
+
+.senderBox {
+  margin-bottom: 100px;  
+}
+
+.addressBox {
+  width: 30%;
+  margin-left: 60%;
+  margin-bottom: 50px;  
+  
+}
+.addressFrom {
+  font-size: 8pt;
+  text-decoration: underline;
+}
+
+.addressTo {
+  font-size: 10pt;
+}
+
+.dateBox {
+  text-align: right;
+}
+
+.positionBox {
+  margin-top: 30px;
+  margin-bottom: 60px;
+}
+
+
+.positionDesc {
+  display: inline-block;
+  width: 80%;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+
+.positionValue {
+  display: inline-block;
+  width: 19%;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  text-align: right;
+}
+
+.positionDescTot {
+  display: inline-block;
+  width: 80%;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+
+.positionValueTot {
+  display: inline-block;
+  width: 19%;
+  text-decoration: underline;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  text-align: right;
+}
+  
+  
+  
+  
