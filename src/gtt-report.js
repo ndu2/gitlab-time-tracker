@@ -71,8 +71,8 @@ let config = new Config(process.cwd());
 let cli = new Cli(program.args);
 
 // if using a dump, set the config accordingly
-if (program.from_dump && fs.existsSync(program.from_dump)) {
-    let data = JSON.parse(fs.readFileSync(program.from_dump));
+if (program.opts().from_dump && fs.existsSync(program.opts().from_dump)) {
+    let data = JSON.parse(fs.readFileSync(program.opts().from_dump));
 
     if (data.data) _.each(data.data, (v, i) => {
         config.set(i, v);
@@ -82,7 +82,7 @@ if (program.from_dump && fs.existsSync(program.from_dump)) {
 }
 
 // if writing a dump, set config accordingly
-if (program.output === "dump") {
+if (program.opts().output === "dump") {
     config.on("dump-updated", () => {
         new Output['dump'](config);
     });
@@ -90,51 +90,51 @@ if (program.output === "dump") {
 
 // overwrite config with args and opts
 config
-    .set('url', program.url)
-    .set('token', program.token)
-    .set('insecure', program.insecure)
+    .set('url', program.opts().url)
+    .set('token', program.opts().token)
+    .set('insecure', program.opts().insecure)
     .set('project', cli.project())
     .set('iids', cli.iids())
-    .set('from', program.from)
-    .set('to', program.to)
-    .set('closed', program.closed)
-    .set('user', program.user)
-    .set('milestone', program.milestone)
-    .set('includeByLabels', program.include_by_labels)
-    .set('excludeByLabels', program.exclude_by_labels)
-    .set('includeLabels', program.include_labels)
-    .set('excludeLabels', program.exclude_labels)
-    .set('dateFormat', program.date_format)
-    .set('timeFormat', program.time_format)
-    .set('hoursPerDay', program.hours_per_day)
-    .set('output', program.output)
-    .set('file', program.file)
-    .set('query', program.query)
-    .set('report', program.report)
-    .set('recordColumns', program.record_columns)
-    .set('issueColumns', program.issue_columns)
-    .set('mergeRequestColumns', program.merge_request_columns)
-    .set('noHeadlines', program.no_headlines)
-    .set('noWarnings', program.no_warnings)
-    .set('quiet', program.quiet)
-    .set('showWithoutTimes', program.show_without_times)
-    .set('userColumns', program.user_columns)
-    .set('proxy', program.proxy)
-    .set('type', program.type)
-    .set('subgroups', program.subgroups)
-    .set('_verbose', program.verbose)
-    .set('_createDump', program.output === 'dump');
+    .set('from', program.opts().from)
+    .set('to', program.opts().to)
+    .set('closed', program.opts().closed)
+    .set('user', program.opts().user)
+    .set('milestone', program.opts().milestone)
+    .set('includeByLabels', program.opts().include_by_labels)
+    .set('excludeByLabels', program.opts().exclude_by_labels)
+    .set('includeLabels', program.opts().include_labels)
+    .set('excludeLabels', program.opts().exclude_labels)
+    .set('dateFormat', program.opts().date_format)
+    .set('timeFormat', program.opts().time_format)
+    .set('hoursPerDay', program.opts().hours_per_day)
+    .set('output', program.opts().output)
+    .set('file', program.opts().file)
+    .set('query', program.opts().query)
+    .set('report', program.opts().report)
+    .set('recordColumns', program.opts().record_columns)
+    .set('issueColumns', program.opts().issue_columns)
+    .set('mergeRequestColumns', program.opts().merge_request_columns)
+    .set('noHeadlines', program.opts().no_headlines)
+    .set('noWarnings', program.opts().no_warnings)
+    .set('quiet', program.opts().quiet)
+    .set('showWithoutTimes', program.opts().show_without_times)
+    .set('userColumns', program.opts().user_columns)
+    .set('proxy', program.opts().proxy)
+    .set('type', program.opts().type)
+    .set('subgroups', program.opts().subgroups)
+    .set('_verbose', program.opts().verbose)
+    .set('_createDump', program.opts().output === 'dump');
 
 // date shortcuts
-if (program.today)
+if (program.opts().today)
     config
         .set('from', moment().startOf('day'))
         .set('to', moment().endOf('day'));
-if (program.this_week)
+if (program.opts().this_week)
     config
         .set('from', moment().startOf('week'))
         .set('to', moment().endOf('week'));
-if (program.this_month)
+if (program.opts().this_month)
     config
         .set('from', moment().startOf('month'))
         .set('to', moment().endOf('month'));

@@ -14,11 +14,11 @@ program
     .option('--time_format <time_format>', 'time format')
     .parse(process.argv);
 
-Cli.verbose = program.verbose;
+Cli.verbose = program.opts().verbose;
 
-let config = new Config(__dirname).set('hoursPerDay', program.hours_per_day),
+let config = new Config(__dirname).set('hoursPerDay', program.opts().hours_per_day),
     tasks = new Tasks(config),
-    timeFormat = config.set('timeFormat', program.time_format).get('timeFormat', 'log');
+    timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
 
 function toHumanReadable(input) {
     return Time.toHumanReadable(Math.ceil(input), config.get('hoursPerDay'), timeFormat);

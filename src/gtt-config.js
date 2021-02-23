@@ -9,8 +9,8 @@ program
     .option('-l, --local', 'edit the local configuration file')
     .parse(process.argv);
 
-if (program.local) {
+if (program.opts().local) {
     config.assertLocalConfig();
 }
 
-Fs.open(program.local ? config.local : config.global);
+Fs.open(program.opts().local ? config.local : config.global);

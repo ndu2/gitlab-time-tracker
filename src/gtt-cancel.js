@@ -10,7 +10,7 @@ program
     .option('--verbose', 'show verbose output')
     .parse(process.argv);
 
-Cli.verbose = program.verbose;
+Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd());
 let tasks = new Tasks(config);

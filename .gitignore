@@ -1,3 +1,4 @@
+/.vscode/
 /coverage
 /.idea/
 **/node_modules
@@ -6,3 +7,4 @@
 yarn-error.log
 **/._*
 out
+package-lock.json

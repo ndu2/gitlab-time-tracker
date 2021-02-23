@@ -12,11 +12,11 @@ program
     .option('--verbose', 'show verbose output')
     .parse(process.argv);
 
-Cli.verbose = program.verbose;
+Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd()),
     tasks = new Tasks(config),
-    type = program.type ? program.type : 'issue',
+    type = program.opts().type ? program.opts().type : 'issue',
     title = program.args.length === 1 ? program.args[0] : program.args[1],
     project = program.args.length === 2 ? program.args[0] : null;
 
