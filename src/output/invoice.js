@@ -19,7 +19,7 @@ class invoice extends Base {
         this.invoiceCurrencyPerHour = this.config.get('invoiceCurrencyPerHour');
         this.invoiceVAT = this.config.get('invoiceVAT');
         this.invoiceCurrencyMaxUnit = this.config.get('invoiceCurrencyMaxUnit');
-        this.totalhForInvoice = this.spent / 3600.0;
+        this.totalhForInvoice = (this.spent-this.spentFree) / 3600.0;
         this.totalForInvoiceExkl = this.totalhForInvoice * this.invoiceCurrencyPerHour;
         this.totalForInvoiceMwst = this.totalForInvoiceExkl * this.invoiceVAT;
         this.totalForInvoice = this.totalForInvoiceExkl + this.totalForInvoiceMwst;
