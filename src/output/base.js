@@ -106,6 +106,9 @@ class base {
         let times = [];
 
         let spentFreeLabels = this.config.get('freeLabels');
+        if(undefined === spentFreeLabels) {
+            spentFreeLabels = [];
+        }
 
         ['issues', 'mergeRequests'].forEach(type => {
             this.report[type].forEach(issue => {
