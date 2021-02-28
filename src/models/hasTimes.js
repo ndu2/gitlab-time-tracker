@@ -15,6 +15,7 @@ class hasTimes extends Base {
     constructor(config) {
         super(config);
         this.times = [];
+        this.timesWarnings = [];
     }
 
     /**
@@ -58,6 +59,7 @@ class hasTimes extends Base {
      */
     getTimes() {
         let times = [],
+            timesWarnings = [],
             timeSpent = 0,
             totalTimeSpent = 0,
             timeUsers = {},
@@ -127,18 +129,22 @@ class hasTimes extends Base {
             !(created.isSameOrAfter(moment(this.config.get('from'))) && created.isSameOrBefore(moment(this.config.get('to'))))
             ) return resolve();
 
+            // warn about difference, but do not correct as gitlab API
+            // stats forget the times after an issue is moved to another project.
             let difference = this.data.time_stats.total_time_spent - totalTimeSpent,
                 note = Object.assign({noteable_type: this._typeSingular}, this.data);
-
-            times.unshift(new Time(Time.toHumanReadable(difference, this.config.get('hoursPerDay')), null, note, this, this.config));
-
+            note.timeWarning = {};
+            note.timeWarning['stats'] = this.data.time_stats.total_time_spent;
+            note.timeWarning['notes'] = totalTimeSpent;
+            timesWarnings.push(new Time(Time.toHumanReadable(difference, this.config.get('hoursPerDay')), null, note, this, this.config));
             resolve();
         }));
 
         promise.then(() => {
             _.each(timeUsers, (time, name) => this[`time_${name}`] = Time.toHumanReadable(time, this.config.get('hoursPerDay'), timeFormat));
             this.timeSpent = timeSpent;
-            this.times = times
+            this.times = times;
+            this.timesWarnings = timesWarnings;
         });
 
         return promise;

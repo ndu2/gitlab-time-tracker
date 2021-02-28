@@ -89,7 +89,21 @@ ${closing}
 <h1 style="page-break-before: always;"><br/><br/>Stundenrapport</h1>`;
 
         this.headline('Total');
-        this.write(stats.substr(1));
+        //this.write(stats.substr(1));
+        this.write(this.config.toHumanReadable(this.spent, 'stats'));
+        this.write(this.config.toHumanReadable(this.spentFree, 'statsFree'));
+
+        // warnings
+        let warnings = '';
+
+        this.timesWarnings.forEach( warning => {
+            let stats = this.config.toHumanReadable(warning.data.timeWarning.stats, 'stats');
+            let notes = this.config.toHumanReadable(warning.data.timeWarning.notes, 'stats');
+            warnings += `\n* ${warning.data.iid} ${warning.data.title}: Difference between stats and notes of ${warning.time}.`;
+            warnings += `<br/>Stats: ${stats}, Notes: ${notes}`
+        });
+        this.warningHeadline('Warnings');
+        this.warning(warnings+'\n');
     }
 
     makeIssues() {
