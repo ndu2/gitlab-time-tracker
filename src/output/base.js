@@ -39,6 +39,14 @@ class base {
     }
 
     /**
+     * print a headline for warnings
+     * @param string
+     */
+    warningHeadline(string) {
+        if (this.config.get('noWarnings')) return;
+        this.headline(string);
+    }
+    /**
      * print a warning
      * @param string
      */
@@ -104,6 +112,7 @@ class base {
         let users = {};
         let projects = {};
         let times = [];
+        let timesWarnings = [];
 
         let spentFreeLabels = this.config.get('freeLabels');
         if(undefined === spentFreeLabels) {
@@ -132,6 +141,7 @@ class base {
                     }
                     times.push(time);
                 });
+                issue.timesWarnings.forEach(warning => timesWarnings.push(warning));
 
                 totalEstimate += parseInt(issue.stats.time_estimate);
                 totalSpent += parseInt(issue.stats.total_time_spent);
@@ -164,6 +174,7 @@ class base {
         this.spent = spent;
         this.spentFree = spentFree;
         this.totalSpent = totalSpent;
+        this.timesWarnings = timesWarnings;
     }
 
     /**
