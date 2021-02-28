@@ -616,6 +616,11 @@ includeLabels:
 - pending
 - approved
 
+# labels  free of charge
+freeLabels:
+ - at no charge
+ - free
+ 
 # Only works if using a local configuration file!
 # Extend the global configuration if set to true, pass a string to extend 
 # the configuration file stored at the given path

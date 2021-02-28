@@ -100,9 +100,15 @@ class base {
         let totalEstimate = 0;
         let totalSpent = 0;
         let spent = 0;
+        let spentFree = 0;
         let users = {};
         let projects = {};
         let times = [];
+
+        let spentFreeLabels = this.config.get('freeLabels');
+        if(undefined === spentFreeLabels) {
+            spentFreeLabels = [];
+        }
 
         ['issues', 'mergeRequests'].forEach(type => {
             this.report[type].forEach(issue => {
@@ -114,6 +120,16 @@ class base {
                     projects[time.project_namespace] += time.seconds;
 
                     spent += time.seconds;
+                    //if(time.parent.labels)
+                    let free = false;
+                    time.parent.labels.forEach(label => {
+                            spentFreeLabels.forEach(freeLabel => {
+                                free |= (freeLabel == label);
+                            });
+                        });
+                    if(free) {
+                        spentFree += time.seconds;
+                    }
                     times.push(time);
                 });
 
@@ -141,10 +157,12 @@ class base {
         this.stats = {
             'total estimate': this.config.toHumanReadable(totalEstimate, 'stats'),
             'total spent': this.config.toHumanReadable(totalSpent, 'stats'),
-            'spent': this.config.toHumanReadable(spent, 'stats')
+            'spent': this.config.toHumanReadable(spent, 'stats'),
+            'spent free': this.config.toHumanReadable(spentFree, 'stats'),
         };
         this.totalEstimate = totalEstimate;
         this.spent = spent;
+        this.spentFree = spentFree;
         this.totalSpent = totalSpent;
     }
 
