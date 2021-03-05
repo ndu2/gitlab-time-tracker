@@ -133,9 +133,22 @@ ${closing}
     makeRecords() {
         this.headline('Details');
 
-        let times = [this.config.get('recordColumns').map(c => c.replace('_', ' '))];
-        this.times.forEach(time => times.push(this.prepare(time, this.config.get('recordColumns'))));
-
+        let times = [['date', 'iid', 'time']];
+        let days = Object.keys(this.days);
+        days.sort();
+        days.forEach(
+            k => {
+                let day = this.days[k];
+                let refD = this.daysMoment[k].format(this.config.get('dateFormat'));
+                let iids = Object.keys(day);
+                iids.sort();
+                iids.forEach(
+                    iid => {
+                    times.push([refD, iid, this.config.toHumanReadable(day[iid], 'records')]);
+                    });
+            });
+        //let times = [this.config.get('recordColumns').map(c => c.replace('_', ' '))];
+        //this.times.forEach(time => times.push(this.prepare(time, this.config.get('recordColumns'))));
         this.write(Table(times));
     }
 }

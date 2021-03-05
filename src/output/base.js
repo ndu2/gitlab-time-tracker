@@ -113,6 +113,8 @@ class base {
         let projects = {};
         let times = [];
         let timesWarnings = [];
+        let days = {};
+        let daysMoment = {};
 
         let spentFreeLabels = this.config.get('freeLabels');
         if(undefined === spentFreeLabels) {
@@ -122,11 +124,20 @@ class base {
         ['issues', 'mergeRequests'].forEach(type => {
             this.report[type].forEach(issue => {
                 issue.times.forEach(time => {
+                    let dateGrp = time.date.format(this.config.get('dateFormatGroupReport'));
                     if (!users[time.user]) users[time.user] = 0;
                     if (!projects[time.project_namespace]) projects[time.project_namespace] = 0;
+                    if (!days[dateGrp]) {
+                        days[dateGrp] = {}
+                        daysMoment[dateGrp] = time.date;
+                    };
+                    if(!days[dateGrp][time.iid]) {
+                        days[dateGrp][time.iid] = 0;
+                    }
 
                     users[time.user] += time.seconds;
                     projects[time.project_namespace] += time.seconds;
+                    days[dateGrp][time.iid] += time.seconds;
 
                     spent += time.seconds;
                     //if(time.parent.labels)
@@ -162,6 +173,8 @@ class base {
             return a.date.isBefore(b.date) ? 1 : -1;
         });
 
+        this.days = days;
+        this.daysMoment = daysMoment;
         this.users = _.mapObject(users, user => this.config.toHumanReadable(user, 'stats'));
         this.projects = _.mapObject(projects, project => this.config.toHumanReadable(project, 'stats'));
         this.stats = {
