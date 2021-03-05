@@ -90,8 +90,8 @@ class report extends Base {
      */
     getIssues() {
         let promise = this.all(`projects/${this.project.id}/issues${this.params()}`);
-        promise.then(issues => this.issues = issues);
-
+        // filter moved issues in any case
+        promise.then(issues => this.issues = issues.filter(issue => (issue.state != 'closed' || issue.moved_to_id == null)));
         return promise;
     }
 
