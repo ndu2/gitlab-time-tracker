@@ -57,7 +57,37 @@ class table extends Base {
         this.write(mergeRequests.toString());
     }
 
+    makeDailyStats() {
+        this.headline('DAILY RECORDS');
+
+        var tabledt = new Table({head: ['date', 'time']});
+        var tabledit = new Table({head: ['date', 'project', 'iid', 'time']});
+        let days = Object.keys(this.days);
+        days.sort();
+        days.forEach(
+            k => {
+                let day = this.days[k];
+                let refD = this.daysMoment[k].format(this.config.get('dateFormat'));
+                let projects = Object.keys(day);
+                let time = 0;
+                projects.forEach(
+                    p => {
+                    let iids = Object.keys(day[p]);
+                    iids.sort();
+                    iids.forEach(
+                        iid => {
+                            tabledit.push([refD, p, iid, this.config.toHumanReadable(day[p][iid], 'records')]);
+                            time += day[p][iid];
+                        });
+                    });
+                tabledt.push([refD, this.config.toHumanReadable(time)]);
+            });
+        this.write(tabledt.toString());
+        this.write(tabledit.toString());
+    }
+
     makeRecords() {
+        this.makeDailyStats();
         this.headline('TIME RECORDS');
         let times = new Table({head: this.config.get('recordColumns').map(c => c.replace('_', ' '))});
         this.times.forEach(time => times.push(this.prepare(time, this.config.get('recordColumns'))));
