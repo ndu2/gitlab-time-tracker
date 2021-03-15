@@ -131,13 +131,17 @@ class base {
                         days[dateGrp] = {}
                         daysMoment[dateGrp] = time.date;
                     };
-                    if(!days[dateGrp][time.iid]) {
-                        days[dateGrp][time.iid] = 0;
+                    if(!days[dateGrp][time.project_namespace]) {
+                        days[dateGrp][time.project_namespace] = {};
                     }
+                    if(!days[dateGrp][time.project_namespace][time.iid]) {
+                        days[dateGrp][time.project_namespace][time.iid] = 0;
+                    }
+
 
                     users[time.user] += time.seconds;
                     projects[time.project_namespace] += time.seconds;
-                    days[dateGrp][time.iid] += time.seconds;
+                    days[dateGrp][time.project_namespace][time.iid] += time.seconds;
 
                     spent += time.seconds;
                     //if(time.parent.labels)
