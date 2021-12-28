@@ -18,6 +18,7 @@ class invoice extends Base {
         this.invoiceCurrency = this.config.get('invoiceCurrency');
         this.invoiceCurrencyPerHour = this.config.get('invoiceCurrencyPerHour');
         this.invoiceVAT = this.config.get('invoiceVAT');
+        this.invoicePositionText = this.config.get('invoicePositionText');
         this.invoiceCurrencyMaxUnit = this.config.get('invoiceCurrencyMaxUnit');
         this.totalhForInvoice = (this.spent-this.spentFree) / 3600.0;
         // round subtotals to 0.01 and total to invoiceCurrencyMaxUnit.
@@ -56,7 +57,7 @@ class invoice extends Base {
         let from = this.concat(this.config.get('invoiceSettings').from, '</br>');
         let opening = this.concat(this.config.get('invoiceSettings').opening, '</br>');
         let closing = this.concat(this.config.get('invoiceSettings').closing, '</br>');
-        let positionText = this.concat(this.config.get('invoiceSettings').positionText, '</br>');
+       
 
         this.out += 
 `<div class="senderBox">${from}</div>
@@ -72,7 +73,7 @@ class invoice extends Base {
 ${opening}
 
 <div class="positionBox">
-<div class="positionDesc">${positionText} (${this.totalhForInvoice.toFixed(2)} Stunden zu ${this.invoiceCurrencyPerHour} ${this.invoiceCurrency})</div>
+<div class="positionDesc">${this.invoicePositionText} (${this.totalhForInvoice.toFixed(2)} Stunden zu ${this.invoiceCurrencyPerHour} ${this.invoiceCurrency})</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceExkl.toFixed(2)}</div>
 <div class="positionDesc">MWST (${this.invoiceVAT*100}%)</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceMwst.toFixed(2)}</div>
