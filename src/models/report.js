@@ -81,7 +81,7 @@ class report extends Base {
         let promise = this.all(`projects/${this.project.id}/merge_requests${this.params()}`);
         let excludes = this.config.get('excludeByLabels');
         promise.then(mergeRequests => this.mergeRequests = mergeRequests.filter(mr => (
-            excludes.filter(l=>mr.labels.includes(l)).length==0 // keep all merge requests not including a exclude label
+            (!excludes || excludes.filter(l=>mr.labels.includes(l)).length==0) // keep all merge requests not including a exclude label
             )));
 
         return promise;
@@ -96,7 +96,7 @@ class report extends Base {
         let excludes = this.config.get('excludeByLabels');
         promise.then(issues => this.issues = issues.filter(issue => (
             issue.moved_to_id == null && // filter moved issues in any case
-            excludes.filter(l=>issue.labels.includes(l)).length==0 // keep all issues not including a exclude label
+            (!excludes || excludes.filter(l=>issue.labels.includes(l)).length==0) // keep all issues not including a exclude label
             )));
         return promise;
     }
