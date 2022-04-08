@@ -102,8 +102,10 @@ ${closing}
             warnings += `\n* ${warning.data.iid} ${warning.data.title}: Difference between stats and notes of ${warning.time}.`;
             warnings += `<br/>Stats: ${stats}, Notes: ${notes}`
         });
-        this.warningHeadline('Warnings');
-        this.warning(warnings+'\n');
+        if(warnings != '') {
+            this.warningHeadline('Warnings');
+            this.warning(warnings+'\n');
+        }
     }
 
     makeIssues() {
@@ -131,6 +133,9 @@ ${closing}
     }
 
     makeRecords() {
+        this.out += `
+
+<h1 style="page-break-before: always;"><br/><br/>Stundenrapport detailliert</h1>`;
         this.headline('Details');
 
         let times = [['date', 'project', 'iid', 'time']];
