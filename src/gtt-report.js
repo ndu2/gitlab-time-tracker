@@ -72,6 +72,7 @@ program
     .option('--invoiceVAT <number>', 'vat decimal (20% = 0.2)')
     .option('--invoiceDate <number>', 'date string')
     .option('--invoiceCurrencyMaxUnit <number>', 'rouning invoice total, e.g. 0.01, 0.05 or 1')
+    .option('--invoicePositionText <text>', 'invoice position text')
     .parse(process.argv);
 
 // init helpers
@@ -138,6 +139,7 @@ config
     .set('invoiceVAT', program.opts().invoiceVAT)
     .set('invoiceDate', program.opts().invoiceDate)
     .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
+    .set('invoicePositionText', program.opts().invoicePositionText)
     .set('_createDump', program.opts().output === 'dump');
 
 // date shortcuts

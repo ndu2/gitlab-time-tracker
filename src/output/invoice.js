@@ -18,13 +18,13 @@ class invoice extends Base {
         this.invoiceCurrency = this.config.get('invoiceCurrency');
         this.invoiceCurrencyPerHour = this.config.get('invoiceCurrencyPerHour');
         this.invoiceVAT = this.config.get('invoiceVAT');
+        this.invoicePositionText = this.config.get('invoicePositionText');
         this.invoiceCurrencyMaxUnit = this.config.get('invoiceCurrencyMaxUnit');
         this.totalhForInvoice = (this.spent-this.spentFree) / 3600.0;
-        this.totalForInvoiceExkl = this.totalhForInvoice * this.invoiceCurrencyPerHour;
-        this.totalForInvoiceMwst = this.totalForInvoiceExkl * this.invoiceVAT;
-        this.totalForInvoice = this.totalForInvoiceExkl + this.totalForInvoiceMwst;
-        // round
-        this.totalForInvoice = Math.round(this.totalForInvoice/this.invoiceCurrencyMaxUnit)*this.invoiceCurrencyMaxUnit;
+        // round subtotals to 0.01 and total to invoiceCurrencyMaxUnit.
+        this.totalForInvoiceExkl = Math.round(this.totalhForInvoice * this.invoiceCurrencyPerHour * 100) * 0.01;
+        this.totalForInvoiceMwst = Math.round(this.totalhForInvoice * this.invoiceCurrencyPerHour * this.invoiceVAT * 100) * 0.01;
+        this.totalForInvoice = Math.round((this.totalForInvoiceExkl + this.totalForInvoiceMwst)/this.invoiceCurrencyMaxUnit)*this.invoiceCurrencyMaxUnit;
     }
 
 
@@ -57,7 +57,7 @@ class invoice extends Base {
         let from = this.concat(this.config.get('invoiceSettings').from, '</br>');
         let opening = this.concat(this.config.get('invoiceSettings').opening, '</br>');
         let closing = this.concat(this.config.get('invoiceSettings').closing, '</br>');
-        let positionText = this.concat(this.config.get('invoiceSettings').positionText, '</br>');
+       
 
         this.out += 
 `<div class="senderBox">${from}</div>
@@ -73,7 +73,7 @@ class invoice extends Base {
 ${opening}
 
 <div class="positionBox">
-<div class="positionDesc">${positionText} (${this.totalhForInvoice.toFixed(2)} Stunden zu ${this.invoiceCurrencyPerHour} ${this.invoiceCurrency})</div>
+<div class="positionDesc">${this.invoicePositionText} (${this.totalhForInvoice.toFixed(2)} Stunden zu ${this.invoiceCurrencyPerHour} ${this.invoiceCurrency})</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceExkl.toFixed(2)}</div>
 <div class="positionDesc">MWST (${this.invoiceVAT*100}%)</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceMwst.toFixed(2)}</div>
@@ -89,7 +89,23 @@ ${closing}
 <h1 style="page-break-before: always;"><br/><br/>Stundenrapport</h1>`;
 
         this.headline('Total');
-        this.write(stats.substr(1));
+        //this.write(stats.substr(1));
+        this.write(this.config.toHumanReadable(this.spent, 'stats'));
+        this.write(this.config.toHumanReadable(this.spentFree, 'statsFree'));
+
+        // warnings
+        let warnings = '';
+
+        this.timesWarnings.forEach( warning => {
+            let stats = this.config.toHumanReadable(warning.data.timeWarning.stats, 'stats');
+            let notes = this.config.toHumanReadable(warning.data.timeWarning.notes, 'stats');
+            warnings += `\n* ${warning.data.iid} ${warning.data.title}: Difference between stats and notes of ${warning.time}.`;
+            warnings += `<br/>Stats: ${stats}, Notes: ${notes}`
+        });
+        if(warnings != '') {
+            this.warningHeadline('Warnings');
+            this.warning(warnings+'\n');
+        }
     }
 
     makeIssues() {
@@ -117,11 +133,31 @@ ${closing}
     }
 
     makeRecords() {
+        this.out += `
+
+<h1 style="page-break-before: always;"><br/><br/>Stundenrapport detailliert</h1>`;
         this.headline('Details');
 
-        let times = [this.config.get('recordColumns').map(c => c.replace('_', ' '))];
-        this.times.forEach(time => times.push(this.prepare(time, this.config.get('recordColumns'))));
-
+        let times = [['date', 'project', 'iid', 'time']];
+        let days = Object.keys(this.days);
+        days.sort();
+        days.forEach(
+            k => {
+                let day = this.days[k];
+                let refD = this.daysMoment[k].format(this.config.get('dateFormat'));
+                let projects = Object.keys(day);
+                projects.forEach(
+                    p => {
+                    let iids = Object.keys(day[p]);
+                    iids.sort();
+                    iids.forEach(
+                        iid => {
+                        times.push([refD, p, iid, this.config.toHumanReadable(day[p][iid], 'records')]);
+                        });
+                    });
+            });
+        //let times = [this.config.get('recordColumns').map(c => c.replace('_', ' '))];
+        //this.times.forEach(time => times.push(this.prepare(time, this.config.get('recordColumns'))));
         this.write(Table(times));
     }
 }
