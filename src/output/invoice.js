@@ -64,16 +64,37 @@ class invoice extends Base {
         let endOfZipPos = this.config.get('invoiceSettings').from[3].search("[ _]");
         let zip = this.config.get('invoiceSettings').from[3].substring(0, endOfZipPos);
         let city = this.config.get('invoiceSettings').from[3].substring(endOfZipPos + 1);
-        let endOfZipPosDebitor = this.config.get('invoiceAddress')[3].search("[ _]");
-        let zipDebitor = this.config.get('invoiceAddress')[3].substring(0, endOfZipPosDebitor);
-        let cityDebitor = this.config.get('invoiceAddress')[3].substring(endOfZipPosDebitor + 1);
+        
+        // debitor
+        let nDebitorAddressFields = this.config.get('invoiceAddress').length;
+        let nameDebitor = "";
+        let zipDebitor = "";
+        let cityDebitor = "";
+        let addressDebitor = "";
+        let countryDebitor = "CH";
+
+        if(nDebitorAddressFields > 0) {
+            nameDebitor = this.config.get('invoiceAddress') [0].replaceAll("_", " ");
+        }
+        if(nDebitorAddressFields > 2) {
+            let endOfZipPosDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].search("[ _]");
+            zipDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(0, endOfZipPosDebitor).replaceAll("_", " ");
+            cityDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(endOfZipPosDebitor + 1).replaceAll("_", " ");
+            addressDebitor = this.config.get('invoiceAddress') [nDebitorAddressFields-2].replaceAll("_", " ");
+            if(zipDebitor.search("-") > 0)
+            {
+                let countryZip = zipDebitor.split("-");
+                countryDebitor = countryZip[0];
+                zipDebitor = countryZip[1];
+            }
+        }
 
         const data = {
             currency: "CHF",
             amount: this.totalForInvoice,
-            reference: this.config.get('invoiceTitle'),
+            additionalInformation: this.config.get('invoiceReference'),
             creditor: {
-            name: this.config.get('invoiceSettings').from [0],
+            name: this.config.get('invoiceSettings').from[0],
             address: this.config.get('invoiceSettings').from [2],
             zip: zip,
             city: city,
@@ -81,11 +102,11 @@ class invoice extends Base {
             country: this.config.get('invoiceSettings').Country
             },
             debtor: {
-            name: this.config.get('invoiceAddress') [0],
-            address: this.config.get('invoiceAddress') [2],
+            name: nameDebitor,
+            address: addressDebitor,
             zip: zipDebitor,
             city: cityDebitor,
-            country: "CH"
+            country: countryDebitor
             }
         };
         const options = {
