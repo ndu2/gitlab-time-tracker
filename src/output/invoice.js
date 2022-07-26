@@ -71,22 +71,28 @@ class invoice extends Base {
         let zipDebitor = "";
         let cityDebitor = "";
         let addressDebitor = "";
-           
+        let countryDebitor = "CH";
 
         if(nDebitorAddressFields > 0) {
-            nameDebitor = this.config.get('invoiceAddress') [0].replace("_", " ");
+            nameDebitor = this.config.get('invoiceAddress') [0].replaceAll("_", " ");
         }
         if(nDebitorAddressFields > 2) {
             let endOfZipPosDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].search("[ _]");
-            zipDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(0, endOfZipPosDebitor).replace("_", " ");
-            cityDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(endOfZipPosDebitor + 1).replace("_", " ");
-            addressDebitor = this.config.get('invoiceAddress') [nDebitorAddressFields-2].replace("_", " ");
+            zipDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(0, endOfZipPosDebitor).replaceAll("_", " ");
+            cityDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(endOfZipPosDebitor + 1).replaceAll("_", " ");
+            addressDebitor = this.config.get('invoiceAddress') [nDebitorAddressFields-2].replaceAll("_", " ");
+            if(zipDebitor.search("-") > 0)
+            {
+                let countryZip = zipDebitor.split("-");
+                countryDebitor = countryZip[0];
+                zipDebitor = countryZip[1];
+            }
         }
 
         const data = {
             currency: "CHF",
             amount: this.totalForInvoice,
-            reference: this.config.get('invoiceReference'),
+            additionalInformation: this.config.get('invoiceReference'),
             creditor: {
             name: this.config.get('invoiceSettings').from[0],
             address: this.config.get('invoiceSettings').from [2],
@@ -100,7 +106,7 @@ class invoice extends Base {
             address: addressDebitor,
             zip: zipDebitor,
             city: cityDebitor,
-            country: "CH"
+            country: countryDebitor
             }
         };
         const options = {
