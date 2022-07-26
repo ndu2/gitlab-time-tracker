@@ -139,7 +139,7 @@ class fileConfig extends config {
     }
 
     get frameDir() {
-        return Fs.join(this.globalDir, 'frames');
+        return Fs.join(this.globalDir, 'frames/files');
     }
 
     get cacheDir() {
