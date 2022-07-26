@@ -28,8 +28,21 @@ tasks.log()
     .then(({frames, times}) => {
             Object.keys(frames).sort().forEach(date => {
                 if (!frames.hasOwnProperty(date)) return;
+                let dayNote = "";
+                let hpd = config.get('hoursPerDay');
+                if(times[date] > hpd*3600*2)
+                {
+                    dayNote = ` - worked over ${hpd*2} hours`.red;
+                }else if(times[date] > hpd*3600*1.5)
+                {
+                    dayNote = ` - worked over ${hpd*1.5} hours`.orange;
+                }else if(times[date] > hpd*3600*1.1)
+                {
+                    dayNote = ` - worked over ${hpd*1.1} hours`.green;
+                }
+                
 
-                console.log(`${moment(date).format('MMMM Do YYYY')} (${toHumanReadable(times[date])})`.green);
+                console.log(`${moment(date).format('MMMM Do YYYY')} (${toHumanReadable(times[date])})`.green + dayNote);
                 frames[date]
                     .sort((a, b) => a.start.isBefore(b.start) ? -1 : 1)
                     .forEach(frame => {
