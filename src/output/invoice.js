@@ -74,7 +74,7 @@ class invoice extends Base {
         let countryDebitor = "CH";
 
         if(nDebitorAddressFields > 0) {
-            nameDebitor = this.config.get('invoiceAddress') [0].replaceAll("_", " ");
+            nameDebitor = this.config.get('invoiceAddress') [0].replace("/_/g", " ");
         }
         else {
             nameDebitor = this.config.get('invoiceAddress').toString();
@@ -83,10 +83,10 @@ class invoice extends Base {
         if(nDebitorAddressFields > 2) {
             let endOfZipPosDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].search("[ _]");
             if(endOfZipPosDebitor > 0){
-                zipDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(0, endOfZipPosDebitor).replaceAll("_", " ");
-                cityDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(endOfZipPosDebitor + 1).replaceAll("_", " ");
+                zipDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(0, endOfZipPosDebitor).replace("/_/g", " ");
+                cityDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(endOfZipPosDebitor + 1).replace("/_/g", " ");
             }
-            addressDebitor = this.config.get('invoiceAddress') [nDebitorAddressFields-2].replaceAll("_", " ");
+            addressDebitor = this.config.get('invoiceAddress') [nDebitorAddressFields-2].replace("/_/g", " ");
             if(zipDebitor.search("-") > 0)
             {
                 let countryZip = zipDebitor.split("-");
