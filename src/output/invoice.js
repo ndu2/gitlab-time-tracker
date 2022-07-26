@@ -71,7 +71,7 @@ class invoice extends Base {
         const data = {
             currency: "CHF",
             amount: this.totalForInvoice,
-            reference: this.config.get('invoiceTitle'),
+            reference: this.config.get('invoiceReference'),
             creditor: {
             name: this.config.get('invoiceSettings').from [0],
             address: this.config.get('invoiceSettings').from [2],
