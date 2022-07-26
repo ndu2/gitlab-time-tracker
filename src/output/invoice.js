@@ -3,6 +3,8 @@ const _ = require('underscore');
 const Table = require('markdown-table');
 const Base = require('./base');
 
+const SwissQRBill = require("swissqrbill");
+
 const format = {
     headline: h => `\n### ${h}\n`,
     warning: w => `${w}`
@@ -58,6 +60,42 @@ class invoice extends Base {
         let opening = this.concat(this.config.get('invoiceSettings').opening, '</br>');
         let closing = this.concat(this.config.get('invoiceSettings').closing, '</br>');
        
+        // QR bill
+        let endOfZipPos = this.config.get('invoiceSettings').from[3].search("[ _]");
+        let zip = this.config.get('invoiceSettings').from[3].substring(0, endOfZipPos);
+        let city = this.config.get('invoiceSettings').from[3].substring(endOfZipPos + 1);
+        let endOfZipPosDebitor = this.config.get('invoiceAddress')[3].search("[ _]");
+        let zipDebitor = this.config.get('invoiceAddress')[3].substring(0, endOfZipPosDebitor);
+        let cityDebitor = this.config.get('invoiceAddress')[3].substring(endOfZipPosDebitor + 1);
+
+        const data = {
+            currency: "CHF",
+            amount: this.totalForInvoice,
+            reference: this.config.get('invoiceTitle'),
+            creditor: {
+            name: this.config.get('invoiceSettings').from [0],
+            address: this.config.get('invoiceSettings').from [2],
+            zip: zip,
+            city: city,
+            account: this.config.get('invoiceSettings').IBAN,
+            country: this.config.get('invoiceSettings').Country
+            },
+            debtor: {
+            name: this.config.get('invoiceAddress') [0],
+            address: this.config.get('invoiceAddress') [2],
+            zip: zipDebitor,
+            city: cityDebitor,
+            country: "CH"
+            }
+        };
+        const options = {
+            language: "DE"
+        };
+        const svg = new SwissQRBill.SVG(data, options);
+        // make svg scalable, by adding viewBox and removing height/width attributes
+        svg.instance.viewBox(0,0,740,420)
+        svg.instance.height("");
+        svg.instance.width("");
 
         this.out += 
 `<div class="senderBox">${from}</div>
@@ -84,6 +122,9 @@ ${opening}
 ${this.config.get('invoiceSettings').bankAccount}
 
 ${closing}
+
+
+<div class="qr-div">${svg.toString()}</div>
 
 
 <h1 style="page-break-before: always;"><br/><br/>Stundenrapport</h1>`;
