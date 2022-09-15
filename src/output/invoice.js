@@ -3,6 +3,8 @@ const _ = require('underscore');
 const Table = require('markdown-table');
 const Base = require('./base');
 
+const SwissQRBill = require("swissqrbill");
+
 const format = {
     headline: h => `\n### ${h}\n`,
     warning: w => `${w}`
@@ -58,6 +60,70 @@ class invoice extends Base {
         let opening = this.concat(this.config.get('invoiceSettings').opening, '</br>');
         let closing = this.concat(this.config.get('invoiceSettings').closing, '</br>');
        
+        // QR bill
+        let endOfZipPos = this.config.get('invoiceSettings').from[3].search("[ _]");
+        let zip = this.config.get('invoiceSettings').from[3].substring(0, endOfZipPos);
+        let city = this.config.get('invoiceSettings').from[3].substring(endOfZipPos + 1);
+        
+        // debitor
+        let nDebitorAddressFields = Array.isArray(this.config.get('invoiceAddress'))? this.config.get('invoiceAddress').length: -1;
+        let nameDebitor = "";
+        let zipDebitor = "";
+        let cityDebitor = "";
+        let addressDebitor = "";
+        let countryDebitor = "CH";
+        let regexAllUnderscores = /_/g;
+
+        if(nDebitorAddressFields > 0) {
+            nameDebitor = this.config.get('invoiceAddress') [0].replace(regexAllUnderscores, " ");
+        }
+        else {
+            nameDebitor = this.config.get('invoiceAddress').toString();
+        }
+
+        if(nDebitorAddressFields > 2) {
+            let endOfZipPosDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].search("[ _]");
+            if(endOfZipPosDebitor > 0){
+                zipDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(0, endOfZipPosDebitor).replace(regexAllUnderscores, " ");
+                cityDebitor = this.config.get('invoiceAddress')[nDebitorAddressFields-1].substring(endOfZipPosDebitor + 1).replace(regexAllUnderscores, " ");
+            }
+            addressDebitor = this.config.get('invoiceAddress') [nDebitorAddressFields-2].replace(regexAllUnderscores, " ");
+            if(zipDebitor.search("-") > 0)
+            {
+                let countryZip = zipDebitor.split("-");
+                countryDebitor = countryZip[0];
+                zipDebitor = countryZip[1];
+            }
+        }
+
+        const data = {
+            currency: "CHF",
+            amount: this.totalForInvoice,
+            additionalInformation: this.config.get('invoiceReference'),
+            creditor: {
+            name: this.config.get('invoiceSettings').from[0],
+            address: this.config.get('invoiceSettings').from [2],
+            zip: zip,
+            city: city,
+            account: this.config.get('invoiceSettings').IBAN,
+            country: this.config.get('invoiceSettings').Country
+            },
+            debtor: {
+            name: nameDebitor,
+            address: addressDebitor,
+            zip: zipDebitor,
+            city: cityDebitor,
+            country: countryDebitor
+            }
+        };
+        const options = {
+            language: "DE"
+        };
+        const svg = new SwissQRBill.SVG(data, options);
+        // make svg scalable, by adding viewBox and removing height/width attributes
+        svg.instance.viewBox(0,0,740,420)
+        svg.instance.height("");
+        svg.instance.width("");
 
         this.out += 
 `<div class="senderBox">${from}</div>
@@ -84,6 +150,9 @@ ${opening}
 ${this.config.get('invoiceSettings').bankAccount}
 
 ${closing}
+
+
+<div class="qr-div">${svg.toString()}</div>
 
 
 <h1 style="page-break-before: always;"><br/><br/>Stundenrapport</h1>`;
