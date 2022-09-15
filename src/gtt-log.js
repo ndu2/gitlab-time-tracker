@@ -35,7 +35,7 @@ tasks.log()
                     dayNote = ` - worked over ${hpd*2} hours`.red;
                 }else if(times[date] > hpd*3600*1.5)
                 {
-                    dayNote = ` - worked over ${hpd*1.5} hours`.orange;
+                    dayNote = ` - worked over ${hpd*1.5} hours`.yellow;
                 }else if(times[date] > hpd*3600*1.1)
                 {
                     dayNote = ` - worked over ${hpd*1.1} hours`.green;
