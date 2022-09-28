@@ -221,7 +221,7 @@ ${closing}
 <h1 style="page-break-before: always;"><br/><br/>Stundenrapport detailliert</h1>`;
         this.headline('Details');
 
-        let times = [['date', 'project', 'iid', 'time']];
+        let times = [['date', 'iid', 'time']];
         let days = Object.keys(this.days);
         days.sort();
         days.forEach(
@@ -235,7 +235,7 @@ ${closing}
                     iids.sort();
                     iids.forEach(
                         iid => {
-                        times.push([refD, p, iid, this.config.toHumanReadable(day[p][iid], 'records')]);
+                        times.push([refD, iid, this.config.toHumanReadable(day[p][iid], 'records')]);
                         });
                     });
             });
