@@ -21,11 +21,18 @@ class invoice extends Base {
         this.invoiceCurrencyPerHour = this.config.get('invoiceCurrencyPerHour');
         this.invoiceVAT = this.config.get('invoiceVAT');
         this.invoicePositionText = this.config.get('invoicePositionText');
+        this.invoicePositionExtraText = this.config.get('invoicePositionExtraText');
+        this.invoicePositionExtraValue = parseFloat(this.config.get('invoicePositionExtraValue'));
+        if(!this.invoicePositionExtraValue > 0) {
+            this.invoicePositionExtraValue = 0.0;
+        }
         this.invoiceCurrencyMaxUnit = this.config.get('invoiceCurrencyMaxUnit');
-        this.totalhForInvoice = (this.spent-this.spentFree) / 3600.0;
+        this.totalhForInvoice = (this.spent-this.spentFree-(this.spentHalfPrice*0.5)) / 3600.0;
         // round subtotals to 0.01 and total to invoiceCurrencyMaxUnit.
-        this.totalForInvoiceExkl = Math.round(this.totalhForInvoice * this.invoiceCurrencyPerHour * 100) * 0.01;
-        this.totalForInvoiceMwst = Math.round(this.totalhForInvoice * this.invoiceCurrencyPerHour * this.invoiceVAT * 100) * 0.01;
+        let invoiceTotal = this.totalhForInvoice * this.invoiceCurrencyPerHour + this.invoicePositionExtraValue;
+        this.totalForInvoiceH = Math.round(this.totalhForInvoice * this.invoiceCurrencyPerHour * 100) * 0.01;
+        this.totalForInvoiceExkl = Math.round(invoiceTotal * 100) * 0.01;
+        this.totalForInvoiceMwst = Math.round(invoiceTotal * this.invoiceVAT * 100) * 0.01;
         this.totalForInvoice = Math.round((this.totalForInvoiceExkl + this.totalForInvoiceMwst)/this.invoiceCurrencyMaxUnit)*this.invoiceCurrencyMaxUnit;
     }
 
@@ -124,6 +131,11 @@ class invoice extends Base {
         svg.instance.viewBox(0,0,740,420)
         svg.instance.height("");
         svg.instance.width("");
+        let extra = "";
+        if(this.invoicePositionExtraValue > 0) {
+            extra = `<div class="positionDesc">${this.invoicePositionExtraText}</div>
+            <div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValue.toFixed(2)}</div>`;
+        }
 
         this.out += 
 `<div class="senderBox">${from}</div>
@@ -140,7 +152,8 @@ ${opening}
 
 <div class="positionBox">
 <div class="positionDesc">${this.invoicePositionText} (${this.totalhForInvoice.toFixed(2)} Stunden zu ${this.invoiceCurrencyPerHour} ${this.invoiceCurrency})</div>
-<div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceExkl.toFixed(2)}</div>
+<div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceH.toFixed(2)}</div>
+${extra}
 <div class="positionDesc">MWST (${this.invoiceVAT*100}%)</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceMwst.toFixed(2)}</div>
 <div class="positionDescTot">Rechnungsbetrag inkl. MWST</div>

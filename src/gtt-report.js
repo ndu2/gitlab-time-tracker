@@ -74,6 +74,8 @@ program
     .option('--invoiceDate <number>', 'date string')
     .option('--invoiceCurrencyMaxUnit <number>', 'rouning invoice total, e.g. 0.01, 0.05 or 1')
     .option('--invoicePositionText <text>', 'invoice position text')
+    .option('--invoicePositionExtraText <text>', 'extra invoice position: text')
+    .option('--invoicePositionExtraValue <number>', 'extra invoice position: value')
     .parse(process.argv);
 
 // init helpers
@@ -142,6 +144,8 @@ config
     .set('invoiceDate', program.opts().invoiceDate)
     .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
     .set('invoicePositionText', program.opts().invoicePositionText)
+    .set('invoicePositionExtraText', program.opts().invoicePositionExtraText)
+    .set('invoicePositionExtraValue', program.opts().invoicePositionExtraValue)
     .set('_createDump', program.opts().output === 'dump');
 
 // date shortcuts
