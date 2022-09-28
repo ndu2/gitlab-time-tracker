@@ -173,6 +173,7 @@ ${closing}
         this.headline('Total');
         //this.write(stats.substr(1));
         this.write(this.config.toHumanReadable(this.spent, 'stats'));
+        this.write(this.config.toHumanReadable(this.spentHalfPrice, 'statsHalfPrice'));
         this.write(this.config.toHumanReadable(this.spentFree, 'statsFree'));
 
         // warnings

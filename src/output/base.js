@@ -109,6 +109,7 @@ class base {
         let totalSpent = 0;
         let spent = 0;
         let spentFree = 0;
+        let spentHalfPrice = 0;
         let users = {};
         let projects = {};
         let times = [];
@@ -119,6 +120,10 @@ class base {
         let spentFreeLabels = this.config.get('freeLabels');
         if(undefined === spentFreeLabels) {
             spentFreeLabels = [];
+        }
+        let spentHalfPriceLabels = this.config.get('halfPriceLabels');
+        if(undefined === spentHalfPriceLabels) {
+            spentHalfPriceLabels = [];
         }
 
         ['issues', 'mergeRequests'].forEach(type => {
@@ -146,13 +151,23 @@ class base {
                     spent += time.seconds;
                     //if(time.parent.labels)
                     let free = false;
+                    let halfPrice = false;
                     time.parent.labels.forEach(label => {
                             spentFreeLabels.forEach(freeLabel => {
                                 free |= (freeLabel == label);
                             });
                         });
+                    time.parent.labels.forEach(label => {
+                            spentHalfPriceLabels.forEach(halfPriceLabel => {
+                                halfPrice |= (halfPriceLabel == label);
+                            });
+                        });
+                        
                     if(free) {
                         spentFree += time.seconds;
+                    }
+                    if(halfPrice) {
+                        spentHalfPrice += time.seconds;
                     }
                     times.push(time);
                 });
@@ -190,6 +205,7 @@ class base {
         this.totalEstimate = totalEstimate;
         this.spent = spent;
         this.spentFree = spentFree;
+        this.spentHalfPrice = spentHalfPrice;
         this.totalSpent = totalSpent;
         this.timesWarnings = timesWarnings;
     }
