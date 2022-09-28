@@ -6,6 +6,7 @@ const Time = require('./time');
 
 const regex = /added (.*) of time spent(?: at (.*))?/i;
 const subRegex = /subtracted (.*) of time spent(?: at (.*))?/i;
+const delRegex = /deleted (.*) of spent time(?: from (.*))?/i;
 const removeRegex = /Removed time spent/i;
 
 /**
@@ -72,23 +73,43 @@ class hasTimes extends Base {
         });
 
         let promise = this.parallel(this.notes, (note, done) => {
-            let created = moment(note.created_at), match, subMatch;
+            let created = moment(note.created_at), match, subMatch, delMatch;
 
             if ( //
             // filter out user notes
             !note.system ||
             // filter out notes that are no time things
-            !(match = regex.exec(note.body)) && !(subMatch = subRegex.exec(note.body)) && !removeRegex.exec(note.body)
+            !(match = regex.exec(note.body)) && !(subMatch = subRegex.exec(note.body)) && !removeRegex.exec(note.body) && !(delMatch = delRegex.exec(note.body))
             ) return done();
 
             // change created date when explicitly defined
             if(match && match[2]) created = moment(match[2]);
             if(subMatch && subMatch[2]) created = moment(subMatch[2]);
+            if(delMatch && delMatch[2]) created = moment(delMatch[2]);
 
             // create a time string and a time object
-            let timeString = match ? match[1] : (subMatch ? `-${subMatch[1]}` : `-${Time.toHumanReadable(timeSpent)}`);
+            let timeString = null;
+            let multiplier = 1;
+            if(match) {
+                timeString = match[1];
+            }
+            else if(subMatch) {
+                timeString = subMatch[1];
+                multiplier = -1;
+            }
+            else if(delMatch){
+                timeString = delMatch[1];
+                multiplier = -1;;
+            }
+            else {
+                // Removed time spent -> remove all
+                timeString = Time.toHumanReadable(timeSpent);
+                multiplier = -1;
+            }
+
             let time = new Time(null, created, note, this, this.config);
-            time.seconds = Time.parse(timeString, 8, 5, 4);
+            time.seconds = Time.parse(timeString, 8, 5, 4) * multiplier;
+            
 
             // add to total time spent
             totalTimeSpent += time.seconds;
