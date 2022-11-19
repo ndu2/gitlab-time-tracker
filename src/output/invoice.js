@@ -62,10 +62,10 @@ class invoice extends Base {
         }
         // REMOVE
         // _.each(this.users, (time, name) => stats += `\n* **${name}**: ${time}`);
-        let to = this.concat(this.config.get('invoiceAddress'), '</br>');
-        let from = this.concat(this.config.get('invoiceSettings').from, '</br>');
-        let opening = this.concat(this.config.get('invoiceSettings').opening, '</br>');
-        let closing = this.concat(this.config.get('invoiceSettings').closing, '</br>');
+        let to = this.concat(this.config.get('invoiceAddress'), '<br />');
+        let from = this.concat(this.config.get('invoiceSettings').from, '<br />');
+        let opening = this.concat(this.config.get('invoiceSettings').opening, '<br />');
+        let closing = this.concat(this.config.get('invoiceSettings').closing, '<br />');
        
         // QR bill
         let endOfZipPos = this.config.get('invoiceSettings').from[3].search("[ _]");
