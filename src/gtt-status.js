@@ -22,6 +22,6 @@ tasks.status()
             return;
         }
 
-        frames.forEach(frame => console.log(`Project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue} is running, started ${moment(frame.start).fromNow().green} (id: ${frame.id})`));
+        frames.forEach(frame => console.log(`Project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue} "${frame.note}" is running, started ${moment(frame.start).fromNow().green} (id: ${frame.id})`));
     })
     .catch(error => Cli.error('Could not read frames.', error));

@@ -10,8 +10,9 @@ class baseFrame {
      * @param config
      * @param id
      * @param type
+     * @param note
      */
-    constructor(config, id, type) {
+    constructor(config, id, type, note) {
         this.config = config;
         this.project = config.get('project');
         this.resource = {id, type};
@@ -24,10 +25,11 @@ class baseFrame {
         this._stop = false;
         this.timezone = config.get('timezone');
         this.notes = [];
+        this._note = note;
     }
 
     static fromJson(config, json) {
-        let frame = new this(config, json.resource.id, json.resource.type);
+        let frame = new this(config, json.resource.id, json.resource.type, json.note);
         frame.project = json.project;
         frame.id = json.id;
         frame._start = json.start;
@@ -68,7 +70,8 @@ class baseFrame {
             start: frame._start,
             stop: frame._stop,
             timezone: frame.timezone,
-            modified: frame.modified
+            modified: frame.modified,
+            note: frame._note,
         });
     }
 
@@ -86,6 +89,10 @@ class baseFrame {
 
     get stop() {
         return this.timezone ? this._stop ? moment(this._stop).tz(this.timezone) : false : (this._stop ? moment(this._stop) : false );
+    }
+
+    get note() {
+        return this._note;
     }
 
     /**

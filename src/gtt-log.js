@@ -49,7 +49,7 @@ tasks.log()
                         let toSync = (Math.ceil(frame.duration) - parseInt(_.reduce(frame.notes, (n, m) => (n + m.time), 0))) != 0;
                         let durationText = toSync ? toHumanReadable(frame.duration).yellow :  toHumanReadable(frame.duration);
                         let issue = frame.resource.new ? `new ${frame.resource.type + ' "' + frame.resource.id.blue}"` : `${(frame.resource.type + ' #' + frame.resource.id).blue}`;
-                        console.log(`  ${frame.id}  ${frame.start.clone().format('HH:mm').green} to ${frame.stop.clone().format('HH:mm').green}\t${durationText}\t\t${frame.project.magenta}\t\t${issue}`)
+                        console.log(`  ${frame.id}  ${frame.start.clone().format('HH:mm').green} to ${frame.stop.clone().format('HH:mm').green}\t${durationText}\t\t${frame.project.magenta}\t\t${issue}\t\t${frame.note!=null?frame.note:''}`)
                     });
             });
         }
