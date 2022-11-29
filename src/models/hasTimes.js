@@ -3,6 +3,7 @@ const moment = require('moment');
 
 const Base = require('./base');
 const Time = require('./time');
+const DayReport = require('./dayReport');
 
 const regex = /added (.*) of time spent(?: at (.*))?/i;
 const subRegex = /subtracted (.*) of time spent(?: at (.*))?/i;
@@ -17,6 +18,7 @@ class hasTimes extends Base {
         super(config);
         this.times = [];
         this.timesWarnings = [];
+        this.days = {};
     }
 
     /**
@@ -58,6 +60,50 @@ class hasTimes extends Base {
         promise.then(notes => this.notes = notes);
 
         return promise;
+    }
+
+    recordTimelogs(timelogs){
+
+      let spentFreeLabels = this.config.get('freeLabels');
+      if(undefined === spentFreeLabels) {
+          spentFreeLabels = [];
+      }
+      let spentHalfPriceLabels = this.config.get('halfPriceLabels');
+      if(undefined === spentHalfPriceLabels) {
+          spentHalfPriceLabels = [];
+      }
+      
+      let free = false;
+      let halfPrice = false;
+      this.labels.forEach(label => {
+              spentFreeLabels.forEach(freeLabel => {
+                  free |= (freeLabel == label);
+              });
+          });
+      this.labels.forEach(label => {
+              spentHalfPriceLabels.forEach(halfPriceLabel => {
+                  halfPrice |= (halfPriceLabel == label);
+              });
+          });
+
+
+      let chargeRatio = free? 0.0: (halfPrice? 0.5: 1.0);
+
+
+        
+        timelogs.forEach(
+            (timelog) => {
+                let spentAt = moment(timelog.spentAt);
+                let dateGrp = spentAt.format(this.config.get('dateFormatGroupReport'));
+                if(!this.days[dateGrp])
+                {
+                    this.days[dateGrp] = new DayReport(this.iid, this.title, spentAt, chargeRatio);
+                }
+                if(timelog.note && timelog.note.body) {
+                    this.days[dateGrp].addNote(timelog.note.body);
+                }
+                this.days[dateGrp].addSpent(timelog.timeSpent);
+            });
     }
 
     /**

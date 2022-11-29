@@ -15,6 +15,7 @@ const Output = {
     pdf: require('./output/pdf'),
     markdown: require('./output/markdown'),
     invoice: require('./output/invoice'),
+    invoice2: require('./output/invoice2'),
     dump: require('./output/dump'),
     xlsx: require('./output/xlsx')
 };
@@ -72,7 +73,8 @@ program
     .option('--invoiceCurrencyPerHour <number>', 'hourly wage rate on invoice')
     .option('--invoiceVAT <number>', 'vat decimal (20% = 0.2)')
     .option('--invoiceDate <number>', 'date string')
-    .option('--invoiceCurrencyMaxUnit <number>', 'rouning invoice total, e.g. 0.01, 0.05 or 1')
+    .option('--invoiceTimeMaxUnit <number>', 'rounds up invoice times, e.g. 60 rounds every issue per day to 1 minute')
+    .option('--invoiceCurrencyMaxUnit <number>', 'rounding invoice total, e.g. 0.01, 0.05 or 1')
     .option('--invoicePositionText <text>', 'invoice position text')
     .option('--invoicePositionExtraText <text>', 'extra invoice position: text')
     .option('--invoicePositionExtraValue <number>', 'extra invoice position: value')
@@ -142,6 +144,7 @@ config
     .set('invoiceCurrencyPerHour', program.opts().invoiceCurrencyPerHour)
     .set('invoiceVAT', program.opts().invoiceVAT)
     .set('invoiceDate', program.opts().invoiceDate)
+    .set('invoiceTimeMaxUnit', program.opts().invoiceTimeMaxUnit)
     .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
     .set('invoicePositionText', program.opts().invoicePositionText)
     .set('invoicePositionExtraText', program.opts().invoicePositionExtraText)
@@ -308,6 +311,21 @@ new Promise(resolve => {
                     .then(() => done());
             })
             .catch(error => Cli.x(`could not fetch merge requests.`, error))
+            .then(() => Cli.mark())
+            .then(() => resolve());
+    }))
+
+    // get timelogs
+    .then(() => new Promise(resolve => {
+        Cli.list(`${Cli.fetch}  Loading timelogs`);
+
+        reports
+            .forEach((report, done) => {
+                report.getTimelogs()
+                    .catch(error => done(error))
+                    .then(() => done());
+            })
+            .catch(error => Cli.x(`could not load timelogs.`, error))
             .then(() => Cli.mark())
             .then(() => resolve());
     }))

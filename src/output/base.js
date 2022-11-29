@@ -116,6 +116,7 @@ class base {
         let timesWarnings = [];
         let days = {};
         let daysMoment = {};
+        let daysNew = {};
 
         let spentFreeLabels = this.config.get('freeLabels');
         if(undefined === spentFreeLabels) {
@@ -128,6 +129,28 @@ class base {
 
         ['issues', 'mergeRequests'].forEach(type => {
             this.report[type].forEach(issue => {
+
+                let free = false;
+                let halfPrice = false;
+                issue.labels.forEach(label => {
+                        spentFreeLabels.forEach(freeLabel => {
+                            free |= (freeLabel == label);
+                        });
+                    });
+                issue.labels.forEach(label => {
+                        spentHalfPriceLabels.forEach(halfPriceLabel => {
+                            halfPrice |= (halfPriceLabel == label);
+                        });
+                    });
+
+                // consolidate all issues back in one day
+                Object.keys(issue.days).forEach((key) => {
+                    if(!daysNew[key]) {
+                        daysNew[key] = [];
+                    }
+                    daysNew[key].push(issue.days[key]);
+                });
+
                 issue.times.forEach(time => {
                     let dateGrp = time.date.format(this.config.get('dateFormatGroupReport'));
                     if (!users[time.user]) users[time.user] = 0;
@@ -149,19 +172,6 @@ class base {
                     days[dateGrp][time.project_namespace][time.iid] += time.seconds;
 
                     spent += time.seconds;
-                    //if(time.parent.labels)
-                    let free = false;
-                    let halfPrice = false;
-                    time.parent.labels.forEach(label => {
-                            spentFreeLabels.forEach(freeLabel => {
-                                free |= (freeLabel == label);
-                            });
-                        });
-                    time.parent.labels.forEach(label => {
-                            spentHalfPriceLabels.forEach(halfPriceLabel => {
-                                halfPrice |= (halfPriceLabel == label);
-                            });
-                        });
                         
                     if(free) {
                         spentFree += time.seconds;
@@ -208,6 +218,7 @@ class base {
         this.spentHalfPrice = spentHalfPrice;
         this.totalSpent = totalSpent;
         this.timesWarnings = timesWarnings;
+        this.daysNew = daysNew;
     }
 
     /**
