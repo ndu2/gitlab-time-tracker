@@ -13,7 +13,7 @@ const format = {
 /**
  * invoice, code heavily based on markdown.js
  */
-class invoice extends Base {
+class invoice2 extends Base {
     constructor(config, report) {
         super(config, report);
         this.format = format;
@@ -27,11 +27,32 @@ class invoice extends Base {
             this.invoicePositionExtraValue = 0.0;
         }
         this.invoiceCurrencyMaxUnit = this.config.get('invoiceCurrencyMaxUnit');
-        this.totalhForInvoice = (this.spent-this.spentFree-(this.spentHalfPrice*0.5)) / 3600.0;
-        // round subtotals to 0.01 and total to invoiceCurrencyMaxUnit.
-        let invoiceTotal = this.totalhForInvoice * this.invoiceCurrencyPerHour + this.invoicePositionExtraValue;
-        this.totalForInvoiceH = Math.round(this.totalhForInvoice * this.invoiceCurrencyPerHour * 100) * 0.01;
-        this.totalForInvoiceExkl = Math.round(invoiceTotal * 100) * 0.01;
+        this.invoiceTimeMaxUnit = this.config.get('invoiceTimeMaxUnit');
+
+        this.invoicePositions = {}; //key=iid, value=[text, total H, Rate, Total]
+
+        Object.keys(this.daysNew).forEach(
+            k => {
+                let day = this.daysNew[k];
+                day.forEach(
+                    (dayReport) => {
+                        let iid = dayReport.getIid();
+                        if(!this.invoicePositions[iid]) {
+                            this.invoicePositions[iid] = [dayReport.getTitle(), 0.0, this.invoiceCurrencyPerHour * dayReport.getChargeRatio(), 0.0];
+                        }
+                        this.invoicePositions[iid][1] += dayReport.getSpent(this.invoiceTimeMaxUnit) / 3600;
+                        this.invoicePositions[iid][3] = Math.round((this.invoicePositions[iid][1] * this.invoicePositions[iid][2]) * 100) * 0.01;
+                    }
+                );
+            });
+        
+        let invoiceTotal = this.invoicePositionExtraValue;
+        Object.keys(this.invoicePositions).forEach(
+            k => {
+                invoiceTotal += this.invoicePositions[k][3];
+            }
+        )
+        this.totalForInvoiceExkl = invoiceTotal;
         this.totalForInvoiceMwst = Math.round(invoiceTotal * this.invoiceVAT * 100) * 0.01;
         this.totalForInvoice = Math.round((this.totalForInvoiceExkl + this.totalForInvoiceMwst)/this.invoiceCurrencyMaxUnit)*this.invoiceCurrencyMaxUnit;
     }
@@ -131,10 +152,26 @@ class invoice extends Base {
         svg.instance.viewBox(0,0,740,420)
         svg.instance.height("");
         svg.instance.width("");
+        let positions ="";
+        let positionIids = Object.keys(this.invoicePositions);
+        positionIids.sort();
+        positionIids.forEach(
+            k => {
+                // text, total H, Rate, Total
+                let position = this.invoicePositions[k];
+                positions += 
+`<div class="positionDesc">${position[0]}: ${position[1].toFixed(2)}h (${position[2]} ${this.invoiceCurrency}/h)</div>
+<div class="positionValue">${this.invoiceCurrency} ${position[3].toFixed(2)}</div>
+`;
+            }
+        );
+
         let extra = "";
         if(this.invoicePositionExtraValue > 0) {
-            extra = `<div class="positionDesc">${this.invoicePositionExtraText}</div>
-            <div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValue.toFixed(2)}</div>`;
+            extra = 
+`<div class="positionDesc">${this.invoicePositionExtraText}</div>
+<div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValue.toFixed(2)}</div>
+`;
         }
 
         this.out += 
@@ -151,8 +188,7 @@ class invoice extends Base {
 ${opening}
 
 <div class="positionBox">
-<div class="positionDesc">${this.invoicePositionText} (${this.totalhForInvoice.toFixed(2)} Stunden zu ${this.invoiceCurrencyPerHour} ${this.invoiceCurrency})</div>
-<div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceH.toFixed(2)}</div>
+${positions}
 ${extra}
 <div class="positionDesc">MWST (${this.invoiceVAT*100}%)</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceMwst.toFixed(2)}</div>
@@ -165,16 +201,52 @@ ${this.config.get('invoiceSettings').bankAccount}
 ${closing}
 
 
-<div class="qr-div">${svg.toString()}</div>
+<div class="qr-div">${svg.toString()}</div>`
 
+    }
+
+    makeIssues() {
+    }
+
+    makeMergeRequests() {
+    }
+
+    makeRecords() {
+        this.out += `
 
 <h1 style="page-break-before: always;"><br/><br/>Stundenrapport</h1>`;
 
-        this.headline('Total');
-        //this.write(stats.substr(1));
-        this.write(this.config.toHumanReadable(this.spent, 'stats'));
-        this.write(this.config.toHumanReadable(this.spentHalfPrice, 'statsHalfPrice'));
-        this.write(this.config.toHumanReadable(this.spentFree, 'statsFree'));
+        let timesNew = [['Datum', 'Beschreibung', 'Stunden']];
+        let daysNew = Object.keys(this.daysNew);
+        daysNew.sort();
+        daysNew.forEach(
+            k => {
+                let day = this.daysNew[k];
+                day.forEach(
+                    (dayReport) => {
+                        let notesLi = "";
+
+                        dayReport.getNotes().forEach(
+                        (note) => (notesLi+=`<li>${note}</li>`));
+                        if(notesLi !== "") {
+                            notesLi = `<ul>${notesLi}</ul>`;
+                        }
+                        timesNew.push([dayReport.getDate().format(this.config.get('dateFormat')),
+                             dayReport.getTitle() + notesLi, 
+                            this.config.toHumanReadable(dayReport.getSpent(this.invoiceTimeMaxUnit), 'records')                                                        
+                        ]);
+                    }
+                );
+            });
+        this.write(`<style>
+table th:first-of-type { width: 12%; }
+table th:nth-of-type(2) { width: 78%; }
+table th:nth-of-type(3) { width: 10%; }
+</style>`);
+
+        this.write(Table(timesNew, { align: ['l', 'l', 'r'] }));
+
+
 
         // warnings
         let warnings = '';
@@ -191,58 +263,6 @@ ${closing}
         }
     }
 
-    makeIssues() {
-        this.headline('Issues');
-
-        if (this.report.issues.length === 0)
-            return this.warning('No issues found');
-
-        let issues = [this.config.get('issueColumns').map(c => c.replace('_', ' '))];
-        this.report.issues.forEach(issue => issues.push(this.prepare(issue, this.config.get('issueColumns'))));
-
-        this.write(Table(issues));
-    }
-
-    makeMergeRequests() {
-        this.headline('Merge Requests');
-
-        if (this.report.mergeRequests.length === 0)
-            return this.warning('No merge requests found');
-
-        let mergeRequests = [this.config.get('mergeRequestColumns').map(c => c.replace('_', ' '))];
-        this.report.mergeRequests.forEach(mergeRequest => mergeRequests.push(this.prepare(mergeRequest, this.config.get('mergeRequestColumns'))));
-
-        this.write(Table(mergeRequests));
-    }
-
-    makeRecords() {
-        this.out += `
-
-<h1 style="page-break-before: always;"><br/><br/>Stundenrapport detailliert</h1>`;
-        this.headline('Details');
-
-        let times = [['date', 'iid', 'time']];
-        let days = Object.keys(this.days);
-        days.sort();
-        days.forEach(
-            k => {
-                let day = this.days[k];
-                let refD = this.daysMoment[k].format(this.config.get('dateFormat'));
-                let projects = Object.keys(day);
-                projects.forEach(
-                    p => {
-                    let iids = Object.keys(day[p]);
-                    iids.sort();
-                    iids.forEach(
-                        iid => {
-                        times.push([refD, iid, this.config.toHumanReadable(day[p][iid], 'records')]);
-                        });
-                    });
-            });
-        //let times = [this.config.get('recordColumns').map(c => c.replace('_', ' '))];
-        //this.times.forEach(time => times.push(this.prepare(time, this.config.get('recordColumns'))));
-        this.write(Table(times));
-    }
 }
 
-module.exports = invoice;
+module.exports = invoice2;

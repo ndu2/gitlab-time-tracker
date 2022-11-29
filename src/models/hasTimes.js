@@ -3,9 +3,11 @@ const moment = require('moment');
 
 const Base = require('./base');
 const Time = require('./time');
+const DayReport = require('./dayReport');
 
 const regex = /added (.*) of time spent(?: at (.*))?/i;
 const subRegex = /subtracted (.*) of time spent(?: at (.*))?/i;
+const delRegex = /deleted (.*) of spent time(?: from (.*))?/i;
 const removeRegex = /Removed time spent/i;
 
 /**
@@ -16,6 +18,7 @@ class hasTimes extends Base {
         super(config);
         this.times = [];
         this.timesWarnings = [];
+        this.days = {};
     }
 
     /**
@@ -23,11 +26,17 @@ class hasTimes extends Base {
      * @param time
      * @returns {*}
      */
-    createTime(time, created_at) {
+    createTime(time, created_at, note) {
+        if(note === null) {
+            note = '';
+        }
+        else {
+            note = '\n\n' + note;
+        }
         var date = new Date(created_at);
         var spentAt = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-"+date.getUTCDate();
         return this.post(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`, {
-            body: '/spend '+Time.toHumanReadable(time, this.config.get('hoursPerDay'), '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]'+' '+spentAt),
+            body: '/spend '+Time.toHumanReadable(time, this.config.get('hoursPerDay'), '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]'+' '+spentAt + note),
         });
     }
 
@@ -53,6 +62,50 @@ class hasTimes extends Base {
         return promise;
     }
 
+    recordTimelogs(timelogs){
+
+      let spentFreeLabels = this.config.get('freeLabels');
+      if(undefined === spentFreeLabels) {
+          spentFreeLabels = [];
+      }
+      let spentHalfPriceLabels = this.config.get('halfPriceLabels');
+      if(undefined === spentHalfPriceLabels) {
+          spentHalfPriceLabels = [];
+      }
+      
+      let free = false;
+      let halfPrice = false;
+      this.labels.forEach(label => {
+              spentFreeLabels.forEach(freeLabel => {
+                  free |= (freeLabel == label);
+              });
+          });
+      this.labels.forEach(label => {
+              spentHalfPriceLabels.forEach(halfPriceLabel => {
+                  halfPrice |= (halfPriceLabel == label);
+              });
+          });
+
+
+      let chargeRatio = free? 0.0: (halfPrice? 0.5: 1.0);
+
+
+        
+        timelogs.forEach(
+            (timelog) => {
+                let spentAt = moment(timelog.spentAt);
+                let dateGrp = spentAt.format(this.config.get('dateFormatGroupReport'));
+                if(!this.days[dateGrp])
+                {
+                    this.days[dateGrp] = new DayReport(this.iid, this.title, spentAt, chargeRatio);
+                }
+                if(timelog.note && timelog.note.body) {
+                    this.days[dateGrp].addNote(timelog.note.body);
+                }
+                this.days[dateGrp].addSpent(timelog.timeSpent);
+            });
+    }
+
     /**
      * set times (call set notes first)
      * @returns {Promise}
@@ -72,23 +125,43 @@ class hasTimes extends Base {
         });
 
         let promise = this.parallel(this.notes, (note, done) => {
-            let created = moment(note.created_at), match, subMatch;
+            let created = moment(note.created_at), match, subMatch, delMatch;
 
             if ( //
             // filter out user notes
             !note.system ||
             // filter out notes that are no time things
-            !(match = regex.exec(note.body)) && !(subMatch = subRegex.exec(note.body)) && !removeRegex.exec(note.body)
+            !(match = regex.exec(note.body)) && !(subMatch = subRegex.exec(note.body)) && !removeRegex.exec(note.body) && !(delMatch = delRegex.exec(note.body))
             ) return done();
 
             // change created date when explicitly defined
             if(match && match[2]) created = moment(match[2]);
             if(subMatch && subMatch[2]) created = moment(subMatch[2]);
+            if(delMatch && delMatch[2]) created = moment(delMatch[2]);
 
             // create a time string and a time object
-            let timeString = match ? match[1] : (subMatch ? `-${subMatch[1]}` : `-${Time.toHumanReadable(timeSpent)}`);
+            let timeString = null;
+            let multiplier = 1;
+            if(match) {
+                timeString = match[1];
+            }
+            else if(subMatch) {
+                timeString = subMatch[1];
+                multiplier = -1;
+            }
+            else if(delMatch){
+                timeString = delMatch[1];
+                multiplier = -1;;
+            }
+            else {
+                // Removed time spent -> remove all
+                timeString = Time.toHumanReadable(timeSpent);
+                multiplier = -1;
+            }
+
             let time = new Time(null, created, note, this, this.config);
-            time.seconds = Time.parse(timeString, 8, 5, 4);
+            time.seconds = Time.parse(timeString, 8, 5, 4) * multiplier;
+            
 
             // add to total time spent
             totalTimeSpent += time.seconds;

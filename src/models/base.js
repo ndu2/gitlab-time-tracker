@@ -53,6 +53,39 @@ class base {
         }));
     }
 
+
+    /**
+     * query the given path
+     * @param path
+     * @param data
+     * @returns {*}
+     */
+     graphQL(data) {
+        // remove v4/ from url, add graphql
+        const path = this.url.substr(0, this.url.length-3) + 'graphql';
+                
+        let key = base.createDumpKey(path, data);
+        if (this.config.dump) return this.getDump(key);
+
+        return new Promise((resolve, reject) => throttle(() => {
+            request.post(`${path}`, {
+                json: true,
+                body: data,
+                insecure: this._insecure,
+                proxy: this._proxy,
+                resolveWithFullResponse: true,
+                headers: {
+                    'Authorization': 'Bearer '+this.token, 
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => {
+                if (this.config.get('_createDump')) this.setDump(response, key);
+                resolve(response);
+            }).catch(e => reject(e));
+        }));
+    }
+
+
     /**
      * query the given path
      * @param path

@@ -117,7 +117,7 @@ class tasks {
         return new Promise((resolve, reject) => {
             let resource = this.sync.resources[frame.resource.type][frame.resource.id];
 
-            resource.createTime(Math.ceil(time), frame._stop)
+            resource.createTime(Math.ceil(time), frame._stop, frame.note)
                 .then(() => resource.getNotes())
                 .then(() => {
                     if (frame.resource.new) {
@@ -213,7 +213,7 @@ class tasks {
      * @param id
      * @returns {Promise}
      */
-    start(project, type, id) {
+    start(project, type, id, note) {
         this.config.set('project', project);
 
         return new Promise((resolve, reject) => {
@@ -222,7 +222,7 @@ class tasks {
                     if (frames.length > 0)
                         return reject("Already running. Please stop it first with 'gtt stop'.");
 
-                    resolve(new Frame(this.config, id, type).startMe());
+                    resolve(new Frame(this.config, id, type, note).startMe());
                 })
                 .catch(error => reject(error));
         })

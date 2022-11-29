@@ -42,7 +42,8 @@ class frame extends BaseFrame {
             start: this._start,
             stop: this._stop,
             timezone: this.timezone,
-            modified: skipModified ? this.modified : moment()
+            modified: skipModified ? this.modified : moment(),
+            note: this._note
         }, null, "\t"));
     }
 

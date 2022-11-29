@@ -12,6 +12,7 @@ program
     .option('-m', 'shorthand for --type=merge_request')
     .option('-i', 'shorthand for --type=issue')
     .option('--verbose', 'show verbose output')
+    .option('--note <note>', 'specify note')
     .parse(process.argv);
 
 Cli.verbose = program.opts().verbose;
@@ -27,6 +28,10 @@ if (program.opts().i) {
 } else if (program.opts().m) {
     type = 'merge_request';
 }
+let note = null;
+if (program.opts().note) {
+    note = program.opts().note;
+}
 
 if (program.args.length < 2 && !config.get('project'))
     Cli.error('No project set');
@@ -34,6 +39,6 @@ if (program.args.length < 2 && !config.get('project'))
 if (!id)
     Cli.error('Wrong or missing issue/merge_request id');
 
-tasks.start(project, type, id)
+tasks.start(project, type, id, note)
     .then(frame => console.log(`Starting project ${config.get('project').magenta} ${type.blue} ${('#' + id).blue} at ${moment().format('HH:mm').green}`))
     .catch(error => Cli.error(error));

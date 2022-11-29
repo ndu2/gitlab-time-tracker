@@ -1,3 +1,4 @@
+const _ = require('underscore');
 const hasTimes = require('./hasTimes');
 
 /**
