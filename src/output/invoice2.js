@@ -29,13 +29,8 @@ class invoice2 extends Base {
         this.invoiceCurrencyMaxUnit = this.config.get('invoiceCurrencyMaxUnit');
         this.invoiceTimeMaxUnit = this.config.get('invoiceTimeMaxUnit');
 
-/*
-
-        <div class="positionDesc">${this.invoicePositionText} (${this.totalhForInvoice.toFixed(2)} Stunden zu ${this.invoiceCurrencyPerHour} ${this.invoiceCurrency})</div>
-<div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceH.toFixed(2)}</div>
-*/
         this.invoicePositions = {}; //key=iid, value=[text, total H, Rate, Total]
-        
+
         Object.keys(this.daysNew).forEach(
             k => {
                 let day = this.daysNew[k];
@@ -165,15 +160,18 @@ class invoice2 extends Base {
                 // text, total H, Rate, Total
                 let position = this.invoicePositions[k];
                 positions += 
-                `<div class="positionDesc">${position[0]} (${position[1].toFixed(2)} Stunden zu ${position[2]} ${this.invoiceCurrency})</div>
-                <div class="positionValue">${this.invoiceCurrency} ${position[3].toFixed(2)}</div>`;
+`<div class="positionDesc">${position[0]}: ${position[1].toFixed(2)}h (${position[2]} ${this.invoiceCurrency}/h)</div>
+<div class="positionValue">${this.invoiceCurrency} ${position[3].toFixed(2)}</div>
+`;
             }
         );
 
         let extra = "";
         if(this.invoicePositionExtraValue > 0) {
-            extra = `<div class="positionDesc">${this.invoicePositionExtraText}</div>
-            <div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValue.toFixed(2)}</div>`;
+            extra = 
+`<div class="positionDesc">${this.invoicePositionExtraText}</div>
+<div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValue.toFixed(2)}</div>
+`;
         }
 
         this.out += 
