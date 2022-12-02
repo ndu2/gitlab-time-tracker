@@ -26,6 +26,7 @@ class baseFrame {
         this.timezone = config.get('timezone');
         this.notes = [];
         this._note = note;
+        this._title = null;
     }
 
     static fromJson(config, json) {
@@ -37,6 +38,7 @@ class baseFrame {
         frame.notes = json.notes;
         frame.timezone = json.timezone;
         frame.modified = json.modified;
+        frame._title = json.title? json.title: null;
         frame.validate();
 
         return frame;
@@ -71,6 +73,7 @@ class baseFrame {
             stop: frame._stop,
             timezone: frame.timezone,
             modified: frame.modified,
+            title: frame._title,
             note: frame._note,
         });
     }
@@ -89,6 +92,14 @@ class baseFrame {
 
     get stop() {
         return this.timezone ? this._stop ? moment(this._stop).tz(this.timezone) : false : (this._stop ? moment(this._stop) : false );
+    }
+
+    set title(title) {
+        this._title = title;
+    }
+
+    get title() {
+        return this._title;
     }
 
     get note() {

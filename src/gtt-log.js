@@ -7,6 +7,7 @@ const Config = require('./include/file-config');
 const Cli = require('./include/cli');
 const Time = require('./models/time');
 const Tasks = require('./include/tasks');
+const mergeRequest = require('./models/mergeRequest');
 
 program
     .option('--verbose', 'show verbose output')
@@ -24,6 +25,14 @@ function toHumanReadable(input) {
     return Time.toHumanReadable(Math.ceil(input), config.get('hoursPerDay'), timeFormat);
 }
 
+function column(str, n){
+    if(str.length > n) {
+        str = str.substr(0, n-1) + "…"
+    }
+    return str.padEnd(n);
+  };
+
+  
 tasks.log()
     .then(({frames, times}) => {
             Object.keys(frames).sort().forEach(date => {
@@ -47,9 +56,12 @@ tasks.log()
                     .sort((a, b) => a.start.isBefore(b.start) ? -1 : 1)
                     .forEach(frame => {
                         let toSync = (Math.ceil(frame.duration) - parseInt(_.reduce(frame.notes, (n, m) => (n + m.time), 0))) != 0;
-                        let durationText = toSync ? toHumanReadable(frame.duration).yellow :  toHumanReadable(frame.duration);
-                        let issue = frame.resource.new ? `new ${frame.resource.type + ' "' + frame.resource.id.blue}"` : `${(frame.resource.type + ' #' + frame.resource.id).blue}`;
-                        console.log(`  ${frame.id}  ${frame.start.clone().format('HH:mm').green} to ${frame.stop.clone().format('HH:mm').green}\t${durationText}\t\t${frame.project.magenta}\t\t${issue}\t\t${frame.note!=null?frame.note:''}`)
+                        let durationText = toSync ? toHumanReadable(frame.duration).padEnd(14).yellow :  toHumanReadable(frame.duration).padEnd(14);
+                        let issue = frame.resource.new ? 
+                        column(`(new ${frame.resource.type + ' "' + frame.resource.id}")`, 70).bgBlue:
+                         `${(frame.resource.type + ' #' + frame.resource.id).padEnd(20).blue}${column(frame.title!=null?frame.title:'', 50)}`;
+                        console.log(`  ${frame.id}  ${frame.start.clone().format('HH:mm').green} to ${frame.stop.clone().format('HH:mm').green}\t${durationText}`+
+                        `${column(frame.project, 50).magenta}${issue}${frame.note!=null?frame.note:''}`);
                     });
             });
         }
