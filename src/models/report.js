@@ -168,8 +168,8 @@ class report extends Base {
                 "project": this.project.data.path_with_namespace,
                 "after": (cursor===undefined)?'':cursor,
                 "entryPerPage": 30,
-                "startTime": this.config.get('from'),
-                "endTime": this.config.get('to')
+                "startTime": this.config.get('from').format("Y-M-D"),
+                "endTime": this.config.get('to').format("Y-M-D")
             }
         };
 
