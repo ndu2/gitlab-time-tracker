@@ -190,6 +190,8 @@ ${opening}
 <div class="positionBox">
 ${positions}
 ${extra}
+<div class="positionDescTot">Summe Netto</div>
+<div class="positionValueTot">${this.invoiceCurrency} ${this.totalForInvoiceExkl.toFixed(2)}</div>
 <div class="positionDesc">MWST (${this.invoiceVAT*100}%)</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.totalForInvoiceMwst.toFixed(2)}</div>
 <div class="positionDescTot">Rechnungsbetrag inkl. MWST</div>
