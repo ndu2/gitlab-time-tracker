@@ -62,6 +62,7 @@ class tasks {
             this.sync.resources[type][id]
                 .make(project, id, frame.resource.new)
                 .then(() => {
+                    frame.title = this.sync.resources[type][id].data.title;
                     if (callback) callback();
                     done();
                 })
