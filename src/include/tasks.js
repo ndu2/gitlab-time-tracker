@@ -43,23 +43,27 @@ class tasks {
      * @returns {Promise}
      */
     syncResolve(callback) {
-        this.sync.resources = {
-            issue: {},
-            merge_request: {}
-        };
-
+        this.sync.resources = {}
+        
         // resolve issues and merge requests
         return this.sync.frames.forEach((frame, done) => {
             let project = frame.project,
                 type = frame.resource.type,
-                id = frame.resource.id,
-                resource = this.sync.resources[type][id];
+                id = frame.resource.id;
+            if(!(project in this.sync.resources))
+            {
+                this.sync.resources[project]=
+                {
+                    issue: {},
+                    merge_request: {}
+                };
+            }
 
-            if (resource !== undefined && resource.data.project_id)
+            if(id in this.sync.resources[project][type]) {
                 return done();
-
-            this.sync.resources[type][id] = new classes[type](this.config, {});
-            this.sync.resources[type][id]
+            }
+            this.sync.resources[project][type][id] = new classes[type](this.config, {});
+            this.sync.resources[project][type][id]
                 .make(project, id, frame.resource.new)
                 .then(() => {
                     frame.title = this.sync.resources[type][id].data.title;
@@ -71,27 +75,16 @@ class tasks {
     }
 
     /**
-     * Get notes for all frames.
+     * sync details to frames.
      */
-    syncNotes(callback) {
+     syncDetails(callback) {
         return this.sync.frames.forEach((frame, done) => {
             let project = frame.project,
                 type = frame.resource.type,
-                id = frame.resource.id,
-                notes;
-
-            if ((notes = this.sync.resources[type][id].notes) && notes.length > 0) {
-                if (callback) callback();
-                return done();
+                id = frame.resource.id;
             }
 
-            this.sync.resources[type][id]
-                .getNotes()
-                .then(() => {
-                    if (callback) callback();
-                    done();
-                })
-                .catch(error => done(`Could not get notes from ${type} ${id} on "${project}"`));
+            return done();
         });
     }
 
@@ -116,7 +109,7 @@ class tasks {
 
     _addTime(frame, time) {
         return new Promise((resolve, reject) => {
-            let resource = this.sync.resources[frame.resource.type][frame.resource.id];
+            let resource = this.sync.resources[frame.project][frame.resource.type][frame.resource.id];
 
             resource.createTime(Math.ceil(time), frame._stop, frame.note)
                 .then(() => resource.getNotes())
