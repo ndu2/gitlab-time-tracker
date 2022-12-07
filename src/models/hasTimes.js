@@ -27,7 +27,7 @@ class hasTimes extends Base {
      * @returns {*}
      */
     createTime(time, created_at, note) {
-        if(note === null) {
+        if(note === null || note === undefined) {
             note = '';
         }
         else {

@@ -34,7 +34,7 @@ tasks.syncInit()
     })
     .then(() => {
         Cli.bar(`${Cli.process}  Processing issues & merge requests...`, tasks.sync.frames.length);
-        return tasks.syncNotes(Cli.advance);
+        return tasks.syncDetails(Cli.advance);
     })
     .then(() => {
         Cli.bar(`${Cli.update}  Syncing time records...`, tasks.sync.frames.length);
