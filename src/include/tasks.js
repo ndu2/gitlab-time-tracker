@@ -66,7 +66,6 @@ class tasks {
             this.sync.resources[project][type][id]
                 .make(project, id, frame.resource.new)
                 .then(() => {
-                    frame.title = this.sync.resources[type][id].data.title;
                     if (callback) callback();
                     done();
                 })
@@ -82,8 +81,10 @@ class tasks {
             let project = frame.project,
                 type = frame.resource.type,
                 id = frame.resource.id;
+        
+            if(id in this.sync.resources[project][type]) {
+                frame.title = this.sync.resources[project][type][id].data.title;
             }
-
             return done();
         });
     }
@@ -116,6 +117,7 @@ class tasks {
                 .then(() => {
                     if (frame.resource.new) {
                         delete frame.resource.new;
+                        frame.resource.title = frame.resource.id;
                         frame.resource.id = resource.data.iid;
                     }
 
