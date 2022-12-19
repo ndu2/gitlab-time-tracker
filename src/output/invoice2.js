@@ -20,7 +20,9 @@ class invoice2 extends Base {
         this.invoiceCurrency = this.config.get('invoiceCurrency');
         this.invoiceCurrencyPerHour = this.config.get('invoiceCurrencyPerHour');
         this.invoiceVAT = this.config.get('invoiceVAT');
+        this.invoiceText = this.config.get('invoiceText') ? this.config.get('invoiceText') : '';
         this.invoicePositionText = this.config.get('invoicePositionText');
+        this.invoicePositionExtra = this.config.get('invoicePositionExtra');
         this.invoicePositionExtraText = this.config.get('invoicePositionExtraText');
         this.invoicePositionExtraValue = parseFloat(this.config.get('invoicePositionExtraValue'));
         if(!this.invoicePositionExtraValue > 0) {
@@ -167,9 +169,13 @@ class invoice2 extends Base {
         );
 
         let extra = "";
-        if(this.invoicePositionExtraValue > 0) {
-            extra = 
-`<div class="positionDesc">${this.invoicePositionExtraText}</div>
+        if(this.invoicePositionExtra || this.invoicePositionExtraValue > 0) {
+            if(this.invoicePositionExtra) {
+                extra += `<div class="position">${this.invoicePositionExtra}</div>`;
+            }
+            extra +=
+`
+<div class="positionDesc">${this.invoicePositionExtraText}</div>
 <div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValue.toFixed(2)}</div>
 `;
         }
@@ -185,9 +191,10 @@ class invoice2 extends Base {
 
 # ${this.config.get('invoiceTitle')}
 
-${opening}
+${opening} ${this.invoiceText}
 
 <div class="positionBox">
+<div class="position">${this.invoicePositionText}</div>
 ${positions}
 ${extra}
 <div class="positionDescTot">Summe Netto</div>

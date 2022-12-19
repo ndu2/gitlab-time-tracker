@@ -68,6 +68,7 @@ program
     .option('--from_dump <file>', 'instead of querying gitlab, use data from the given dump file')
     .option('--invoiceTitle <title>', 'title on invoice')
     .option('--invoiceReference <reference>', 'payment reference on invoice')
+    .option('--invoiceText <text>', 'text above positions')
     .option('--invoiceAddress [address...]', 'address')
     .option('--invoiceCurrency <currency>', 'currecnty on invoice')
     .option('--invoiceCurrencyPerHour <number>', 'hourly wage rate on invoice')
@@ -76,6 +77,7 @@ program
     .option('--invoiceTimeMaxUnit <number>', 'rounds up invoice times, e.g. 60 rounds every issue per day to 1 minute')
     .option('--invoiceCurrencyMaxUnit <number>', 'rounding invoice total, e.g. 0.01, 0.05 or 1')
     .option('--invoicePositionText <text>', 'invoice position text')
+    .option('--invoicePositionExtra <text>', 'extra invoice position: header text')
     .option('--invoicePositionExtraText <text>', 'extra invoice position: text')
     .option('--invoicePositionExtraValue <number>', 'extra invoice position: value')
     .parse(process.argv);
@@ -139,6 +141,7 @@ config
     .set('_verbose', program.opts().verbose)
     .set('invoiceTitle', program.opts().invoiceTitle)
     .set('invoiceReference', program.opts().invoiceReference)
+    .set('invoiceText', program.opts().invoiceText)
     .set('invoiceAddress', program.opts().invoiceAddress)
     .set('invoiceCurrency', program.opts().invoiceCurrency)
     .set('invoiceCurrencyPerHour', program.opts().invoiceCurrencyPerHour)
@@ -147,6 +150,7 @@ config
     .set('invoiceTimeMaxUnit', program.opts().invoiceTimeMaxUnit)
     .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
     .set('invoicePositionText', program.opts().invoicePositionText)
+    .set('invoicePositionExtra', program.opts().invoicePositionExtra)
     .set('invoicePositionExtraText', program.opts().invoicePositionExtraText)
     .set('invoicePositionExtraValue', program.opts().invoicePositionExtraValue)
     .set('_createDump', program.opts().output === 'dump');
