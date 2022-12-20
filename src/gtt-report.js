@@ -151,8 +151,8 @@ config
     .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
     .set('invoicePositionText', program.opts().invoicePositionText)
     .set('invoicePositionExtra', program.opts().invoicePositionExtra)
-    .set('invoicePositionExtraText', program.opts().invoicePositionExtraText)
-    .set('invoicePositionExtraValue', program.opts().invoicePositionExtraValue)
+    .set('invoicePositionExtraText', program.opts().invoicePositionExtraText.split(','))
+    .set('invoicePositionExtraValue', program.opts().invoicePositionExtraValue.split(','))
     .set('_createDump', program.opts().output === 'dump');
 
 // date shortcuts
@@ -171,6 +171,11 @@ if (program.opts().this_month)
 
 Cli.quiet = config.get('quiet');
 Cli.verbose = config.get('_verbose');
+
+// check extra Text/value arrays
+if(config.get('invoicePositionExtraText').length != config.get('invoicePositionExtraValue').length) {
+    Cli.error(`invoicePositionExtraText and invoicePositionExtraValue length do not match`);
+}
 
 // create stuff
 let reports = new ReportCollection(config),

@@ -21,15 +21,21 @@ class invoice extends Base {
         this.invoiceCurrencyPerHour = this.config.get('invoiceCurrencyPerHour');
         this.invoiceVAT = this.config.get('invoiceVAT');
         this.invoicePositionText = this.config.get('invoicePositionText');
-        this.invoicePositionExtraText = this.config.get('invoicePositionExtraText');
-        this.invoicePositionExtraValue = parseFloat(this.config.get('invoicePositionExtraValue'));
-        if(!this.invoicePositionExtraValue > 0) {
-            this.invoicePositionExtraValue = 0.0;
-        }
+        this.invoicePositionExtraTexts = this.config.get('invoicePositionExtraText');
+        this.invoicePositionExtraValues = this.config.get('invoicePositionExtraValue').map(
+            (v) => {
+                const value = parseFloat(v);
+                return value > 0? value: 0; // NaN -> 0
+            });
+        this.invoicePositionExtraTotal = 0.0;
+        this.invoicePositionExtraValues.forEach(v => (this.invoicePositionExtraTotal += v));
+
+
+
         this.invoiceCurrencyMaxUnit = this.config.get('invoiceCurrencyMaxUnit');
         this.totalhForInvoice = (this.spent-this.spentFree-(this.spentHalfPrice*0.5)) / 3600.0;
         // round subtotals to 0.01 and total to invoiceCurrencyMaxUnit.
-        let invoiceTotal = this.totalhForInvoice * this.invoiceCurrencyPerHour + this.invoicePositionExtraValue;
+        let invoiceTotal = this.totalhForInvoice * this.invoiceCurrencyPerHour + this.invoicePositionExtraTotal;
         this.totalForInvoiceH = Math.round(this.totalhForInvoice * this.invoiceCurrencyPerHour * 100) * 0.01;
         this.totalForInvoiceExkl = Math.round(invoiceTotal * 100) * 0.01;
         this.totalForInvoiceMwst = Math.round(invoiceTotal * this.invoiceVAT * 100) * 0.01;
@@ -132,9 +138,15 @@ class invoice extends Base {
         svg.instance.height("");
         svg.instance.width("");
         let extra = "";
-        if(this.invoicePositionExtraValue > 0) {
-            extra = `<div class="positionDesc">${this.invoicePositionExtraText}</div>
-            <div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValue.toFixed(2)}</div>`;
+        if(this.invoicePositionExtraTotal > 0) {
+            for(var i in this.invoicePositionExtraTexts) {
+                extra +=
+                `
+                <div class="positionDesc">${this.invoicePositionExtraTexts[i]}</div>
+                <div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValues[i].toFixed(2)}</div>
+                `;
+            }
+
         }
 
         this.out += 

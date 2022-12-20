@@ -23,11 +23,15 @@ class invoice2 extends Base {
         this.invoiceText = this.config.get('invoiceText') ? this.config.get('invoiceText') : '';
         this.invoicePositionText = this.config.get('invoicePositionText');
         this.invoicePositionExtra = this.config.get('invoicePositionExtra');
-        this.invoicePositionExtraText = this.config.get('invoicePositionExtraText');
-        this.invoicePositionExtraValue = parseFloat(this.config.get('invoicePositionExtraValue'));
-        if(!this.invoicePositionExtraValue > 0) {
-            this.invoicePositionExtraValue = 0.0;
-        }
+        this.invoicePositionExtraTexts = this.config.get('invoicePositionExtraText');
+        this.invoicePositionExtraValues = this.config.get('invoicePositionExtraValue').map(
+            (v) => {
+                const value = parseFloat(v);
+                return value > 0? value: 0; // NaN -> 0
+            });
+        this.invoicePositionExtraTotal = 0.0;
+        this.invoicePositionExtraValues.forEach(v => (this.invoicePositionExtraTotal += v));
+
         this.invoiceCurrencyMaxUnit = this.config.get('invoiceCurrencyMaxUnit');
         this.invoiceTimeMaxUnit = this.config.get('invoiceTimeMaxUnit');
 
@@ -48,7 +52,7 @@ class invoice2 extends Base {
                 );
             });
         
-        let invoiceTotal = this.invoicePositionExtraValue;
+        let invoiceTotal = this.invoicePositionExtraTotal;
         Object.keys(this.invoicePositions).forEach(
             k => {
                 invoiceTotal += this.invoicePositions[k][3];
@@ -169,15 +173,17 @@ class invoice2 extends Base {
         );
 
         let extra = "";
-        if(this.invoicePositionExtra || this.invoicePositionExtraValue > 0) {
+        if(this.invoicePositionExtra || this.invoicePositionExtraTotal > 0) {
             if(this.invoicePositionExtra) {
                 extra += `<div class="position">${this.invoicePositionExtra}</div>`;
             }
-            extra +=
-`
-<div class="positionDesc">${this.invoicePositionExtraText}</div>
-<div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValue.toFixed(2)}</div>
-`;
+            for(var i in this.invoicePositionExtraTexts) {
+                extra +=
+                `
+                <div class="positionDesc">${this.invoicePositionExtraTexts[i]}</div>
+                <div class="positionValue">${this.invoiceCurrency} ${this.invoicePositionExtraValues[i].toFixed(2)}</div>
+                `;
+            }
         }
 
         this.out += 
