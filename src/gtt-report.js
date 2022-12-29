@@ -151,8 +151,8 @@ config
     .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
     .set('invoicePositionText', program.opts().invoicePositionText)
     .set('invoicePositionExtra', program.opts().invoicePositionExtra)
-    .set('invoicePositionExtraText', program.opts().invoicePositionExtraText.split(','))
-    .set('invoicePositionExtraValue', program.opts().invoicePositionExtraValue.split(','))
+    .set('invoicePositionExtraText', (program.opts().invoicePositionExtraText??"").split(','))
+    .set('invoicePositionExtraValue', (program.opts().invoicePositionExtraValue??"").split(','))
     .set('_createDump', program.opts().output === 'dump');
 
 // date shortcuts
