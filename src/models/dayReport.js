@@ -39,7 +39,9 @@ class dayReport {
       this.spent += seconds;
     }
     addNote(note) {
+      if(!this.notes.includes(note)) {
         this.notes.push(note);
+      }
     }
     getChargeRatio() {
       return this.chargeRatio;
