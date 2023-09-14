@@ -15,7 +15,7 @@ program
 let config = new Config(process.cwd());
 let id = program.args[0];
 let timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
-
+const listSize = 30;
 
 function column(str, n){
     if(str.length > n) {
@@ -29,7 +29,7 @@ function toHumanReadable(input) {
 }
 
 if (!id) {
-  lastFrames = Fs.all(config.frameDir).slice(-10); // last 10 frames (one page of inquirer)
+  lastFrames = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
   lastFrames = lastFrames.map((file) =>
     Frame.fromFile(config, Fs.join(config.frameDir, file))
   );
@@ -59,7 +59,7 @@ if (!id) {
         message: "Frame?",
         default: lastFramesDetails.length - 1,
         choices: lastFramesDetails,
-        pageSize: 10,
+        pageSize: listSize,
       },
     ])
     .then((answer) => {
