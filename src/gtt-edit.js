@@ -37,21 +37,13 @@ if (!id) {
   lastFramesDetails = lastFrames
     .sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1))
     .map((frame) => {
-      let toSync =
-        Math.ceil(frame.duration) -
-          parseInt(_.reduce(frame.notes, (n, m) => n + m.time, 0)) !=
-        0;
-      let durationText = toSync
-        ? toHumanReadable(frame.duration).padEnd(14).yellow
-        : toHumanReadable(frame.duration).padEnd(14);
       let issue = `${
         (frame.resource.type + " #" + frame.resource.id).padEnd(20).blue
       }${column(frame.title != null ? frame.title : "", 50)}`;
       return {
         name:
           `  ${frame.id}  ${frame.start.clone().format("MMMM Do YYYY HH:mm").green} ${
-            frame.stop ? "to " + frame.stop.clone().format("HH:mm").green : "(running)"
-          }\t${durationText}` +
+            frame.stop ? "to " + frame.stop.clone().format("HH:mm").green : "(running)"}\t` +
           `${column(frame.project, 50).magenta}${issue}${
             frame.note != null ? frame.note : ""
           }`,
