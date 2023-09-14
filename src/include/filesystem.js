@@ -42,6 +42,10 @@ class filesystem {
         return _.max(fs.readdirSync(dir), file => (fs.statSync(path.join(dir, file)).ctime));
     }
 
+    static all(dir) {
+        return _.sortBy(fs.readdirSync(dir), file => (fs.statSync(path.join(dir, file)).ctime));
+    }
+
     static readDir(dir) {
         return fs.readdirSync(dir);
     }
