@@ -50,7 +50,7 @@ if (!id) {
       return {
         name:
           `  ${frame.id}  ${frame.start.clone().format("MMMM Do YYYY HH:mm").green} ${
-            frame.stop ? "to" + frame.stop.clone().format("HH:mm").green : "(running)"
+            frame.stop ? "to " + frame.stop.clone().format("HH:mm").green : "(running)"
           }\t${durationText}` +
           `${column(frame.project, 50).magenta}${issue}${
             frame.note != null ? frame.note : ""
