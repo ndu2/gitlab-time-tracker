@@ -12,7 +12,6 @@ const ReportCollection = require('./models/reportCollection');
 const Output = {
     table: require('./output/table'),
     csv: require('./output/csv'),
-    pdf: require('./output/pdf'),
     markdown: require('./output/markdown'),
     invoice: require('./output/invoice'),
     invoice2: require('./output/invoice2'),
@@ -207,9 +206,6 @@ if (!config.get('project')) {
 }
 if (!Output[config.get('output')]) {
     Cli.error(`The output ${config.get('output')} doesn't exist. Available outputs: ${Object.keys(Output).join(',')}`);
-}
-if (config.get('output') === 'pdf' && !config.get('file')) {
-    Cli.error(`Cannot output a pdf to stdout. You probably forgot to use the --file parameter`);
 }
 if (!config.get('from').isValid()) {
     Cli.error(`FROM is not in a valid ISO date format.`);

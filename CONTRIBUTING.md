@@ -59,7 +59,6 @@ gtt report "kriskbx/example-project" "example-group/example-project"
 gtt report --output=table "kriskbx/example-project"
 gtt report --output=markdown "kriskbx/example-project"
 gtt report --output=csv "kriskbx/example-project"
-gtt report --output=pdf --file=test.pdf "kriskbx/example-project"
 gtt report --output=xlsx --file=test.xlsx "kriskbx/example-project"
 
 # Test timeframes (adjust the values so it includes/excludes your issues)

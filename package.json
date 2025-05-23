@@ -1,13 +1,13 @@
 {
   "name": "gitlab-time-tracker",
-  "version": "1.7.39",
+  "version": "1.8.0",
   "description": "A command line interface for GitLabs time tracking feature.",
   "bugs": {
-    "url": "https://github.com/kriskbx/gitlab-time-tracker/issues"
+    "url": "https://github.com/ndu2/gitlab-time-tracker/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/kriskbx/gitlab-time-tracker.git"
+    "url": "https://github.com/ndu2/gitlab-time-tracker.git"
   },
   "main": "src/gtt.js",
   "scripts": {
@@ -45,7 +45,6 @@
     "hash-sum": "^1.0.2",
     "hashids": "^1.1.1",
     "inquirer": "^8.2.0",
-    "markdown-pdf": "^10.0.0",
     "markdown-table": "^1.1.0",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.21",

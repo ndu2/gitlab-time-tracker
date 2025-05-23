@@ -267,11 +267,16 @@ gtt report example-group example-group-2 --type=group
 gtt report --output=table
 gtt report --output=markdown
 gtt report --output=csv
-gtt report --output=pdf --file=filename.pdf
 gtt report --output=xlsx --file=filename.xlsx
 gtt report --output=invoice --file=invoice.md
 ```
-Defaults to `table`. `csv` and `markdown` can be printed to stdout, `pdf` and `xlsx` need the file parameter.
+Defaults to `table`. `csv` and `markdown` can be printed to stdout, `xlsx` need the file parameter.
+
+pdf output was dropped. you can use 3rd party tools to convert markdown to pdf, e.g
+```shell
+showdown makehtml -u UTF8 -i "invoice.md" -o "invoice.html" -c tables
+chromium --headless --run-all-compositor-stages-before-draw --print-to-pdf-no-header --disable-gpu --print-to-pdf="invoice.pdf" "invoice.html"
+```
 
 #### Invoice Output
 
