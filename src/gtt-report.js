@@ -11,7 +11,6 @@ import table from './output/table.js';
 import csv from './output/csv.js';
 import markdown from './output/markdown.js';
 import invoice from './output/invoice.js';
-import invoice2 from './output/invoice2.js';
 import dump from './output/dump.js';
 import xlsx from './output/xlsx.js';
 
@@ -20,7 +19,6 @@ const Output = {
     csv,
     markdown,
     invoice,
-    invoice2,
     dump,
     xlsx
 };
