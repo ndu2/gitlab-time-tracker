@@ -1,5 +1,5 @@
-const _ = require('underscore');
-const hasTimes = require('./hasTimes');
+import _ from 'underscore';
+import hasTimes from './hasTimes.js';
 
 /**
  * merge request model
@@ -101,4 +101,4 @@ class mergeRequest extends hasTimes {
     }
 }
 
-module.exports = mergeRequest;
+export default mergeRequest;

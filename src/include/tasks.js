@@ -1,12 +1,10 @@
-const _ = require('underscore');
-const moment = require('moment');
-
-const Config = require('./config');
-const Fs = require('./filesystem');
-const Frame = require('./../models/frame');
-const Issue = require('./../models/issue');
-const MergeRequest = require('./../models/mergeRequest');
-const FrameCollection = require('./../models/frameCollection');
+import _ from 'underscore';
+import moment from 'moment';
+import Fs from './filesystem.js';
+import Frame from './../models/frame.js';
+import Issue from './../models/issue.js';
+import MergeRequest from './../models/mergeRequest.js';
+import FrameCollection from './../models/frameCollection.js';
 
 const classes = {
     issue: Issue,
@@ -266,4 +264,4 @@ class tasks {
     }
 }
 
-module.exports = tasks;
+export default tasks;

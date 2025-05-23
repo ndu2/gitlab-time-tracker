@@ -1,9 +1,8 @@
-const _ = require('underscore');
-const moment = require('moment');
-
-const Base = require('./base');
-const Time = require('./time');
-const DayReport = require('./dayReport');
+import _ from 'underscore';
+import moment from 'moment';
+import Base from './base.js';
+import Time from './time.js';
+import DayReport from './dayReport.js';
 
 const regex = /added (.*) of time spent(?: at (.*))?/i;
 const subRegex = /subtracted (.*) of time spent(?: at (.*))?/i;
@@ -224,4 +223,4 @@ class hasTimes extends Base {
     }
 }
 
-module.exports = hasTimes;
+export default hasTimes;

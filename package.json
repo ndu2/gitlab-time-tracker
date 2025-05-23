@@ -1,6 +1,7 @@
 {
   "name": "gitlab-time-tracker",
   "version": "1.8.0",
+  "type": "module",
   "description": "A command line interface for GitLabs time tracking feature.",
   "bugs": {
     "url": "https://github.com/ndu2/gitlab-time-tracker/issues"
@@ -20,15 +21,7 @@
     "gtt": "src/gtt.js"
   },
   "engines": {
-    "node": ">=18"
-  },
-  "pkg": {
-    "scripts": "src/**/*.js",
-    "targets": [
-      "node18-linux-x64",
-      "node18-macos-x64",
-      "node18-win-x64"
-    ]
+    "node": ">=20"
   },
   "author": "kriskbx",
   "license": "GPL-2.0",

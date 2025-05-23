@@ -1,10 +1,9 @@
-const moment = require('moment');
-const program = require('commander');
-
-const Config = require('./include/file-config');
-const Cli = require('./include/cli');
-const Tasks = require('./include/tasks');
-const Owner = require('./models/owner');
+import moment from 'moment';
+import program from 'commander';
+import Config from './include/file-config';
+import Cli from './include/cli';
+import Tasks from './include/tasks';
+import Owner from './models/owner';
 
 program
     .option('-p --proxy <proxy>', 'use a proxy server with the given url')
@@ -21,8 +20,8 @@ let config = new Config(process.cwd())
         .set('token', program.opts().token)
         .set('insecure', program.opts().insecure)
         .set('proxy', program.opts().proxy);
-    tasks = new Tasks(config),
-    owner = new Owner(config);
+tasks = new Tasks(config),
+owner = new Owner(config);
 
 tasks.syncInit()
     .then(() => tasks.sync.frames.length === 0 ? process.exit(0) : null)

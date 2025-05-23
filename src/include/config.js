@@ -1,8 +1,7 @@
-const moment = require('moment');
-const _ = require('underscore');
-
-const Time = require('./../models/time');
-const EventEmitter = require('events');
+import moment from 'moment';
+import _ from 'underscore';
+import Time from './../models/time.js';
+import EventEmitter from 'events';
 
 const dates = ['from', 'to'];
 const objectsWithDefaults = ['timeFormat', 'columns'];
@@ -104,4 +103,4 @@ class config extends EventEmitter {
     }
 }
 
-module.exports = config;
+export default config;

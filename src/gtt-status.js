@@ -1,10 +1,9 @@
-const program = require('commander');
-const colors = require('colors');
-const moment = require('moment');
-
-const Config = require('./include/file-config');
-const Cli = require('./include/cli');
-const Tasks = require('./include/tasks');
+import {program} from 'commander';
+import colors from 'colors';
+import moment from 'moment';
+import Config from './include/file-config.js';
+import Cli from './include/cli.js';
+import Tasks from './include/tasks.js';
 
 program
     .option('--verbose', 'show verbose output')
@@ -13,7 +12,7 @@ program
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(__dirname),
+let config = new Config(process.cwd()),
     tasks = new Tasks(config);
 
 tasks.status()

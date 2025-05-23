@@ -1,8 +1,9 @@
-const request = require('request-promise-native');
-const url = require('url');
-const async = require('async');
-const crypto = require('crypto');
-const throttle = require('throttled-queue')(10, 1000);
+import request from 'request-promise-native';
+import url from 'url';
+import async from 'async';
+import crypto from 'crypto';
+import throttleFactory from 'throttled-queue';
+const throttle = throttleFactory(10, 1000);
 
 /**
  * base model
@@ -224,4 +225,4 @@ class base {
     }
 }
 
-module.exports = base;
+export default base;

@@ -1,6 +1,5 @@
-const _ = require('underscore');
-
-const Base = require('./base');
+import _ from 'underscore';
+import Base from './base.js';
 
 /**
  * owner model
@@ -131,4 +130,4 @@ class owner extends Base {
     }
 }
 
-module.exports = owner;
+export default owner;

@@ -1,10 +1,9 @@
-const _ = require('underscore');
-const moment = require('moment');
-
-const Base = require('./base');
-const Issue = require('./issue');
-const MergeRequest = require('./mergeRequest');
-const Project = require('./project');
+import _ from 'underscore';
+import moment from 'moment';
+import Base from './base.js';
+import Issue from './issue.js';
+import MergeRequest from './mergeRequest.js';
+import Project from './project.js';
 
 /**
  * report model
@@ -300,4 +299,4 @@ class report extends Base {
     }
 }
 
-module.exports = report;
+export default report;

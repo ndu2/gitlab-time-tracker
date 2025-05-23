@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const moment = require('moment');
-const BaseFrame = require('./baseFrame.js');
+import fs from 'fs';
+import path from 'path';
+import moment from 'moment';
+import BaseFrame from './baseFrame.js';
 
 class frame extends BaseFrame {
     static fromFile(config, file) {
@@ -53,4 +53,4 @@ class frame extends BaseFrame {
     }
 }
 
-module.exports = frame;
+export default frame;

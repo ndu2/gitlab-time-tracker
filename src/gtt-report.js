@@ -1,22 +1,28 @@
-const _ = require('underscore');
-const fs = require('fs');
-const program = require('commander');
-const moment = require('moment');
-
-const Cli = require('./include/cli');
-const Config = require('./include/file-config');
-const Report = require('./models/report');
-const Owner = require('./models/owner');
-const ReportCollection = require('./models/reportCollection');
+import _ from 'underscore';
+import fs from 'fs';
+import {program} from 'commander';
+import moment from 'moment';
+import Cli from './include/cli.js';
+import Config from './include/file-config.js';
+import Report from './models/report.js';
+import Owner from './models/owner.js';
+import ReportCollection from './models/reportCollection.js';
+import table from './output/table.js';
+import csv from './output/csv.js';
+import markdown from './output/markdown.js';
+import invoice from './output/invoice.js';
+import invoice2 from './output/invoice2.js';
+import dump from './output/dump.js';
+import xlsx from './output/xlsx.js';
 
 const Output = {
-    table: require('./output/table'),
-    csv: require('./output/csv'),
-    markdown: require('./output/markdown'),
-    invoice: require('./output/invoice'),
-    invoice2: require('./output/invoice2'),
-    dump: require('./output/dump'),
-    xlsx: require('./output/xlsx')
+    table,
+    csv,
+    markdown,
+    invoice,
+    invoice2,
+    dump,
+    xlsx
 };
 
 // this collects options
@@ -168,7 +174,7 @@ if (program.opts().this_month)
     config
         .set('from', moment().startOf('month'))
         .set('to', moment().endOf('month'));
-if (program.last_month)
+if (program.opts().last_month)
     config
         .set('from', moment().subtract(1, 'months').startOf('month'))
         .set('to', moment().subtract(1, 'months').endOf('month'));
@@ -382,7 +388,7 @@ new Promise(resolve => {
             Cli.error('No issues or merge requests matched your criteria.');
 
         Cli.list(`${Cli.output}  Making report`);
-        output = new Output[config.get('output')](config, master);
+        output = new (Output[config.get('output')])(config, master);
         output.make();
         Cli.mark();
         resolve();

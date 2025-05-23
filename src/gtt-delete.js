@@ -1,9 +1,8 @@
-const program = require('commander');
-
-const Frame = require('./models/frame');
-const Config = require('./include/file-config');
-const Cli = require('./include/cli');
-const Fs = require('./include/filesystem');
+import program from 'commander';
+import Frame from './models/frame';
+import Config from './include/file-config';
+import Cli from './include/cli';
+import Fs from './include/filesystem';
 
 program
     .arguments('[id]')

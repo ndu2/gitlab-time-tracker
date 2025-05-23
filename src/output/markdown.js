@@ -1,7 +1,6 @@
-const _ = require('underscore');
-
-const Table = require('markdown-table');
-const Base = require('./base');
+import _ from 'underscore';
+import {markdownTable as Table} from 'markdown-table'
+import Base from './base.js';
 
 const format = {
     headline: h => `\n### ${h}\n`,
@@ -69,4 +68,4 @@ class markdown extends Base {
     }
 }
 
-module.exports = markdown;
+export default markdown;

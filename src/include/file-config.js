@@ -1,12 +1,12 @@
-const fs = require('fs');
-const shell = require('shelljs');
-const path = require('path');
-const os = require("os");
-const xdgBaseDir = require('xdg-basedir');
-const config = require('./config');
-const yaml = require('read-yaml');
-const hash = require('hash-sum');
-const Fs = require('./filesystem');
+import fs from 'fs';
+import shell from 'shelljs';
+import path from 'path';
+import os from 'os';
+import {xdgData} from 'xdg-basedir';
+import config from './config.js';
+import yaml from 'read-yaml';
+import hash from 'hash-sum';
+import Fs from './filesystem.js';
 
 /**
  * file config with local and global configuration files
@@ -135,7 +135,7 @@ class fileConfig extends config {
     }
 
     get globalDir() {
-        return Fs.join(xdgBaseDir.data, '.gtt');
+        return Fs.join(xdgData, '.gtt');
     }
 
     get frameDir() {
@@ -164,4 +164,4 @@ class fileConfig extends config {
     }
 }
 
-module.exports = fileConfig;
+export default fileConfig;

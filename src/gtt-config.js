@@ -1,7 +1,6 @@
-const program = require('commander');
-
-const Config = require('./include/file-config');
-const Fs = require('./include/filesystem');
+import {program} from 'commander';
+import Config from './include/file-config.js';
+import Fs from './include/filesystem.js';
 
 let config = new Config(process.cwd());
 

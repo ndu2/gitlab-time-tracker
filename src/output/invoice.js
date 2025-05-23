@@ -1,9 +1,7 @@
-const _ = require('underscore');
-
-const Table = require('markdown-table');
-const Base = require('./base');
-
-const SwissQRBill = require("swissqrbill");
+import _ from 'underscore';
+import {markdownTable as Table} from 'markdown-table';
+import Base from './base.js';
+import { SwissQRBill } from "swissqrbill/svg";
 
 const format = {
     headline: h => `\n### ${h}\n`,
@@ -132,7 +130,7 @@ class invoice extends Base {
         const options = {
             language: "DE"
         };
-        const svg = new SwissQRBill.SVG(data, options);
+        const svg = new SwissQRBill(data, options);
         // make svg scalable, by adding viewBox and removing height/width attributes
         svg.instance.viewBox(0,0,740,420)
         svg.instance.height("");
@@ -257,4 +255,4 @@ ${closing}
     }
 }
 
-module.exports = invoice;
+export default invoice;
