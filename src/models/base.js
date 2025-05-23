@@ -1,19 +1,27 @@
 import request from 'request-promise-native';
-import url from 'url';
 import async from 'async';
 import crypto from 'crypto';
 import throttleFactory from 'throttled-queue';
-const throttle = throttleFactory(10, 1000);
 
 /**
  * base model
  */
 class base {
+    static throttle;
+    
+    static init(config) {
+        if(base.throttle == undefined){
+            base.throttle = throttleFactory(config.data.throttleMaxRequestsPerInterval, config.data.throttleInterval);
+        }
+    }
+
+
     /**
      * construct
      * @param config
      */
     constructor(config) {
+        base.init(config);
         this.config = config;
 
         this.url = config.get('url').endsWith('/') ? config.get('url') : `${config.get('url')}/`;
@@ -37,7 +45,7 @@ class base {
 
         data.private_token = this.token;
 
-        return new Promise((resolve, reject) => throttle(() => {
+        return new Promise((resolve, reject) => base.throttle(() => {
             request.post(`${this.url}${path}`, {
                 json: true,
                 body: data,
@@ -68,7 +76,7 @@ class base {
         let key = base.createDumpKey(path, data);
         if (this.config.dump) return this.getDump(key);
 
-        return new Promise((resolve, reject) => throttle(() => {
+        return new Promise((resolve, reject) => base.throttle(() => {
             request.post(`${path}`, {
                 json: true,
                 body: data,
@@ -101,7 +109,7 @@ class base {
         path += (path.includes('?') ? '&' : '?') + `private_token=${this.token}`;
         path += `&page=${page}&per_page=${perPage}`;
 
-        return new Promise((resolve, reject) => throttle(() => {
+        return new Promise((resolve, reject) => base.throttle(() => {
             request(`${this.url}${path}`, {
                 json: true,
                 insecure: this._insecure,

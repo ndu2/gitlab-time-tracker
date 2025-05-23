@@ -43,7 +43,9 @@ const defaults = {
     _parallel: 10,
     _verbose: false,
     _checkToken: true,
-    _skipDescriptionParsing: false
+    _skipDescriptionParsing: false,
+    throttleMaxRequestsPerInterval: 10,
+    throttleInterval: 1000,
 };
 
 /**
