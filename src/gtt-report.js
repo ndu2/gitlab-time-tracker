@@ -247,9 +247,11 @@ new Promise(resolve => {
                 switch (config.get('type')) {
                     case 'project':
                         let report = new Report(config);
-                        reports.push(report);
                         report.getProject()
-                            .then(() => done())
+                            .then(() =>  {
+                                reports.push(report);
+                                done();
+                            })
                             .catch(e => Cli.x(`Project not found or no access rights "${projectLabels}".`, e));
                         break;
 
