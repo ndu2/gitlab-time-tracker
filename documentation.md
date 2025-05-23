@@ -634,6 +634,15 @@ extend: true
 # defaults to 10
 _parallel: 20
 
+
+# throttle API request to gitlab to max at throttleMaxRequestsPerInterval per throttleInterval (ms)
+# defaults to 10
+throttleMaxRequestsPerInterval: 10
+# throttle API request to gitlab to max at throttleMaxRequestsPerInterval per throttleInterval (ms)
+# defaults to 1000
+throttleInterval: 1000
+
+
 # Change rows per page (max. 100)
 # defaults to 100
 _perPage: 100
