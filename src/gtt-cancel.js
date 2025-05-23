@@ -1,13 +1,14 @@
-import {program} from 'commander';
+import {Command} from 'commander';
 import colors from 'colors';
 import moment from 'moment';
 import Config from './include/file-config.js';
 import Cli from './include/cli.js';
 import Tasks from './include/tasks.js';
 
-program
+function cancel() {
+  const cancel = new Command('cancel', 'cancel and discard active monitoring time')
     .option('--verbose', 'show verbose output')
-    .parse(process.argv);
+    .action((options, program) => {
 
 Cli.verbose = program.opts().verbose;
 
@@ -24,3 +25,9 @@ tasks.cancel()
         })
     })
     .catch(error => Cli.error(error));
+    }
+);
+return cancel;
+}
+
+export default cancel;

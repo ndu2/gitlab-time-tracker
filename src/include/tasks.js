@@ -187,7 +187,9 @@ class tasks {
             frames
                 .filter(frame => frame.project === project)
                 .sort((a, b) => moment(a.stop).isBefore(moment(b.stop)) ? 1 : -1);
-
+            if (frames.length == 0) {
+                return reject("No task found to resume.");
+            }
             let last = frames.frames[0];
             this.start(last.project, last.resource.type, last.resource.id)
                 .then(frame => resolve(frame))

@@ -1,6 +1,6 @@
 import _ from 'underscore';
 import fs from 'fs';
-import {program} from 'commander';
+import {Command} from 'commander';
 import moment from 'moment';
 import Cli from './include/cli.js';
 import Config from './include/file-config.js';
@@ -33,9 +33,10 @@ function collect(val, arr) {
     return _.uniq(arr);
 }
 
-// set options
-program
-    .arguments('[project] [ids]')
+
+function report() {
+    const report = new Command('report', 'generate a report for the given project and issues')
+    .arguments('[project] [ids...]')
     .option('-e --type <type>', 'specify the query type: project, user, group')
     .option('--subgroups', 'include sub groups')
     .option('--url <url>', 'URL to GitLabs API')
@@ -86,7 +87,7 @@ program
     .option('--invoicePositionExtra <text>', 'extra invoice position: header text')
     .option('--invoicePositionExtraText <text>', 'extra invoice position: text')
     .option('--invoicePositionExtraValue <number>', 'extra invoice position: value')
-    .parse(process.argv);
+    .action((project, ids, options, program) => {
 
 // init helpers
 let config = new Config(process.cwd());
@@ -412,3 +413,9 @@ new Promise(resolve => {
 
     // time for a beer
     .then(() => Cli.done());
+}
+);
+return report;
+}
+
+export default report;

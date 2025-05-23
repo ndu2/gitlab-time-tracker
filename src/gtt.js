@@ -1,29 +1,38 @@
 #!/usr/bin/env node
 
-import { readFile } from 'fs/promises';
-const json = JSON.parse(
-  await readFile(
-    new URL('../package.json', import.meta.url)
-  )
-);
-let version = json.version;
+let version = "1.8.0";
+
 import { program } from 'commander';
+
+import start from './gtt-start.js';
+import create from './gtt-create.js';
+import status from './gtt-status.js';
+import stop from './gtt-stop.js';
+import resume from './gtt-resume.js';
+import cancel from './gtt-cancel.js';
+import list from './gtt-list.js';
+import log from './gtt-log.js';
+import sync from './gtt-sync.js';
+import edit from './gtt-edit.js';
+import delCmd from './gtt-delete.js';
+import report from './gtt-report.js';
+import config from './gtt-config.js';
 
 program
     .version(version)
-    .command('start [project] [id]', 'start monitoring time for the given project and resource id')
-    .command('create [project] [title]', 'start monitoring time for the given project and create a new issue or merge request with the given title')
-    .command('status', 'shows if time monitoring is running')
-    .command('stop', 'stop monitoring time')
-    .command('resume [project]', 'resume monitoring time for last stopped record')
-    .command('cancel', 'cancel and discard active monitoring time')
-    .command('list [project]', 'list all open issues')
-    .command('log', 'log recorded time records')
-    .command('sync', 'sync local time records to GitLab')
-    .command('edit [id]', 'edit time record by the given id')
-    .command('delete [id]', 'delete time record by the given id')
-    .command('report [project] [ids]', 'generate a report for the given project and issues')
-    .command('config', 'edit the configuration file in your default editor')
+    .addCommand(start())
+    .addCommand(create())
+    .addCommand(status())
+    .addCommand(stop())
+    .addCommand(resume())
+    .addCommand(cancel())
+    .addCommand(list())
+    .addCommand(log())
+    .addCommand(sync())
+    .addCommand(edit())
+    .addCommand(delCmd())
+    .addCommand(report())
+    .addCommand(config())
     .parse(process.argv);
 
     

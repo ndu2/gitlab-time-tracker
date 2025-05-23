@@ -1,17 +1,18 @@
 import moment from 'moment';
-import program from 'commander';
-import Config from './include/file-config';
-import Cli from './include/cli';
-import Tasks from './include/tasks';
-import Owner from './models/owner';
+import {Command} from 'commander';
+import Config from './include/file-config.js';
+import Cli from './include/cli.js';
+import Tasks from './include/tasks.js';
+import Owner from './models/owner.js';
 
-program
+function sync() {
+    const sync = new Command('sync', 'sync local time records to GitLab')
     .option('-p --proxy <proxy>', 'use a proxy server with the given url')
     .option('--url <url>', 'URL to GitLabs API')
     .option('--token <token>', 'API access token')
     .option('--insecure', 'don\'t check certificates')
     .option('--verbose', 'show verbose output')
-    .parse(process.argv);
+    .action((options, program) => {
 
 Cli.verbose = program.opts().verbose;
 
@@ -40,3 +41,10 @@ tasks.syncInit()
         return tasks.syncUpdate(Cli.advance)
     })
     .catch(error => Cli.x(error));
+
+}
+);
+return sync;
+}
+
+export default sync;

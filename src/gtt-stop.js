@@ -1,13 +1,15 @@
-import {program} from 'commander';
+import {Command} from 'commander';
 import colors from 'colors';
 import moment from 'moment';
 import Config from './include/file-config.js';
 import Cli from './include/cli.js';
 import Tasks from './include/tasks.js';
 
-program
+
+function stop() {
+    const stop = new Command('stop', 'stop monitoring time')
     .option('--verbose', 'show verbose output')
-    .parse(process.argv);
+    .action((options, program) => {
 
 Cli.verbose = program.opts().verbose;
 
@@ -24,3 +26,9 @@ tasks.stop()
         });
     })
     .catch(error => Cli.error(error));
+}
+);
+return stop;
+}
+
+export default stop;
