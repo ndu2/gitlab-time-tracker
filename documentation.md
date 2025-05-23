@@ -656,6 +656,9 @@ _checkToken: false
 # Skip parsing the issue/merge_request description for time records
 _skipDescriptionParsing: false
 
+# directory for the track record files. defaults to ~/.local/share/.gtt/frames/, %LOCALAPPDATA%\.gtt\Data\frames or equivalent
+#frameDir: /some/absolute/directory/
+
 # settings for invoice output
 invoiceSettings:
  from:

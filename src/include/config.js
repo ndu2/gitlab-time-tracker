@@ -46,6 +46,7 @@ const defaults = {
     _skipDescriptionParsing: false,
     throttleMaxRequestsPerInterval: 10,
     throttleInterval: 1000,
+    frameDir: undefined,
 };
 
 /**

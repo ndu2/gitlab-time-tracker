@@ -22,6 +22,7 @@ class fileConfig extends config {
         this.assertGlobalConfig();
         this.workDir = workDir;
         this.data = Object.assign(this.data, this.localExists() ? this.parseLocal() : this.parseGlobal());
+        if (!fs.existsSync(this.frameDir)) shell.mkdir('-p', this.frameDir);
         this._dump = {};
         this.cache = {
             delete: this._cacheDelete,
@@ -94,7 +95,6 @@ class fileConfig extends config {
 
 
         if (!fs.existsSync(this.globalDir)) shell.mkdir('-p', this.globalDir);
-        if (!fs.existsSync(this.frameDir)) shell.mkdir('-p', this.frameDir);
         if (!fs.existsSync(this.cacheDir)) shell.mkdir('-p', this.cacheDir);
         if (!fs.existsSync(this.global)) fs.appendFileSync(this.global, '');
     }
@@ -139,7 +139,10 @@ class fileConfig extends config {
     }
 
     get frameDir() {
-        return Fs.join(this.globalDir, 'frames/files');
+        if(this.data.frameDir) {
+            return this.data.frameDir;
+        }
+        return Fs.join(this.globalDir, 'frames');
     }
 
     get cacheDir() {
