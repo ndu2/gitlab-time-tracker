@@ -41,6 +41,7 @@
     "colors": "^1.4.0",
     "commander": "^14.0.0",
     "csv-string": "^4.1.1",
+    "env-paths": "^3.0.0",
     "find-in-files": "^0.5.0",
     "hash-sum": "^2.0.0",
     "hashids": "^2.3.0",
@@ -60,7 +61,6 @@
     "tempfile": "^5.0.0",
     "throttled-queue": "^2.1.4",
     "underscore": "^1.13.7",
-    "xdg-basedir": "^5.1.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {

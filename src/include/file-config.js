@@ -2,11 +2,12 @@ import fs from 'fs';
 import shell from 'shelljs';
 import path from 'path';
 import os from 'os';
-import {xdgData} from 'xdg-basedir';
 import config from './config.js';
 import yaml from 'read-yaml';
 import hash from 'hash-sum';
 import Fs from './filesystem.js';
+import envPaths from 'env-paths';
+
 
 /**
  * file config with local and global configuration files
@@ -18,7 +19,6 @@ class fileConfig extends config {
      */
     constructor(workDir) {
         super();
-
         this.assertGlobalConfig();
         this.workDir = workDir;
         this.data = Object.assign(this.data, this.localExists() ? this.parseLocal() : this.parseGlobal());
@@ -135,7 +135,7 @@ class fileConfig extends config {
     }
 
     get globalDir() {
-        return Fs.join(xdgData, '.gtt');
+        return envPaths(".gtt", {suffix:""}).data;
     }
 
     get frameDir() {
