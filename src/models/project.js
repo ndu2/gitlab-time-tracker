@@ -1,4 +1,4 @@
-const Base = require('./base');
+import Base from './base.js';
 
 /**
  * project model
@@ -67,4 +67,4 @@ class project extends Base {
     }
 }
 
-module.exports = project;
+export default project;

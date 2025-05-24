@@ -1,5 +1,5 @@
-const _ = require('underscore');
-const moment = require('moment');
+import _ from 'underscore';
+import moment from 'moment';
 
 const defaultTimeFormat = '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]';
 const mappings = ['complete', 'sign', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'];
@@ -180,4 +180,4 @@ class time {
     }
 }
 
-module.exports = time;
+export default time;

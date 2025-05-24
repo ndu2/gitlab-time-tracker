@@ -1,7 +1,7 @@
-const _ = require('underscore');
-const Table = require('cli-table');
-const Base = require('./base');
-const Color = require('colors');
+import _ from 'underscore';
+import Table from 'cli-table';
+import Base from './base.js';
+import Color from 'colors';
 
 const format = {
     headline: h => `\n${h.bold.underline}\n`,
@@ -95,4 +95,4 @@ class table extends Base {
     }
 }
 
-module.exports = table;
+export default table;

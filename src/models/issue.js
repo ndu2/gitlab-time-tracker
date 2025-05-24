@@ -1,7 +1,6 @@
-const _ = require('underscore');
-const moment = require('moment');
-
-const hasTimes = require('./hasTimes');
+import _ from 'underscore';
+import moment from 'moment';
+import hasTimes from './hasTimes.js';
 
 /**
  * issue model
@@ -128,4 +127,4 @@ class issue extends hasTimes {
     }
 }
 
-module.exports = issue;
+export default issue;

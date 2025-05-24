@@ -1,10 +1,9 @@
-const _ = require('underscore');
-const fs = require('fs');
-const path = require('path');
-const XLSX = require('xlsx');
-
-const Base = require('./base');
-const Cli = require('./../include/cli');
+import _ from 'underscore';
+import fs from 'fs';
+import path from 'path';
+import XLSX from 'xlsx';
+import Base from './base.js';
+import Cli from './../include/cli.js';
 
 /**
  * xlsx output
@@ -105,4 +104,4 @@ class xlsx extends Base {
     }
 }
 
-module.exports = xlsx;
+export default xlsx;

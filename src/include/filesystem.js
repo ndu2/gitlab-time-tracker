@@ -1,9 +1,9 @@
-const _ = require('underscore');
-const fs = require('fs');
-const path = require('path');
-const open = require('open');
-const find = require('find-in-files');
-const child_process = require('child_process');
+import _ from 'underscore';
+import fs from 'fs';
+import path from 'path';
+import open from 'open';
+import find from 'find-in-files';
+import child_process from 'child_process';
 
 class filesystem {
     static find(pattern, dir) {
@@ -51,4 +51,4 @@ class filesystem {
     }
 }
 
-module.exports = filesystem;
+export default filesystem;

@@ -1,5 +1,5 @@
-const config = require('./../../src/include/config');
-const expect = require('chai').expect;
+import config from '../../src/include/config.js';
+import { expect } from 'chai';
 
 describe('The config class', () => {
     it('stores data', () => {

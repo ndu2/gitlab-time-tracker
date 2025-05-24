@@ -1,4 +1,4 @@
-const Base = require('./base');
+import Base from './base.js';
 let projlist = [];
 
 class reportCollection extends Base {
@@ -23,4 +23,4 @@ class reportCollection extends Base {
     }
 }
 
-module.exports = reportCollection;
+export default reportCollection;

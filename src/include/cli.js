@@ -1,9 +1,10 @@
-const _ = require('underscore');
-const colors = require('colors');
-const prompt = require('prompt');
-const spinner = require('node-spinner')();
-const cursor = require('cli-cursor');
-const progress = require('progress');
+import _ from 'underscore';
+import colors from 'colors';
+import prompt from 'prompt';
+import spinnerFactory from 'node-spinner';
+const spinner = spinnerFactory();
+import cursor from 'cli-cursor';
+import progress from 'progress';
 spinner.set('|/-\\');
 
 /**
@@ -268,4 +269,4 @@ class cli {
     }
 }
 
-module.exports = cli;
+export default cli;

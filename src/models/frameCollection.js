@@ -1,6 +1,6 @@
-const Base = require('./base');
-const Frame = require('./frame');
-const Fs = require('./../include/filesystem');
+import Base from './base.js';
+import Frame from './frame.js';
+import Fs from './../include/filesystem.js';
 
 class frameCollection extends Base {
     constructor(config) {
@@ -54,4 +54,4 @@ class frameCollection extends Base {
     }
 }
 
-module.exports = frameCollection;
+export default frameCollection;

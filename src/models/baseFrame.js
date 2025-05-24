@@ -1,7 +1,6 @@
-const Config = require('../include/config');
-
-const moment = require('moment-timezone');
-const Hashids = require('hashids');
+import Config from '../include/config.js';
+import moment from 'moment-timezone';
+import Hashids from 'hashids';
 const hashids = new Hashids();
 
 class baseFrame {
@@ -115,4 +114,4 @@ class baseFrame {
     }
 }
 
-module.exports = baseFrame;
+export default baseFrame;

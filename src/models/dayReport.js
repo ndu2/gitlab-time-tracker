@@ -49,5 +49,5 @@ class dayReport {
 
 
   }
-  
-module.exports = dayReport;
+
+export default dayReport;

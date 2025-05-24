@@ -1,8 +1,7 @@
-const sinon = require('sinon');
-const chai = require('chai');
+import sinon from "sinon";
 
 beforeEach(function () {
-    this.sandbox = sinon.sandbox.create()
+    this.sandbox = sinon.createSandbox()
 });
 
 afterEach(function () {

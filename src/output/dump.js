@@ -1,5 +1,5 @@
-const fs = require('fs');
-const Config = require('../include/config');
+import fs from 'fs';
+import Config from '../include/config.js';
 
 class dump {
     constructor(config, report) {
@@ -27,4 +27,4 @@ class dump {
     }
 }
 
-module.exports = dump;
+export default dump;

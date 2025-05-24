@@ -1,11 +1,11 @@
-const program = require('commander');
-const Config = require('./include/file-config');
-const Cli = require('./include/cli');
-const Fs = require('./include/filesystem');
-const _ = require('underscore');
-const Time = require('./models/time');
-const Frame = require('./models/frame');
-const inquirer = require('inquirer');
+import {program} from 'commander';
+import Config from './include/file-config.js';
+import Cli from './include/cli.js';
+import Fs from './include/filesystem.js';
+import _ from 'underscore';
+import Time from './models/time.js';
+import Frame from './models/frame.js';
+import inquirer from 'inquirer';
 
 
 program
@@ -29,12 +29,12 @@ function toHumanReadable(input) {
 }
 
 if (!id) {
-  lastFrames = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
+  let lastFrames = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
   lastFrames = lastFrames.map((file) =>
     Frame.fromFile(config, Fs.join(config.frameDir, file))
   );
 
-  lastFramesDetails = lastFrames
+  let lastFramesDetails = lastFrames
     .sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1))
     .map((frame) => {
       let issue = `${

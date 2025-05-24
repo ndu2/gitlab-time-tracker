@@ -1,28 +1,25 @@
-const program = require('commander');
-const colors = require('colors');
-const moment = require('moment');
-const Table = require('cli-table');
+import { program } from 'commander';
+import colors from 'colors';
+import moment from 'moment';
+import Table from 'cli-table';
 
 
-const Config = require('./include/file-config');
-const Cli = require('./include/cli');
-const Tasks = require('./include/tasks');
+import Config from './include/file-config.js';
+import cli from './include/cli.js';
+import Tasks from './include/tasks.js';
 
-program
-    .arguments('[project]')
+program.arguments('[project]')
     .option('--verbose', 'show verbose output')
     .option('-c, --closed', 'show closed issues (instead of opened only)')
     .option('--my', 'show only issues assigned to me')
     .parse(process.argv);
 
-Cli.verbose = program.verbose;
-
 let config = new Config(process.cwd()),
     tasks = new Tasks(config),
-    type = program.type ? program.type : 'issue',
+    type = program.opts().type ? program.opts().type : 'issue',
     project = program.args[0];
 
-tasks.list(project, program.closed ? 'closed' : 'opened', program.my)
+tasks.list(project, program.opts().closed ? 'closed' : 'opened', program.opts().my)
   .then(issues => {
     let table = new Table({
       style : {compact : true, 'padding-left' : 1}
@@ -35,5 +32,5 @@ tasks.list(project, program.closed ? 'closed' : 'opened', program.my)
     })
     console.log(table.toString());
   })
-  .catch(error => Cli.error(error));
+  .catch(error => cli.error(error));
 

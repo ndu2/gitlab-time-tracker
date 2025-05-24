@@ -1,10 +1,9 @@
-const colors = require('colors');
-const moment = require('moment');
-const program = require('commander');
-
-const Config = require('./include/file-config');
-const Cli = require('./include/cli');
-const Tasks = require('./include/tasks');
+import colors from 'colors';
+import moment from 'moment';
+import program from 'commander';
+import Config from './include/file-config';
+import Cli from './include/cli';
+import Tasks from './include/tasks';
 
 program
     .arguments('[project] [title]')

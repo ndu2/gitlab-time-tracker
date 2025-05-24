@@ -1,9 +1,8 @@
-const _ = require('underscore');
-const fs = require('fs');
-const path = require('path');
-const Csv = require('csv-string');
-
-const Base = require('./base');
+import _ from 'underscore';
+import fs from 'fs';
+import path from 'path';
+import Csv from 'csv-string';
+import Base from './base.js';
 
 /**
  * csv output
@@ -101,4 +100,4 @@ class csv extends Base {
     }
 }
 
-module.exports = csv;
+export default csv;

@@ -1,6 +1,6 @@
-const _ = require('underscore');
-const fs = require('fs');
-const moment = require('moment');
+import _ from 'underscore';
+import fs from 'fs';
+import moment from 'moment';
 
 const defaultFormats = {
     headline: h => `${h}\n`,
@@ -242,4 +242,4 @@ class base {
     }
 }
 
-module.exports = base;
+export default base;

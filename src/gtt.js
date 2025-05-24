@@ -1,8 +1,13 @@
 #!/usr/bin/env node
-require('app-module-path').addPath(__dirname);
 
-const version = require('../package.json').version;
-const program = require('commander');
+import { readFile } from 'fs/promises';
+const json = JSON.parse(
+  await readFile(
+    new URL('../package.json', import.meta.url)
+  )
+);
+let version = json.version;
+import { program } from 'commander';
 
 program
     .version(version)
@@ -20,3 +25,5 @@ program
     .command('report [project] [ids]', 'generate a report for the given project and issues')
     .command('config', 'edit the configuration file in your default editor')
     .parse(process.argv);
+
+    

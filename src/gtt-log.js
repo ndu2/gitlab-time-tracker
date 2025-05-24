@@ -1,13 +1,12 @@
-const _ = require('underscore');
-const program = require('commander');
-const colors = require('colors');
-const moment = require('moment-timezone');
-
-const Config = require('./include/file-config');
-const Cli = require('./include/cli');
-const Time = require('./models/time');
-const Tasks = require('./include/tasks');
-const mergeRequest = require('./models/mergeRequest');
+import _ from 'underscore';
+import program from 'commander';
+import colors from 'colors';
+import moment from 'moment-timezone';
+import Config from './include/file-config';
+import Cli from './include/cli';
+import Time from './models/time';
+import Tasks from './include/tasks';
+import mergeRequest from './models/mergeRequest';
 
 program
     .option('--verbose', 'show verbose output')
@@ -31,7 +30,7 @@ function column(str, n){
         str = str.substr(0, n-1) + "…"
     }
     return str.padEnd(n);
-  };
+  }
 
 const logCSV = (frames, times) => {
     console.log("frameId, project, issueid, date, starttime, endtime, duration (s), title, note");
@@ -43,7 +42,7 @@ const logCSV = (frames, times) => {
         });
     });
 };
-    
+
 const logCli =  (frames, times) => {
     Object.keys(frames).sort().forEach(date => {
         if (!frames.hasOwnProperty(date)) return;
