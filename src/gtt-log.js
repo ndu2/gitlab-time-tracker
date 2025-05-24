@@ -1,12 +1,12 @@
 import _ from 'underscore';
-import program from 'commander';
+import {program} from 'commander';
 import colors from 'colors';
 import moment from 'moment-timezone';
-import Config from './include/file-config';
-import Cli from './include/cli';
-import Time from './models/time';
-import Tasks from './include/tasks';
-import mergeRequest from './models/mergeRequest';
+import Config from './include/file-config.js';
+import Cli from './include/cli.js';
+import Time from './models/time.js';
+import Tasks from './include/tasks.js';
+import mergeRequest from './models/mergeRequest.js';
 
 program
     .option('--verbose', 'show verbose output')
@@ -17,7 +17,7 @@ program
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(__dirname).set('hoursPerDay', program.opts().hours_per_day),
+let config = new Config(process.cwd()).set('hoursPerDay', program.opts().hours_per_day),
     tasks = new Tasks(config),
     timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
 

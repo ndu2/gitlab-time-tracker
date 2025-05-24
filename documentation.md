@@ -22,7 +22,7 @@
 
 ## requirements
 
-* [node.js](https://nodejs.org/en/download) version >= 6
+* [node.js](https://nodejs.org/en/download) version >= 20
 * [npm](https://github.com/npm/npm) or [yarn](https://yarnpkg.com/en/docs/install)
 
 ## installation

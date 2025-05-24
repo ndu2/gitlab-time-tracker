@@ -1,4 +1,4 @@
-import program from 'commander';
+import {program} from 'commander';
 import colors from 'colors';
 import moment from 'moment';
 import Config from './include/file-config';

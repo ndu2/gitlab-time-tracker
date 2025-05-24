@@ -1,4 +1,4 @@
-import program from 'commander';
+import {program} from 'commander';
 import Frame from './models/frame';
 import Config from './include/file-config';
 import Cli from './include/cli';

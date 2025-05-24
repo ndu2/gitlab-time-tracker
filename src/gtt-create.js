@@ -1,6 +1,6 @@
 import colors from 'colors';
 import moment from 'moment';
-import program from 'commander';
+import {program} from 'commander';
 import Config from './include/file-config';
 import Cli from './include/cli';
 import Tasks from './include/tasks';
