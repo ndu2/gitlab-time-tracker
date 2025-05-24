@@ -13,13 +13,22 @@
   "main": "src/gtt.js",
   "scripts": {
     "test": "NODE_ENV=test mocha 'spec/**/*.spec.js'",
-    "build": "pkg src/gtt.js -o out/gtt -c package.json"
+    "esbuild": "esbuild 'src/gtt*.js' --format=cjs --target=node20 --platform=node --bundle --outdir=dist",
+    "build": "pkg dist/gtt.js -o out/gtt -c package.json"
   },
   "bin": {
-    "gtt": "src/gtt.js"
+    "gtt": "dist/gtt.js"
   },
   "engines": {
     "node": ">=20"
+  },
+  "pkg": {
+    "scripts": "src/**/*.js",
+    "targets": [
+      "node20-linux-x64",
+      "node20-macos-x64",
+      "node20-win-x64"
+    ]
   },
   "author": "kriskbx",
   "license": "GPL-2.0",
@@ -54,9 +63,10 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
+    "@yao-pkg/pkg": "^6.5.1",
     "chai": "^5.2.0",
+    "esbuild": "^0.25.4",
     "mocha": "^11.4.0",
-    "pkg": "^5.8.1",
     "sinon": "^20.0.0"
   }
 }

@@ -1,5 +1,5 @@
 import _ from 'underscore';
-import {program} from 'commander';
+import {Command, program} from 'commander';
 import colors from 'colors';
 import moment from 'moment-timezone';
 import Config from './include/file-config.js';
@@ -8,18 +8,20 @@ import Time from './models/time.js';
 import Tasks from './include/tasks.js';
 import mergeRequest from './models/mergeRequest.js';
 
-program
+function log() {
+  const log = new Command('log', 'log recorded time records')
     .option('--verbose', 'show verbose output')
     .option('--hours_per_day <hours>', 'hours per day for human readable time formats')
     .option('--time_format <time_format>', 'time format')
     .option('--csv', 'comma separated output')
-    .parse(process.argv);
+    //.parse(process.argv);
+    .action((options, cmd) => {
 
-Cli.verbose = program.opts().verbose;
+Cli.verbose = options.verbose;
 
-let config = new Config(process.cwd()).set('hoursPerDay', program.opts().hours_per_day),
+let config = new Config(process.cwd()).set('hoursPerDay', options.hours_per_day),
     tasks = new Tasks(config),
-    timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
+    timeFormat = config.set('timeFormat', options.time_format).get('timeFormat', 'log');
 
 function toHumanReadable(input) {
     return Time.toHumanReadable(Math.ceil(input), config.get('hoursPerDay'), timeFormat);
@@ -76,8 +78,15 @@ const logCli =  (frames, times) => {
     });
 };
 
-const log = program.opts().csv? logCSV : logCli;
+const log = options.csv? logCSV : logCli;
 
 tasks.log()
     .then(({frames, times}) => log(frames, times))
     .catch(error => Cli.error(error));
+
+}
+);
+return log;
+}
+
+export default log;
