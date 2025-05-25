@@ -677,6 +677,7 @@ invoiceSettings:
  - 
  - Name
  bankAccount: "Bitte den Betrag auf unser Konto... IBAN .."
+ SwissQRBill: false
 ```
 
 ### Time format

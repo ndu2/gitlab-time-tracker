@@ -128,6 +128,8 @@ class invoice extends Base {
             }
         }
 
+        let qrDivContent = "";
+
         const data = {
             currency: "CHF",
             amount: this.totalForInvoice,
@@ -151,11 +153,16 @@ class invoice extends Base {
         const options = {
             language: "DE"
         };
-        const svg = new SwissQRBill(data, options);
-        // make svg scalable, by adding viewBox and removing height/width attributes
-        svg.instance.viewBox(0,0,740,420)
-        svg.instance.height("");
-        svg.instance.width("");
+
+        if(this.config.get('invoiceSettings').SwissQRBill) {
+            const svg = new SwissQRBill(data, options);
+            // make svg scalable, by adding viewBox and removing height/width attributes
+            svg.instance.viewBox(0,0,740,420)
+            svg.instance.height("");
+            svg.instance.width("");
+            qrDivContent = svg.toString();
+        }
+
         let positions ="";
         let positionIids = Object.keys(this.invoicePositions);
         positionIids.sort();
@@ -214,7 +221,7 @@ ${this.config.get('invoiceSettings').bankAccount}
 ${closing}
 
 
-<div class="qr-div">${svg.toString()}</div>`
+<div class="qr-div">${qrDivContent}</div>`
 
     }
 
