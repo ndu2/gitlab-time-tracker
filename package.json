@@ -1,6 +1,6 @@
 {
   "name": "gitlab-time-tracker",
-  "version": "1.8.0",
+  "version": "1.8.0-snapshot",
   "type": "module",
   "description": "A command line interface for GitLabs time tracking feature.",
   "bugs": {
@@ -12,23 +12,25 @@
   },
   "main": "src/gtt.js",
   "scripts": {
+    "prebuild": "echo \"let version = '${npm_package_version}'; export default version;\" > src/version.js",
     "test": "NODE_ENV=test mocha 'spec/**/*.spec.js'",
     "esbuild": "esbuild 'src/gtt.js' --format=cjs --target=node20 --platform=node --bundle --outfile=dist/gtt.cjs --inject:./src/polyfill/import-meta-url.js --define:import.meta.url=import_meta_url",
     "pkg": "pkg dist/gtt.cjs -o out/gtt -c package.json",
-    "build": "npm run-script test && npm run-script esbuild && npm run-script pkg"
+    "docker": "docker build . -t gtt:${npm_package_version} -t gtt:latest",
+    "buildAll": "npm run-script prebuild && npm run-script test && npm run-script esbuild && npm run-script pkg && npm run-script docker"
   },
   "bin": {
     "gtt": "dist/gtt.cjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "pkg": {
     "scripts": "dist/gtt.cjs",
     "targets": [
-      "node20-linux-x64",
-      "node20-macos-x64",
-      "node20-win-x64"
+      "node22-linux-x64",
+      "node22-macos-x64",
+      "node22-win-x64"
     ]
   },
   "author": "kriskbx",

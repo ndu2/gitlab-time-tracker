@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-let version = "1.8.0";
+import version from './version.js';
 
 import { program } from 'commander';
 
