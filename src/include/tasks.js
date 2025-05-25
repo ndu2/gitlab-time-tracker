@@ -177,21 +177,12 @@ class tasks {
      *
      * @returns {Promise}
      */
-    resume() {
+    resume(frame) {
         return new Promise((resolve, reject) => {
-            let project = this.config.get('project'),
-                frames = new FrameCollection(this.config);
-
-            if (!project) return reject("No project set.");
-
-            frames
-                .filter(frame => frame.project === project)
-                .sort((a, b) => moment(a.stop).isBefore(moment(b.stop)) ? 1 : -1);
-            if (frames.length == 0) {
+            if (!frame) {
                 return reject("No task found to resume.");
             }
-            let last = frames.frames[0];
-            this.start(last.project, last.resource.type, last.resource.id)
+            this.start(frame.project, frame.resource.type, frame.resource.id, frame.note)
                 .then(frame => resolve(frame))
                 .catch(error => reject(error));
         });
