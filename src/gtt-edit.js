@@ -1,4 +1,4 @@
-import {program} from 'commander';
+import {Command} from 'commander';
 import Config from './include/file-config.js';
 import Cli from './include/cli.js';
 import Fs from './include/filesystem.js';
@@ -8,12 +8,13 @@ import Frame from './models/frame.js';
 import inquirer from 'inquirer';
 
 
-program
+
+function edit() {
+  const edit = new Command('edit', 'edit time record by the given id')
     .arguments('[id]')
-    .parse(process.argv);
+    .action((id, opts ,program) => {
 
 let config = new Config(process.cwd());
-let id = program.args[0];
 let timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
 const listSize = 30;
 
@@ -75,3 +76,9 @@ if (!id) {
   Fs.open(Fs.join(config.frameDir, id.replace(".json", "") + ".json"));
 }
 
+}
+);
+return edit;
+}
+
+export default edit;

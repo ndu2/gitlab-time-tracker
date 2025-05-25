@@ -1,15 +1,17 @@
 import colors from 'colors';
 import moment from 'moment';
-import program from 'commander';
-import Config from './include/file-config';
-import Cli from './include/cli';
-import Tasks from './include/tasks';
+import {Command} from 'commander';
+import Config from './include/file-config.js';
+import Cli from './include/cli.js';
+import Tasks from './include/tasks.js';
 
-program
+
+function create() {
+    const create = new Command('create', 'start monitoring time for the given project and create a new issue or merge request with the given title')
     .arguments('[project] [title]')
     .option('-t, --type <type>', 'specify resource type: issue, merge_request')
     .option('--verbose', 'show verbose output')
-    .parse(process.argv);
+    .action((aproject, atitle, options, program) => {
 
 Cli.verbose = program.opts().verbose;
 
@@ -28,3 +30,9 @@ if (!title)
 tasks.start(project, type, title)
     .then(frame => console.log(`Starting project ${config.get('project').magenta} and create ${type} "${title.blue}" at ${moment().format('HH:mm').green}`))
     .catch(error => Cli.error(error));
+}
+);
+return create;
+}
+
+export default create;

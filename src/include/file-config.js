@@ -2,11 +2,12 @@ import fs from 'fs';
 import shell from 'shelljs';
 import path from 'path';
 import os from 'os';
-import {xdgData} from 'xdg-basedir';
 import config from './config.js';
 import yaml from 'read-yaml';
 import hash from 'hash-sum';
 import Fs from './filesystem.js';
+import envPaths from 'env-paths';
+
 
 /**
  * file config with local and global configuration files
@@ -18,10 +19,10 @@ class fileConfig extends config {
      */
     constructor(workDir) {
         super();
-
         this.assertGlobalConfig();
         this.workDir = workDir;
         this.data = Object.assign(this.data, this.localExists() ? this.parseLocal() : this.parseGlobal());
+        if (!fs.existsSync(this.frameDir)) shell.mkdir('-p', this.frameDir);
         this._dump = {};
         this.cache = {
             delete: this._cacheDelete,
@@ -94,7 +95,6 @@ class fileConfig extends config {
 
 
         if (!fs.existsSync(this.globalDir)) shell.mkdir('-p', this.globalDir);
-        if (!fs.existsSync(this.frameDir)) shell.mkdir('-p', this.frameDir);
         if (!fs.existsSync(this.cacheDir)) shell.mkdir('-p', this.cacheDir);
         if (!fs.existsSync(this.global)) fs.appendFileSync(this.global, '');
     }
@@ -135,11 +135,14 @@ class fileConfig extends config {
     }
 
     get globalDir() {
-        return Fs.join(xdgData, '.gtt');
+        return envPaths(".gtt", {suffix:""}).data;
     }
 
     get frameDir() {
-        return Fs.join(this.globalDir, 'frames/files');
+        if(this.data.frameDir) {
+            return this.data.frameDir;
+        }
+        return Fs.join(this.globalDir, 'frames');
     }
 
     get cacheDir() {

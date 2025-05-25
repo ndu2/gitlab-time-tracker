@@ -1,14 +1,16 @@
-import {program} from 'commander';
+import {Command} from 'commander';
 import colors from 'colors';
 import moment from 'moment';
 import Config from './include/file-config.js';
 import Cli from './include/cli.js';
 import Tasks from './include/tasks.js';
 
-program
+
+function status() {
+    const status = new Command('status', 'shows if time monitoring is running')
     .option('--verbose', 'show verbose output')
     .option('-s', 'short output')
-    .parse(process.argv);
+    .action((options, program) => {
 
 Cli.verbose = program.opts().verbose;
 
@@ -32,3 +34,9 @@ tasks.status()
         }
     })
     .catch(error => Cli.error('Could not read frames.', error));
+}
+);
+return status;
+}
+
+export default status;

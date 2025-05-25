@@ -22,7 +22,7 @@
 
 ## requirements
 
-* [node.js](https://nodejs.org/en/download) version >= 6
+* [node.js](https://nodejs.org/en/download) version >= 20
 * [npm](https://github.com/npm/npm) or [yarn](https://yarnpkg.com/en/docs/install)
 
 ## installation
@@ -655,6 +655,9 @@ _checkToken: false
 
 # Skip parsing the issue/merge_request description for time records
 _skipDescriptionParsing: false
+
+# directory for the track record files. defaults to ~/.local/share/.gtt/frames/, %LOCALAPPDATA%\.gtt\Data\frames or equivalent
+#frameDir: /some/absolute/directory/
 
 # settings for invoice output
 invoiceSettings:

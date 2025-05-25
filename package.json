@@ -13,15 +13,23 @@
   "main": "src/gtt.js",
   "scripts": {
     "test": "NODE_ENV=test mocha 'spec/**/*.spec.js'",
-    "cover": "istanbul cover _mocha $(find ./spec -name \"*.spec.js\")",
-    "coveralls": "yarn run cover -- --report lcovonly && cat ./coverage/lcov.info | coveralls",
-    "build": "pkg src/gtt.js -o out/gtt -c package.json"
+    "esbuild": "esbuild 'src/gtt.js' --format=cjs --target=node20 --platform=node --bundle --outfile=dist/gtt.cjs --inject:./src/polyfill/import-meta-url.js --define:import.meta.url=import_meta_url",
+    "pkg": "pkg dist/gtt.cjs -o out/gtt -c package.json",
+    "build": "npm run-script test && npm run-script esbuild && npm run-script pkg"
   },
   "bin": {
-    "gtt": "src/gtt.js"
+    "gtt": "dist/gtt.cjs"
   },
   "engines": {
     "node": ">=20"
+  },
+  "pkg": {
+    "scripts": "dist/gtt.cjs",
+    "targets": [
+      "node20-linux-x64",
+      "node20-macos-x64",
+      "node20-win-x64"
+    ]
   },
   "author": "kriskbx",
   "license": "GPL-2.0",
@@ -33,6 +41,7 @@
     "colors": "^1.4.0",
     "commander": "^14.0.0",
     "csv-string": "^4.1.1",
+    "env-paths": "^3.0.0",
     "find-in-files": "^0.5.0",
     "hash-sum": "^2.0.0",
     "hashids": "^2.3.0",
@@ -52,16 +61,13 @@
     "tempfile": "^5.0.0",
     "throttled-queue": "^2.1.4",
     "underscore": "^1.13.7",
-    "xdg-basedir": "^5.1.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
+    "@yao-pkg/pkg": "^6.5.1",
     "chai": "^5.2.0",
-    "coveralls": "^3.1.1",
-    "istanbul": "^0.4.5",
+    "esbuild": "^0.25.4",
     "mocha": "^11.4.0",
-    "mocha-lcov-reporter": "^1.3.0",
-    "pkg": "^5.8.1",
     "sinon": "^20.0.0"
   }
 }

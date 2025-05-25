@@ -1,4 +1,4 @@
-import { program } from 'commander';
+import {Command} from 'commander';
 import colors from 'colors';
 import moment from 'moment';
 import Table from 'cli-table';
@@ -8,11 +8,13 @@ import Config from './include/file-config.js';
 import cli from './include/cli.js';
 import Tasks from './include/tasks.js';
 
-program.arguments('[project]')
+function list() {
+  const list = new Command('list', 'list all open issues')
+    .arguments('[project]')
     .option('--verbose', 'show verbose output')
     .option('-c, --closed', 'show closed issues (instead of opened only)')
     .option('--my', 'show only issues assigned to me')
-    .parse(process.argv);
+    .action((aproject, options, program) => {
 
 let config = new Config(process.cwd()),
     tasks = new Tasks(config),
@@ -34,3 +36,9 @@ tasks.list(project, program.opts().closed ? 'closed' : 'opened', program.opts().
   })
   .catch(error => cli.error(error));
 
+}
+);
+return list;
+}
+
+export default list;
