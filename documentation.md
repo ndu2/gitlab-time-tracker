@@ -20,20 +20,21 @@
 * [support further development 🍺](#support-further-development)
 * [license](#license)
 
+
+## features
+
+ * command line
+ * create reports in various formats from time tracking data stored on GitLab
+ * monitor the time you spent on an issue or merge request locally and syncs the data to GitLab
+
+
 ## requirements
 
-* [node.js](https://nodejs.org/en/download) version >= 22
-* [npm](https://github.com/npm/npm) or [yarn](https://yarnpkg.com/en/docs/install)
+ * GitLab instance
 
 ## installation
 
-Install the gtt command line interface using yarn: 
-
-```shell
-yarn global add gitlab-time-tracker --prefix /usr/local
-```
-
-... or download a compiled binary from [here](https://github.com/kriskbx/gitlab-time-tracker/releases) and put it into your `PATH`.
+Download a compiled binary from [here](https://github.com/ndu2/gitlab-time-tracker/releases) and put it into your `PATH`.
 
 Run the config command to create a config file and open it in your default editor.
 In linux terminal, you must set your preferred editor in the environment. For example, use `export EDITOR=vim` to edit the files with vim (put this in `.bashrc` or similar to have it always configured).
@@ -55,56 +56,57 @@ token: 01234567891011
 
 **Updating from version <= 1.5? Please [click here](https://github.com/kriskbx/gitlab-time-tracker/blob/master/upgrade.md)!**
 
-Update gtt via yarn:
+
+## build tools
+
+You will need node and npm to build the project
+
+* [node.js](https://nodejs.org/en/download) version >= 22
+* [npm](https://github.com/npm/npm)
+
+
+Download the source code, and compile everything with
 
 ```shell
-yarn global upgrade gitlab-time-tracker
+npm install
+npm run-script buildAll
 ```
 
 ## docker
 
-You don't need to have node and gtt installed on your system in order to use gtt,
-you can use the official [Docker image](https://hub.docker.com/r/kriskbx/gitlab-time-tracker) as well:
+Build scripts including Dockerfile running the CommonJS build are provided. `npm run-script buildAll` will create a docker image (gitlab-time-tracker:latest).
+
+Examples:
 
 ```shell
 docker run \
        --rm -it \
        -v ~/.local/share/.gtt/:/home/gtt/.local/share/.gtt \
-       kriskbx/gitlab-time-tracker \
+       gitlab-time-tracker:latest \
        --help
 ```
 
 `--rm` removes the container after running, `-it` makes it interactive, `-v ~/.local/share/.gtt/:/home/gtt/.local/share/.gtt ` mounts your gtt configuration directory in the gtt user home directory inside the container. For example, to run a report for a particular user with a date range:
 
 ```shell
-sudo docker run \
+docker run \
        --rm -it \
        -v ~/.local/share/.gtt/:/home/gtt/.local/share/.gtt \
-       kriskbx/gitlab-time-tracker \
+       gitlab-time-tracker:latest \
        report "ourorganization/aproject" --user=xxxx --from="2020-04-01" --to="2020-06-30"
 ```
 
-If you want to store the config in another place, mount another directory: 
- 
- 
- ```shell
- docker run \
-        --rm -it \
-        -v /path/to/gtt-config-dir:/home/gtt/.local/share/.gtt \
-        kriskbx/gitlab-time-tracker \
-        --help
- ```
 
 I highly recommend creating an alias and adding it to your `bashrc`:
  
 ```shell
-echo "alias gtt='docker run --rm -it -v -v ~/.local/share/.gtt/:/home/gtt/.local/share/.gtt kriskbx/gitlab-time-tracker'" >>~/.bashrc
+echo "alias gtt='docker run --rm -it -v -v ~/.local/share/.gtt/:/home/gtt/.local/share/.gtt gitlab-time-tracker:latest'" >>~/.bashrc
 ```
 
 Now you can simply write `gtt` instead of the bulky Docker command before. Try it out: `gtt --help`
 
 **Note:** If you want to save reports via the `--file` parameter, make sure to save them in `/root` or another 
-mounted directory that you have access to on your host machine. Take a look at the [Docker documentation](https://docs.docker.com/engine/tutorials/dockervolumes/) about how Dopcker handles data and volumes.
+mounted directory that you have access to on your host machine. Take a look at the [Docker documentation](https://docs.docker.com/engine/tutorials/dockervolumes/) about how Docker handles data and volumes.
 
 ## commands
 
@@ -196,7 +198,7 @@ gtt edit 2XZkV5LNM
 gtt edit
 ```
 
-You can omit the id to edit the last added time record.
+You can omit the id to edit to bring up a list of the latest records to choose from.
 
 **Delete a local time record by the given id:**
 
@@ -206,6 +208,17 @@ gtt delete
 ```
 
 You can omit the id to delete the last added time record.
+
+
+**Resume previous activity:**
+
+```shell
+gtt resume
+gtt resume --ask
+```
+
+Resume the last activity (--ask let you choose the activity to resume)
+
 
 **Sync local time records with time tracking data on Gitlab:**
 
@@ -287,6 +300,10 @@ gtt report --output=invoice --file=invoice.md --from 2021-02-01 --to 2021-02-28 
 ```
 
 For paper invoice, further process the output with a css, see the folder preview (styles.css, invoice.pdf)
+
+
+![invoice example](preview/invoice.png)
+
 
 #### Print the output to a file
 
@@ -786,63 +803,6 @@ timeFormat: "[%sign][%hours_overall:2]"
 18,25
 ```
 
-## how to use gtt as a library
-
-Add as a dependency using yarn:
-
-```shell
-yarn add gitlab-time-tracker
-```
-
-... or using npm:
-
-```shell
-npm install --save gitlab-time-tracker
-```
-
-Use it in your project:
-
-```js
-// require modules
-const Config = require('gitlab-time-tracker/src/include/config');
-const Report = require('gitlab-time-tracker/src/models/report');
-
-// create a default config
-let config = new Config();
-
-// set required parameters
-config.set('token', 'abcdefghijklmnopqrst');
-config.set('project', 'namespace/project');
-
-// create report
-let report = new Report(config);
-
-// query and process data
-try {
-    await report.getProject()
-    await report.getIssues()
-    await report.getMergeRequests()
-    await report.processIssues()
-    await report.processMergeRequests()
-} catch (error) {
-    console.log(error)
-}
-      
-// access data on report
-report.issues.forEach(issue => {
-    // time records on issue
-    console.log(issue.times);
-    // time spent of single time record
-    console.log(issue.times[0].time);
-});
-report.mergeRequests.forEach(mergeRequest => {
-    // time records on merge requests
-    console.log(mergeRequest.times);
-    // user of single time record
-    console.log(mergeRequest.times[0].user);
-});
-```
-
 ## dumps
 
 Starting with 1.7.4 gtt can dump the results of all API requests within a report and use it on another machine without access to the GitLab instance itself. This is very useful for debugging purposes. If you stumble upon a bug which could be unique to your set of data, please rerun the report with these options to save a dump to the given file: `--output=dump --file=/path/dump.json` Check your dump for sensitive information and provide it when asked.
@@ -857,21 +817,22 @@ is the total amount of time spent in the given time frame.
 
 ## contributing
 
-I would love to integrate unit testing in this project, but unfortunately my knowledge of 
-testing in the JavaScript/Node.js world is very limited. (I'm actually a PHP dev) 
-So this would be a very helpful thing to contribute but of course all contributions are very welcome.
+If you would like to contribute and provide bug fixes:
 
 * Please work in your own branch, e.g. `integrate-awesome-feature`, `fix-awful-bug`, `improve-this-crappy-docs`
-* Create a pull request to the `dev` branch
+* Create a pull request to the `main` branch
+
 
 ## support further development
 
-gtt is an open source project, developed and maintained completely in my free time.
+gtt is an open source project.
 
 If you enjoy using gtt you can support the project by [contributing](#contributing) to the code base, 
-sharing it to your colleagues and co-workers or monetarily by [donating via PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DN9YVDKFGC6V6). 
+sharing it to your colleagues and co-workers or monetarily by [donating via PayPal](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DN9YVDKFGC6V6) to the original author. 
 Every type of support is helpful and thank you very much if you consider supporting the project 
 or already have done so. 💜
+
+Commercial support is available via my employer (see my github profile).
 
 ## license
 
