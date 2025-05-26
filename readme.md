@@ -13,7 +13,7 @@ Shout-out to kris for creating this handy tool. As we use gtt regularly and main
 
 Feel free to contact me or create a Pull Request if you have some patches or proposals.
 
-### Where to get gtt v1.8.0
+### Where to get gtt v1.8
 
 There are various options:
 
