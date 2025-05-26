@@ -6,7 +6,7 @@ import Cli from './include/cli.js';
 import Tasks from './include/tasks.js';
 import Fs from './include/filesystem.js';
 import Frame from './models/frame.js';
-import inquirer from 'inquirer';
+import select from '@inquirer/select';
 
 const listSize = 30;
 
@@ -62,22 +62,19 @@ function resume() {
                             value: frame,
                         };
                     });
-
-
-                inquirer
-                    .prompt([
-                        {
-                            type: "list",
-                            name: "frame",
-                            message: "Frame?",
-                            default: lastFramesDetails.length - 1,
-                            choices: lastFramesDetails,
-                            pageSize: listSize,
-                        },
-                    ])
-                    .then((answer) => {
-                        resumeFrame(tasks, answer.frame);
-                    });
+                    if (lastFramesDetails.length == 0) {
+                      Cli.error("No records found.");
+                    } else {
+                      select({
+                        message: "Frame?",
+                        default:
+                          lastFramesDetails[lastFramesDetails.length - 1].value,
+                        choices: lastFramesDetails,
+                        pageSize: listSize,
+                      }).then((answer) => {
+                        resumeFrame(tasks, answer);
+                      });
+                    }
             }
 
 

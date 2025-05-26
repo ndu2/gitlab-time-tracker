@@ -5,7 +5,7 @@ import Fs from './include/filesystem.js';
 import _ from 'underscore';
 import Time from './models/time.js';
 import Frame from './models/frame.js';
-import inquirer from 'inquirer';
+import select from '@inquirer/select';
 
 
 
@@ -52,24 +52,22 @@ if (!id) {
       };
     });
 
-  inquirer
-    .prompt([
-      {
-        type: "list",
-        name: "frame",
+    if (lastFramesDetails.length == 0) {
+      Cli.error("No records found.");
+    } else {
+      select({
         message: "Frame?",
-        default: lastFramesDetails.length - 1,
+        default: lastFramesDetails[lastFramesDetails.length - 1].value,
         choices: lastFramesDetails,
         pageSize: listSize,
-      },
-    ])
-    .then((answer) => {
-      if (!Fs.exists(Fs.join(config.frameDir, answer.frame + ".json"))) {
-        Cli.error("record not found.");
-      } else {
-        Fs.open(Fs.join(config.frameDir, answer.frame + ".json"));
-      }
-    });
+      }).then((answer) => {
+        if (!Fs.exists(Fs.join(config.frameDir, answer + ".json"))) {
+          Cli.error("record not found.");
+        } else {
+          Fs.open(Fs.join(config.frameDir, answer + ".json"));
+        }
+      });
+    }
 } else {
   if (!Fs.exists(Fs.join(config.frameDir, id + ".json")))
     Cli.error("No record found.");
