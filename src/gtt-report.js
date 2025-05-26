@@ -11,7 +11,6 @@ import table from './output/table.js';
 import csv from './output/csv.js';
 import markdown from './output/markdown.js';
 import invoice from './output/invoice.js';
-import dump from './output/dump.js';
 import xlsx from './output/xlsx.js';
 
 const Output = {
@@ -19,7 +18,6 @@ const Output = {
     csv,
     markdown,
     invoice,
-    dump,
     xlsx
 };
 
@@ -39,8 +37,6 @@ function report() {
     .option('--subgroups', 'include sub groups')
     .option('--url <url>', 'URL to GitLabs API')
     .option('--token <token>', 'API access token')
-    .option('-p --proxy <proxy>', 'use a proxy server with the given url')
-    .option('--insecure', 'don\'t check certificates')
     .option('-f --from <from>', 'query times that are equal or greater than the given date')
     .option('-t --to <to>', 'query times that are equal or smaller than the given date')
     .option('--today', 'ignores --from and --to and queries entries for today')
@@ -70,7 +66,6 @@ function report() {
     .option('--quiet', 'only output report')
     .option('--verbose', 'show verbose output')
     .option('--show_without_times', 'show issues/merge requests without time records')
-    .option('--from_dump <file>', 'instead of querying gitlab, use data from the given dump file')
     .option('--invoiceTitle <title>', 'title on invoice')
     .option('--invoiceReference <reference>', 'payment reference on invoice')
     .option('--invoiceText <text>', 'text above positions')
@@ -91,29 +86,10 @@ function report() {
 let config = new Config(process.cwd());
 let cli = new Cli(program.args);
 
-// if using a dump, set the config accordingly
-if (program.opts().from_dump && fs.existsSync(program.opts().from_dump)) {
-    let data = JSON.parse(fs.readFileSync(program.opts().from_dump));
-
-    if (data.data) _.each(data.data, (v, i) => {
-        config.set(i, v);
-    });
-
-    if (data._dump) config.dump = data._dump;
-}
-
-// if writing a dump, set config accordingly
-if (program.opts().output === "dump") {
-    config.on("dump-updated", () => {
-        new Output['dump'](config);
-    });
-}
-
 // overwrite config with args and opts
 config
     .set('url', program.opts().url)
     .set('token', program.opts().token)
-    .set('insecure', program.opts().insecure)
     .set('project', cli.project())
     .set('iids', cli.iids())
     .set('from', program.opts().from)
@@ -140,7 +116,6 @@ config
     .set('quiet', program.opts().quiet)
     .set('showWithoutTimes', program.opts().show_without_times)
     .set('userColumns', program.opts().user_columns)
-    .set('proxy', program.opts().proxy)
     .set('type', program.opts().type)
     .set('subgroups', program.opts().subgroups)
     .set('_verbose', program.opts().verbose)
@@ -157,8 +132,7 @@ config
     .set('invoicePositionText', program.opts().invoicePositionText)
     .set('invoicePositionExtra', program.opts().invoicePositionExtra)
     .set('invoicePositionExtraText', (program.opts().invoicePositionExtraText? program.opts().invoicePositionExtraText: "").split(','))
-    .set('invoicePositionExtraValue', (program.opts().invoicePositionExtraValue? program.opts().invoicePositionExtraValue: "").split(','))
-    .set('_createDump', program.opts().output === 'dump');
+    .set('invoicePositionExtraValue', (program.opts().invoicePositionExtraValue? program.opts().invoicePositionExtraValue: "").split(','));
 
 // date shortcuts
 if (program.opts().today)

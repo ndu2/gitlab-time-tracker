@@ -1,4 +1,3 @@
-import request from 'request-promise-native';
 import async from 'async';
 import crypto from 'crypto';
 import throttleFactory from 'throttled-queue';
@@ -29,8 +28,6 @@ class base {
 
         this._perPage = this.config ? this.config.get('_perPage') : 100;
         this._parallel = this.config ? this.config.get('_parallel') : 4;
-        this._proxy = this.config && this.config.get('proxy') ? this.config.get('proxy') : undefined;
-        this._insecure = this.config && this.config.get('insecure') ? this.config.get('insecure') : false;
     }
 
     /**
@@ -40,24 +37,26 @@ class base {
      * @returns {*}
      */
     post(path, data) {
-        let key = base.createDumpKey(path, data);
-        if (this.config.dump) return this.getDump(key);
 
         data.private_token = this.token;
 
+
         return new Promise((resolve, reject) => base.throttle(() => {
-            request.post(`${this.url}${path}`, {
-                json: true,
-                body: data,
-                insecure: this._insecure,
-                proxy: this._proxy,
-                resolveWithFullResponse: true,
+            fetch(`${this.url}${path}`, {
+                method: 'POST',
                 headers: {
-                    'PRIVATE-TOKEN': this.token
-                }
+                    'PRIVATE-TOKEN': this.token,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             }).then(response => {
-                if (this.config.get('_createDump')) this.setDump(response, key);
-                resolve(response);
+                if(!response.ok) {
+                    reject(`Error: response not OK`);
+                }
+                const isJson = response.headers.get("content-type").startsWith('application/json');
+                return (Promise.all([isJson ? response.json(): Promise.resolve(undefined), Promise.resolve(response.headers)]));
+            }).then(response => {
+                resolve({body: response[0], headers: response[1]});
             }).catch(e => reject(e));
         }));
     }
@@ -72,24 +71,25 @@ class base {
      graphQL(data) {
         // remove v4/ from url, add graphql
         const path = this.url.substr(0, this.url.length-3) + 'graphql';
-                
-        let key = base.createDumpKey(path, data);
-        if (this.config.dump) return this.getDump(key);
-
+        
         return new Promise((resolve, reject) => base.throttle(() => {
-            request.post(`${path}`, {
-                json: true,
-                body: data,
-                insecure: this._insecure,
-                proxy: this._proxy,
-                resolveWithFullResponse: true,
+            fetch(`${path}`, {
+                method: 'POST',
                 headers: {
                     'Authorization': 'Bearer '+this.token, 
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify(data)
             }).then(response => {
-                if (this.config.get('_createDump')) this.setDump(response, key);
-                resolve(response);
+                if(!response.ok) {
+                    reject(`Error: response not OK`);
+                }
+                if(!response.headers.get("content-type").startsWith('application/json')) {
+                    reject(`Error: response not application/json`);
+                }
+                return (Promise.all([response.json(), Promise.resolve(response.headers)]));
+            }).then(response => {
+                resolve({body: response[0], headers: response[1]});
             }).catch(e => reject(e));
         }));
     }
@@ -103,24 +103,25 @@ class base {
      * @returns {Promise}
      */
     get(path, page = 1, perPage = this._perPage) {
-        let key = base.createDumpKey(path, page, perPage);
-        if (this.config.dump) return this.getDump(key);
 
         path += (path.includes('?') ? '&' : '?') + `private_token=${this.token}`;
         path += `&page=${page}&per_page=${perPage}`;
 
         return new Promise((resolve, reject) => base.throttle(() => {
-            request(`${this.url}${path}`, {
-                json: true,
-                insecure: this._insecure,
-                proxy: this._proxy,
-                resolveWithFullResponse: true,
+            fetch(`${this.url}${path}`, {
                 headers: {
                     'PRIVATE-TOKEN': this.token
                 }
             }).then(response => {
-                if (this.config.get('_createDump')) this.setDump(response, key);
-                resolve(response);
+                if(!response.ok) {
+                    reject(`Error: response not OK`);
+                }
+                if(!response.headers.get("content-type").startsWith('application/json')) {
+                    reject(`Error: response not application/json`);
+                }
+                return (Promise.all([response.json(), Promise.resolve(response.headers)]));
+            }).then(response => {
+                resolve({body: response[0], headers: response[1]});
             }).catch(e => reject(e));
         }));
     }
@@ -137,9 +138,9 @@ class base {
         return new Promise((resolve, reject) => {
             let collect = [];
 
-            this.get(path, 1, perPage).then(response => {
+            this.get(path, 1, perPage).then((response) => {
                 response.body.forEach(item => collect.push(item));
-                let pages = parseInt(response.headers['x-total-pages']);
+                let pages = parseInt(response.headers.get('x-total-pages'));
 
                 if (pages === 1) return resolve(collect);
 
@@ -185,27 +186,6 @@ class base {
     }
 
     /**
-     * save the given response to dump
-     * @param response
-     * @param key
-     */
-    setDump(response, key) {
-        this.config.setDump(key, {
-            headers: response.headers,
-            body: response.body
-        });
-    }
-
-    /**
-     * get from dump
-     * @param key
-     * @returns {Promise}
-     */
-    getDump(key) {
-        return new Promise(r => r(this.config.getDump(key)));
-    }
-
-    /**
      * create a task list to get all pages from
      * the given path
      * @param path
@@ -222,14 +202,6 @@ class base {
         }
 
         return tasks;
-    }
-
-    /**
-     * create a key representing a request
-     * @param args
-     */
-    static createDumpKey(...args) {
-        return crypto.createHash('md5').update(JSON.stringify(args)).digest("hex");
     }
 }
 

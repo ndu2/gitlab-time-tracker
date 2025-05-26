@@ -14,7 +14,6 @@
     * [config file](#config-file)
     * [time format](#time-format)
 * [how to use gtt as a library](#how-to-use-gtt-as-a-library)
-* [dumps](#dumps)
 * [faqs](#faqs)
 * [contributing](#contributing)
 * [support further development 🍺](#support-further-development)
@@ -219,10 +218,7 @@ Resume the last activity (--ask let you choose the activity to resume)
 
 ```shell
 gtt sync
-gtt sync --proxy="http://localhost:8888"
 ```
-
-You can pass an url to the proxy option if you want to use a proxy server.
 
 ### III) reports
 
@@ -459,12 +455,6 @@ gtt report --include_labels=pending --include_labels=approved
 gtt report --exclude_labels=bug --exclude_labels=feature
 ```
 
-#### Use a proxy server
-
-```shell
-gtt report --proxy="http://localhost:8080"
-```
-
 #### Output verbose debug information
 
 ```shell
@@ -489,14 +479,6 @@ url: http://gitlab.com/api/v4/
 # GitLab personal api token
 # [required]
 token: abcdefghijklmnopqrst
-
-# Use a proxy server
-# defaults to false
-proxy: http://localhost:8080
-
-# Don't check SSL certificate
-# defaults to false
-insecure: true
 
 # Project
 # defaults to false
@@ -797,10 +779,6 @@ timeFormat: "[%sign][%hours_overall:2]"
 0,51
 18,25
 ```
-
-## dumps
-
-Starting with 1.7.4 gtt can dump the results of all API requests within a report and use it on another machine without access to the GitLab instance itself. This is very useful for debugging purposes. If you stumble upon a bug which could be unique to your set of data, please rerun the report with these options to save a dump to the given file: `--output=dump --file=/path/dump.json` Check your dump for sensitive information and provide it when asked.
 
 ## faqs
 

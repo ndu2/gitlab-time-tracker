@@ -7,10 +7,8 @@ import Owner from './models/owner.js';
 
 function sync() {
     const sync = new Command('sync', 'sync local time records to GitLab')
-    .option('-p --proxy <proxy>', 'use a proxy server with the given url')
     .option('--url <url>', 'URL to GitLabs API')
     .option('--token <token>', 'API access token')
-    .option('--insecure', 'don\'t check certificates')
     .option('--verbose', 'show verbose output')
     .action((options, program) => {
 
@@ -18,9 +16,7 @@ Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd())
         .set('url', program.opts().url)
-        .set('token', program.opts().token)
-        .set('insecure', program.opts().insecure)
-        .set('proxy', program.opts().proxy);
+        .set('token', program.opts().token),
 tasks = new Tasks(config),
 owner = new Owner(config);
 

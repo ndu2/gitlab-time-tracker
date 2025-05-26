@@ -23,7 +23,6 @@ class fileConfig extends config {
         this.workDir = workDir;
         this.data = Object.assign(this.data, this.localExists() ? this.parseLocal() : this.parseGlobal());
         if (!fs.existsSync(this.frameDir)) shell.mkdir('-p', this.frameDir);
-        this._dump = {};
         this.cache = {
             delete: this._cacheDelete,
             get: this._cacheGet,
@@ -155,15 +154,6 @@ class fileConfig extends config {
 
     get local() {
         return Fs.join(this.workDir, this.localConfigFile);
-    }
-
-    setDump(key, value) {
-        this._dump[key] = value;
-        this.emit('dump-updated');
-    }
-
-    getDump(key) {
-        return this._dump[key];
     }
 }
 

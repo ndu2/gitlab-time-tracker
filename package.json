@@ -56,8 +56,6 @@
     "progress": "^2.0.3",
     "prompt": "^1.3.0",
     "read-yaml": "^1.1.0",
-    "request": "^2.88.2",
-    "request-promise-native": "^1.0.9",
     "shelljs": "^0.10.0",
     "swissqrbill": "^4.1.2",
     "tempfile": "^5.0.0",
