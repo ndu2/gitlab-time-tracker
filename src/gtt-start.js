@@ -14,13 +14,15 @@ function start() {
     .option('-i', 'shorthand for --type=issue')
     .option('--verbose', 'show verbose output')
     .option('--note <note>', 'specify note')
-    .action((project, id, options, program) => {
+    .action((arg1, arg2, options, program) => {
 
 Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd()),
     tasks = new Tasks(config),
-    type = program.opts().type ? program.opts().type : 'issue';
+    type = program.opts().type ? program.opts().type : 'issue',
+    id = program.args.length === 1 ? parseInt(program.args[0]) : parseInt(program.args[1]),
+    project = program.args.length === 2 ? program.args[0] : null;
 
 if (program.opts().i) {
     type = 'issue';
