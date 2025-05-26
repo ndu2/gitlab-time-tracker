@@ -52,11 +52,6 @@ url: https://gitlab.com/api/v4/
 token: 01234567891011
 ```
 
-## updating
-
-**Updating from version <= 1.5? Please [click here](https://github.com/kriskbx/gitlab-time-tracker/blob/master/upgrade.md)!**
-
-
 ## build tools
 
 You will need node and npm to build the project

@@ -29,8 +29,9 @@ By this time of writing:
 
 ## documentation
 
-How to install and use gtt? You can find the documentation [here](https://github.com/kriskbx/gitlab-time-tracker/blob/master/documentation.md).
+How to install and use gtt? You can find the documentation [here](documentation.md).
+
 
 ## license
 
-gtt is open-source software licensed under the [GPL V2 license](https://github.com/kriskbx/gitlab-time-tracker/blob/master/LICENSE).
+gtt is open-source software licensed under the [GPL V2 license](LICENSE).
