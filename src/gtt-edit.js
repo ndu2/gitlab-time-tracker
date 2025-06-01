@@ -32,7 +32,7 @@ function toHumanReadable(input) {
 if (!id) {
   let lastFrames = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
   lastFrames = lastFrames.map((file) =>
-    Frame.fromFile(config, Fs.join(config.frameDir, file))
+    Frame.fromFile(config, Fs.join(config.frameDir, file.name))
   );
 
   let lastFramesDetails = lastFrames

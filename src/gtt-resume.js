@@ -40,7 +40,7 @@ function resume() {
 
             let lastFrames = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
             lastFrames = lastFrames.map((file) =>
-                Frame.fromFile(config, Fs.join(config.frameDir, file))
+                Frame.fromFile(config, Fs.join(config.frameDir, file.name))
             );
             lastFrames = lastFrames.sort((a, b) => moment(a.stop || moment()).isBefore(moment(b.stop || moment())) ? 1 : -1);
 
