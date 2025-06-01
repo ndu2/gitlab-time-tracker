@@ -237,6 +237,9 @@ class base {
             if (obj[column] === undefined || obj[column] === null)
                 return '';
 
+            if(typeof obj[column] == 'object') {
+                return obj[column].toString()
+            }
             return obj[column];
         });
     }
