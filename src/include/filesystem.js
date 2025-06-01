@@ -39,15 +39,15 @@ class filesystem {
     }
 
     static newest(dir) {
-        return _.max(fs.readdirSync(dir), file => (fs.statSync(path.join(dir, file)).ctime));
+        return _.max(filesystem.readDir(dir), file => (fs.statSync(path.join(dir, file.name)).ctime));
     }
 
     static all(dir) {
-        return _.sortBy(fs.readdirSync(dir), file => (fs.statSync(path.join(dir, file)).ctime));
+        return _.sortBy(filesystem.readDir(dir), file => (fs.statSync(path.join(dir, file.name)).ctime));
     }
 
     static readDir(dir) {
-        return fs.readdirSync(dir);
+        return fs.readdirSync(dir, { withFileTypes: true }).filter(file=>file.isFile() && file.name.endsWith(".json"));
     }
 }
 

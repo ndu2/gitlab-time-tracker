@@ -671,7 +671,10 @@ invoiceSettings:
  - 
  - Name
  bankAccount: "Bitte den Betrag auf unser Konto... IBAN .."
+ IBAN: CHXXYYZZ
+ Country: "CH"
  SwissQRBill: false
+ Language: "DE"
 ```
 
 ### Time format

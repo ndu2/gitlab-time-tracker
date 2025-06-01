@@ -1,6 +1,6 @@
 {
   "name": "gitlab-time-tracker",
-  "version": "1.8.0-alpha.4",
+  "version": "1.8.0-snapshot",
   "type": "module",
   "description": "A command line interface for GitLabs time tracking feature.",
   "bugs": {
@@ -17,6 +17,7 @@
     "esbuild": "esbuild 'src/gtt.js' --format=cjs --target=node20 --platform=node --bundle --outfile=dist/gtt.cjs --inject:./src/polyfill/import-meta-url.js --define:import.meta.url=import_meta_url",
     "pkg": "pkg dist/gtt.cjs -o out/gtt -c package.json",
     "docker": "docker build . -t gitlab-time-tracker:${npm_package_version} -t gitlab-time-tracker:latest",
+    "build": "npm run-script prebuild && npm run-script test && npm run-script esbuild && npm run-script pkg",
     "buildAll": "npm run-script prebuild && npm run-script test && npm run-script esbuild && npm run-script pkg && npm run-script docker"
   },
   "bin": {
@@ -50,14 +51,14 @@
     "inquirer": "^12.6.1",
     "markdown-table": "^3.0.4",
     "moment": "^2.30.1",
-    "moment-timezone": "^0.5.48",
+    "moment-timezone": "^0.6.0",
     "node-spinner": "^0.0.4",
     "open": "^10.1.2",
     "progress": "^2.0.3",
     "prompt": "^1.3.0",
     "read-yaml": "^1.1.0",
     "shelljs": "^0.10.0",
-    "swissqrbill": "^4.1.2",
+    "swissqrbill": "^4.2.0",
     "tempfile": "^5.0.0",
     "throttled-queue": "^2.1.4",
     "underscore": "^1.13.7",

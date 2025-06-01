@@ -1,0 +1,37 @@
+# This workflow will run tests using node and then build articats
+name: npm CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      publishbuilds:
+        required: false
+        description: Publish Builds?
+        type: boolean
+        default: false
+  pull_request:
+    branches:
+     - main
+  push:
+    branches:
+     - main
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - run: npm test
+      - run: npm run-script build
+      - name: publish
+        if: inputs.publishbuilds
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.ref_name }}
+          path: |
+            out/gtt-*
+            dist/gtt.cjs

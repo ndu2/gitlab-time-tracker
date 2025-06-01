@@ -88,14 +88,14 @@ class invoice extends Base {
         // REMOVE
         // _.each(this.users, (time, name) => stats += `\n* **${name}**: ${time}`);
         let to = this.concat(this.config.get('invoiceAddress'), '<br />');
-        let from = this.concat(this.config.get('invoiceSettings').from, '<br />');
-        let opening = this.concat(this.config.get('invoiceSettings').opening, '<br />');
-        let closing = this.concat(this.config.get('invoiceSettings').closing, '<br />');
+        let from = this.concat(this.config.get('invoiceSettings')?.from, '<br />');
+        let opening = this.concat(this.config.get('invoiceSettings')?.opening, '<br />');
+        let closing = this.concat(this.config.get('invoiceSettings')?.closing, '<br />');
        
         // QR bill
-        let endOfZipPos = this.config.get('invoiceSettings').from[3].search("[ _]");
-        let zip = this.config.get('invoiceSettings').from[3].substring(0, endOfZipPos);
-        let city = this.config.get('invoiceSettings').from[3].substring(endOfZipPos + 1);
+        let endOfZipPos = this.config.get('invoiceSettings')?.from[3]?.search("[ _]");
+        let zip = this.config.get('invoiceSettings')?.from[3]?.substring(0, endOfZipPos);
+        let city = this.config.get('invoiceSettings')?.from[3]?.substring(endOfZipPos + 1);
         
         // debitor
         let nDebitorAddressFields = Array.isArray(this.config.get('invoiceAddress'))? this.config.get('invoiceAddress').length: -1;
@@ -109,7 +109,7 @@ class invoice extends Base {
         if(nDebitorAddressFields > 0) {
             nameDebitor = this.config.get('invoiceAddress') [0].replace(regexAllUnderscores, " ");
         }
-        else {
+        else if (this.config.get('invoiceAddress')){
             nameDebitor = this.config.get('invoiceAddress').toString();
         }
 
@@ -131,16 +131,16 @@ class invoice extends Base {
         let qrDivContent = "";
 
         const data = {
-            currency: "CHF",
+            currency: this.invoiceCurrency,
             amount: this.totalForInvoice,
             additionalInformation: this.config.get('invoiceReference'),
             creditor: {
-            name: this.config.get('invoiceSettings').from[0],
-            address: this.config.get('invoiceSettings').from [2],
+            name: this.config.get('invoiceSettings')?.from[0],
+            address: this.config.get('invoiceSettings')?.from [2],
             zip: zip,
             city: city,
-            account: this.config.get('invoiceSettings').IBAN,
-            country: this.config.get('invoiceSettings').Country
+            account: this.config.get('invoiceSettings')?.IBAN,
+            country: this.config.get('invoiceSettings')?.Country
             },
             debtor: {
             name: nameDebitor,
@@ -151,10 +151,10 @@ class invoice extends Base {
             }
         };
         const options = {
-            language: "DE"
+            language: this.config.get('invoiceSettings')?.Language ?? "DE"
         };
 
-        if(this.config.get('invoiceSettings').SwissQRBill) {
+        if(this.config.get('invoiceSettings')?.SwissQRBill) {
             const svg = new SwissQRBill(data, options);
             // make svg scalable, by adding viewBox and removing height/width attributes
             svg.instance.viewBox(0,0,740,420)
@@ -195,7 +195,7 @@ class invoice extends Base {
 `<div class="senderBox">${from}</div>
 
 <div class="addressBox">
-<div class="addressFrom">${this.config.get('invoiceSettings').fromShort}</div>
+<div class="addressFrom">${this.config.get('invoiceSettings')?.fromShort}</div>
 <div class="addressTo">${to}</div>
 </div>
 <div class="dateBox">${this.config.get('invoiceDate')}</div>
@@ -216,7 +216,7 @@ ${extra}
 <div class="positionValueTot">${this.invoiceCurrency} ${this.totalForInvoice.toFixed(2)}</div>
 </div>
 
-${this.config.get('invoiceSettings').bankAccount}
+${this.config.get('invoiceSettings')?.bankAccount}
 
 ${closing}
 

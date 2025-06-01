@@ -1,0 +1,117 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt log",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["log"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt cfg",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["config"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt edit",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["edit"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt resume",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["resume", "--ask"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt stop",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["stop"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt delete",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["delete"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt config",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["config"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt report",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["report", "--last_month", "--query=issues"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "gtt report invoice",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": ["report", "--last_month", "--output=invoice", "--file=invoice.md", "--closed", 
+            "--invoiceCurrencyMaxUnit", "1", "--invoiceTitle", "Rechnung", "--invoiceReference", "Reference", 
+            "--invoiceAddress", "Firma", "Mr. X", "Strasse", "10000 Ort", "Land", 
+            "--invoiceCurrency", "EUR", "--invoiceCurrencyPerHour", "50", "--invoiceVAT", "0.15", "--invoiceDate", "1.03.2021", "--invoicePositionText", "Position Text"],
+            "program": "${workspaceFolder}/src/gtt.js",
+            "console": "integratedTerminal",
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+        }
+    ],
+}

@@ -10,10 +10,10 @@ class frameCollection extends Base {
             Fs.readDir(config.frameDir)
                 .map(file => {
                     try {
-                        return Frame.fromFile(this.config, Fs.join(this.config.frameDir, file));
+                        return Frame.fromFile(this.config, Fs.join(this.config.frameDir, file.name));
                     } catch (e) {
                         console.log(e);
-                        throw `Error parsing frame file: ${file}`
+                        throw `Error parsing frame file: ${file.name}`
                     }
                 })
                 .filter(frame => frame);
