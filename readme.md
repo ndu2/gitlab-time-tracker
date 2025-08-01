@@ -31,6 +31,10 @@ By this time of writing:
 
 How to install and use gtt? You can find the documentation [here](documentation.md).
 
+### limitations
+
+Time tracking for other work items (e.g. tasks, epics) is currently not supported.
+
 
 ## license
 

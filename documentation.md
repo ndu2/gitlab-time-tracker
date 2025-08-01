@@ -23,9 +23,12 @@
 ## features
 
  * command line
- * create reports in various formats from time tracking data stored on GitLab
+ * create reports in various formats from time tracking data stored on GitLab (issues and merge requests)
  * monitor the time you spent on an issue or merge request locally and syncs the data to GitLab
 
+### limitations
+
+ Time tracking for other work items (e.g. tasks, epics) is currently not supported. See also https://github.com/ndu2/gitlab-time-tracker/issues/33
 
 ## requirements
 
@@ -617,7 +620,7 @@ freeLabels:
  - at no charge
  - free
  
-# labels charing half price only
+# labels charging half price only
 halfPriceLabels:
  - at half price
  - at half-price
