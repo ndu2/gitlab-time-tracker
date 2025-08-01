@@ -4,9 +4,9 @@ import Base from './base.js';
 import Time from './time.js';
 import DayReport from './dayReport.js';
 
-const regex = /added (.*) of time spent(?: at (.*))?/i;
-const subRegex = /subtracted (.*) of time spent(?: at (.*))?/i;
-const delRegex = /deleted (.*) of spent time(?: from (.*))?/i;
+const regex = /added (.*) of time spent(?: at ([0-9-]*))?/i;
+const subRegex = /subtracted (.*) of time spent(?: at ([0-9-]*))?/i;
+const delRegex = /deleted (.*) of spent time(?: from ([0-9-]*))?/i;
 const removeRegex = /Removed time spent/i;
 
 /**
