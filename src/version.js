@@ -1,1 +1,1 @@
-let version = '1.8.1'; export default version;
+let version = '1.8.2-snapshot'; export default version;
