@@ -90,7 +90,7 @@ docker run \
        --rm -it \
        -v ~/.local/share/.gtt/:/home/gtt/.local/share/.gtt \
        gitlab-time-tracker:latest \
-       report "ourorganization/aproject" --user=xxxx --from="2020-04-01" --to="2020-06-30"
+       report "ourorganization/aproject" --user=xxxx --from="2020-04-01" --to="2020-07-01"
 ```
 
 
@@ -290,7 +290,7 @@ chromium --headless --run-all-compositor-stages-before-draw --print-to-pdf-no-he
 There are additional options for the invoice output as given in the following example:
 
 ```shell
-gtt report --output=invoice --file=invoice.md --from 2021-02-01 --to 2021-02-28 --closed  --invoiceCurrencyMaxUnit 1 --invoiceTitle "Rechnung" --invoiceReference "Reference" --invoiceAddress "Firma" "Mr. X" "Strasse" "10000 Ort" "Land" --invoiceCurrency "EUR" --invoiceCurrencyPerHour "50" --invoiceVAT "0.15" --invoiceDate "1.03.2021" --invoicePositionText "Position Text"
+gtt report --output=invoice --file=invoice.md --from 2021-02-01 --to 2021-03-01 --closed  --invoiceCurrencyMaxUnit 1 --invoiceTitle "Rechnung" --invoiceReference "Reference" --invoiceAddress "Firma" "Mr. X" "Strasse" "10000 Ort" "Land" --invoiceCurrency "EUR" --invoiceCurrencyPerHour "50" --invoiceVAT "0.15" --invoiceDate "1.03.2021" --invoicePositionText "Position Text"
 ```
 
 For paper invoice, further process the output with a css, see the folder preview (styles.css, invoice.pdf)
