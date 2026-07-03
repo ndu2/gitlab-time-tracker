@@ -40,7 +40,6 @@
     "@inquirer/checkbox": "^5.2.1",
     "@inquirer/confirm": "^6.1.1",
     "@inquirer/select": "^5.2.1",
-    "async": "^3.2.6",
     "camelcase": "^9.0.0",
     "cli-cursor": "^5.0.0",
     "cli-table": "^0.3.11",
