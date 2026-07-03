@@ -1,11 +1,11 @@
-import moment from 'moment';
+import dayjs from '../../src/core/dayjs.js';
 import { expect } from 'chai';
 import Config from '../../src/core/config.js';
 import Output from '../../src/reporting/output/base.js';
 import calculateStats from '../../src/reporting/stats.js';
 
 function makeTime({ user = 'alice', seconds = 0, date = '2026-01-05T10:00:00Z', iid = 1, project = 'group/project' } = {}) {
-    return { user, seconds, iid, project_namespace: project, date: moment(date) };
+    return { user, seconds, iid, project_namespace: project, date: dayjs(date) };
 }
 
 function makeIssue({ iid = 1, labels = [], times = [], days = {}, estimate = 0, spent = 0 } = {}) {
@@ -117,14 +117,14 @@ describe('calculateStats', () => {
 });
 
 describe('Output.prepare', () => {
-    it('formats moments, replaces null/undefined and picks columns in order', () => {
+    it('formats dayjs dates, replaces null/undefined and picks columns in order', () => {
         const config = new Config();
         config.set('dateFormat', 'YYYY-MM-DD');
 
         const output = new Output(config, { issues: [], mergeRequests: [] });
         const row = output.prepare({
             iid: 7,
-            date: moment('2026-01-05T10:00:00Z'),
+            date: dayjs('2026-01-05T10:00:00Z'),
             missing: null,
             labels: ['a', 'b']
         }, ['iid', 'date', 'missing', 'undefined_column', 'labels']);

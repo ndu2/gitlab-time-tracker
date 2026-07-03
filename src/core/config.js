@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from './dayjs.js';
 import Time from './time.js';
 
 const dates = ['from', 'to'];
@@ -10,7 +10,7 @@ const defaults = {
     token: false,
     project: false,
     from: "1970-01-01",
-    to: moment().format(),
+    to: dayjs().format(),
     iids: false,
     closed: false,
     milestone: false,
@@ -81,7 +81,7 @@ class Config {
      */
     get(key, subKey = false) {
         if (dates.includes(key))
-            return moment(this.data[key]);
+            return dayjs(this.data[key]);
 
         if (objectsWithDefaults.includes(key) && typeof this.data[key] === 'object' && this.data[key] !== null)
             return subKey && this.data[key][subKey] ? this.data[key][subKey] : defaults[key];

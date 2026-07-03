@@ -1,6 +1,6 @@
 import fs from 'fs';
 import {Command} from 'commander';
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import Cli from '../../core/cli.js';
 import Config from '../../core/file-config.js';
 import Report from '../api/report.js';
@@ -133,20 +133,20 @@ config
 // date shortcuts
 if (program.opts().today)
     config
-        .set('from', moment().startOf('day'))
-        .set('to', moment().endOf('day'));
+        .set('from', dayjs().startOf('day'))
+        .set('to', dayjs().endOf('day'));
 if (program.opts().this_week)
     config
-        .set('from', moment().startOf('week'))
-        .set('to', moment().endOf('week'));
+        .set('from', dayjs().startOf('week'))
+        .set('to', dayjs().endOf('week'));
 if (program.opts().this_month)
     config
-        .set('from', moment().startOf('month'))
-        .set('to', moment().endOf('month'));
+        .set('from', dayjs().startOf('month'))
+        .set('to', dayjs().endOf('month'));
 if (program.opts().last_month)
     config
-        .set('from', moment().subtract(1, 'months').startOf('month'))
-        .set('to', moment().subtract(1, 'months').endOf('month'));
+        .set('from', dayjs().subtract(1, 'months').startOf('month'))
+        .set('to', dayjs().subtract(1, 'months').endOf('month'));
 
 Cli.quiet = config.get('quiet');
 Cli.verbose = config.get('_verbose');

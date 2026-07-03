@@ -1,6 +1,5 @@
 import {Command} from 'commander';
 import colors from 'colors';
-import moment from 'moment';
 import Table from 'cli-table';
 
 

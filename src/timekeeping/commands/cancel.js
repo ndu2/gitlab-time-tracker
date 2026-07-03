@@ -1,6 +1,6 @@
 import {Command} from 'commander';
 import colors from 'colors';
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
@@ -19,9 +19,9 @@ timekeeper.cancel()
     .then(frames => {
         frames.forEach(frame => {
             if(!frame.resource.new)
-                return console.log(`Cancel project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue}, started ${moment(frame.start).fromNow().green}`)
+                return console.log(`Cancel project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue}, started ${dayjs(frame.start).fromNow().green}`)
 
-            console.log(`Cancel project ${frame.project.magenta} for new ${frame.resource.type} "${(frame.resource.id).blue}", started ${moment(frame.start).fromNow().green}`)
+            console.log(`Cancel project ${frame.project.magenta} for new ${frame.resource.type} "${(frame.resource.id).blue}", started ${dayjs(frame.start).fromNow().green}`)
         })
     })
     .catch(error => Cli.error(error));

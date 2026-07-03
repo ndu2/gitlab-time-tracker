@@ -1,6 +1,6 @@
 import {Command} from 'commander';
 import colors from 'colors';
-import moment from 'moment-timezone';
+import dayjs from '../../core/dayjs.js';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Time from '../../core/time.js';
@@ -38,7 +38,7 @@ const logCSV = (frames, times) => {
         if (!frames.hasOwnProperty(date)) return;
         frames[date].sort((a, b) => a.start.isBefore(b.start) ? -1 : 1)
         .forEach(frame => {
-            console.log(`${frame.id}, ${frame.project}, ${frame.resource.id}, ${moment(date).format('YYYY-MM-DD')}, ${frame.start.clone().format('HH:mm')}, ${frame.stop.clone().format('HH:mm')}, ${frame.duration}, ${frame.title!=null?frame.title:''}, ${frame.note!=null?frame.note:''}`);
+            console.log(`${frame.id}, ${frame.project}, ${frame.resource.id}, ${dayjs(date).format('YYYY-MM-DD')}, ${frame.start.clone().format('HH:mm')}, ${frame.stop.clone().format('HH:mm')}, ${frame.duration}, ${frame.title!=null?frame.title:''}, ${frame.note!=null?frame.note:''}`);
         });
     });
 };
@@ -61,7 +61,7 @@ const logCli =  (frames, times) => {
         }
         
 
-        console.log(`${moment(date).format('MMMM Do YYYY')} (${toHumanReadable(times[date])})`.green + dayNote);
+        console.log(`${dayjs(date).format('MMMM Do YYYY')} (${toHumanReadable(times[date])})`.green + dayNote);
         frames[date]
             .sort((a, b) => a.start.isBefore(b.start) ? -1 : 1)
             .forEach(frame => {

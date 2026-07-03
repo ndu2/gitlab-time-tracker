@@ -1,4 +1,3 @@
-import moment from 'moment';
 import {Command} from 'commander';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';

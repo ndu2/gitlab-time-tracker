@@ -1,5 +1,5 @@
 import fs from 'fs';
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import calculateStats from '../stats.js';
 
 const defaultFormats = {
@@ -105,14 +105,14 @@ class Output {
     /**
      * prepare the given object by only returning
      * the given columns/properties and formatting
-     * special properties like moment instances
+     * special properties like dayjs instances
      * @param obj
      * @param columns
      * @returns {Array}
      */
     prepare(obj = {}, columns = []) {
         return columns.map(column => {
-            if (moment.isMoment(obj[column]))
+            if (dayjs.isDayjs(obj[column]))
                 return obj[column].format(this.config.get('dateFormat'));
 
             if (obj[column] === undefined || obj[column] === null)

@@ -32,7 +32,7 @@ describe('The config class', () => {
         expect(Config.get(key)).to.equal(undefined);
     });
 
-    it('returns moment instances for dates', () => {
+    it('returns dayjs instances for dates', () => {
         let Config = new config(),
             dates = ['from', 'to'];
 

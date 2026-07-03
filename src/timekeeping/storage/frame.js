@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import moment from 'moment-timezone';
+import dayjs from '../../core/dayjs.js';
 import Hashids from 'hashids';
 const hashids = new Hashids();
 
@@ -49,22 +49,18 @@ class Frame {
     }
 
     validate() {
-        moment.suppressDeprecationWarnings = true;
-
-        if(!moment(this._start).isValid())
+        if(!dayjs(this._start).isValid())
             throw new Error(`Start date is not in a valid ISO date format!`);
 
-        if(this._stop && !moment(this._stop).isValid())
+        if(this._stop && !dayjs(this._stop).isValid())
             throw new Error(`Stop date is not in a valid ISO date format!`);
-
-        moment.suppressDeprecationWarnings = false;
     }
 
     _getCurrentDate() {
         if(this.timezone)
-            return moment().tz(this.timezone).format();
+            return dayjs().tz(this.timezone).format();
 
-        return moment();
+        return dayjs();
     }
 
     startMe() {
@@ -97,7 +93,7 @@ class Frame {
             start: this._start,
             stop: this._stop,
             timezone: this.timezone,
-            modified: skipModified ? this.modified : moment(),
+            modified: skipModified ? this.modified : dayjs(),
             title: this._title,
             note: this._note
         }, null, "\t"));
@@ -105,7 +101,7 @@ class Frame {
     }
 
     get duration() {
-        return moment(this.stop).diff(this.start) / 1000;
+        return dayjs(this.stop).diff(this.start) / 1000;
     }
 
     get date() {
@@ -113,20 +109,20 @@ class Frame {
     }
 
     get start() {
-        return this.timezone ? moment(this._start).tz(this.timezone) : moment(this._start);
+        return this.timezone ? dayjs(this._start).tz(this.timezone) : dayjs(this._start);
     }
 
     set start(value) {
-        this._start = moment.isMoment(value) ? value.format() : value;
+        this._start = dayjs.isDayjs(value) ? value.format() : value;
         this.validate();
     }
 
     get stop() {
-        return this.timezone ? this._stop ? moment(this._stop).tz(this.timezone) : false : (this._stop ? moment(this._stop) : false );
+        return this.timezone ? this._stop ? dayjs(this._stop).tz(this.timezone) : false : (this._stop ? dayjs(this._stop) : false );
     }
 
     set stop(value) {
-        this._stop = value ? (moment.isMoment(value) ? value.format() : value) : false;
+        this._stop = value ? (dayjs.isDayjs(value) ? value.format() : value) : false;
         this.validate();
     }
 
