@@ -20,7 +20,7 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
 - [x] Extract billing/aggregation logic (`calculate()`) out of the `Output`
       base class into a report model; presentation layer should only render.
       Behavior is pinned by `spec/output/base.spec.js`.
-- [ ] Remove shared `Config` mutation: stop `config.set('project', ...)` inside
+- [x] Remove shared `Config` mutation: stop `config.set('project', ...)` inside
       the report parallel loop (only safe because runners = 1); pass the
       project into `Report` explicitly. Drop unused `EventEmitter` inheritance;
       reconsider magic special cases in `config.get()`.

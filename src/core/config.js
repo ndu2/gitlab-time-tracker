@@ -1,6 +1,5 @@
 import moment from 'moment';
 import Time from './time.js';
-import EventEmitter from 'events';
 
 const dates = ['from', 'to'];
 const objectsWithDefaults = ['timeFormat', 'columns'];
@@ -49,13 +48,11 @@ const defaults = {
 /**
  * basic config
  */
-class config extends EventEmitter {
+class config {
     /**
      * construct
      */
     constructor() {
-        super();
-
         this.data = {...defaults};
     }
 

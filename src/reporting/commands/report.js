@@ -211,14 +211,12 @@ try {
 
 try {
     await parallel(projects, async (project, done) => {
-        config.set('project', project);
-
         try {
             switch (config.get('type')) {
                 case 'project': {
                     let report = new Report(config, undefined, client);
                     try {
-                        await report.getProject();
+                        await report.getProject(project);
                     } catch (error) {
                         Cli.x(`Project not found or no access rights "${projectLabels}".`, error);
                     }
@@ -227,7 +225,7 @@ try {
                 }
 
                 case 'group': {
-                    await owner.getGroup();
+                    await owner.getGroup(project);
                     if (config.get('subgroups')) await owner.getSubGroups();
                     await owner.getProjectsByGroup();
                     owner.projects.forEach(project => reports.push(new Report(config, project, client)));
