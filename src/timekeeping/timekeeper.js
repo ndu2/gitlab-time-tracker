@@ -44,13 +44,11 @@ class Timekeeper {
      * Filter frames that need an update
      * @returns {Promise}
      */
-    syncInit() {
+    async syncInit() {
         this.sync.frames = new FrameCollection(this.config);
 
         // filter out frames, that don't need an update
         this.sync.frames.filter(frame => !(Math.ceil(frame.duration) === _.reduce(frame.notes, (n, m) => (n + m.time), 0)));
-
-        return new Promise(r => r());
     }
 
     /**
@@ -60,9 +58,9 @@ class Timekeeper {
      */
     syncResolve(callback) {
         this.sync.resources = {}
-        
+
         // resolve issues and merge requests
-        return this.sync.frames.forEach((frame, done) => {
+        return this.sync.frames.forEach(async (frame, done) => {
             let project = frame.project,
                 type = frame.resource.type,
                 id = frame.resource.id;
@@ -79,13 +77,14 @@ class Timekeeper {
                 return done();
             }
             this.sync.resources[project][type][id] = new classes[type](this.config, {});
-            this.sync.resources[project][type][id]
-                .make(project, id, frame.resource.new)
-                .then(() => {
-                    if (callback) callback();
-                    done();
-                })
-                .catch(error => done(`Could not resolve ${type} ${id} on "${project}"`));
+
+            try {
+                await this.sync.resources[project][type][id].make(project, id, frame.resource.new);
+                if (callback) callback();
+                done();
+            } catch (error) {
+                done(`Could not resolve ${type} ${id} on "${project}"`);
+            }
         })
     }
 
@@ -97,7 +96,7 @@ class Timekeeper {
             let project = frame.project,
                 type = frame.resource.type,
                 id = frame.resource.id;
-        
+
             if(id in this.sync.resources[project][type]) {
                 frame.title = this.sync.resources[project][type][id].data.title;
             }
@@ -106,7 +105,7 @@ class Timekeeper {
     }
 
     syncUpdate(callback) {
-        return this.sync.frames.forEach((frame, done) => {
+        return this.sync.frames.forEach(async (frame, done) => {
             let time = frame.duration,
                 project = frame.project,
                 type = frame.resource.type,
@@ -115,118 +114,99 @@ class Timekeeper {
             if (frame.notes.length > 0)
                 time = Math.ceil(frame.duration) - parseInt(_.reduce(frame.notes, (n, m) => (n + m.time), 0));
 
-            this._addTime(frame, time)
-                .then(() => {
-                    if (callback) callback();
-                    done();
-                })
-                .catch(error => done(`Could not update ${type} ${id} on ${project}`))
-        });
-    }
-
-    _addTime(frame, time) {
-        return new Promise((resolve, reject) => {
-            let resource = this.sync.resources[frame.project][frame.resource.type][frame.resource.id];
-
-            resource.createTime(Math.ceil(time), frame._stop, frame.note)
-                .then(() => resource.getNotes())
-                .then(() => {
-                    if (frame.resource.new) {
-                        delete frame.resource.new;
-                        frame.resource.title = frame.resource.id;
-                        frame.resource.id = resource.data.iid;
-                    }
-
-                    frame.notes.push({
-                        id: resource.notes[0].id,
-                        time: Math.ceil(time)
-                    });
-
-                    frame.write(true);
-                    resolve();
-                })
-                .catch(error => reject(error));
-        });
-    }
-
-    /**
-     *
-     * @returns {Promise}
-     */
-    status() {
-        return new Promise((resolve, reject) => {
-            let id = this._currentId();
-
-            if (!id) return resolve([]);
-
-            resolve([Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json'))]);
-        });
-    }
-
-    /**
-     *
-     * @returns {Promise}
-     */
-    log() {
-        return new Promise((resolve, reject) => {
-            let frames = {},
-                times = {};
-
-            new FrameCollection(this.config)
-                .forEach((frame, done) => {
-                    if (frame.stop === false) return done();
-                    let date = frame.date.format('YYYY-MM-DD');
-
-                    if (!frames[date]) frames[date] = [];
-                    if (!times[date]) times[date] = 0;
-
-                    frames[date].push(frame);
-                    times[date] += Math.ceil(frame.duration);
-
-                    done();
-                })
-                .then(() => new Promise(r => {
-                    resolve({frames, times});
-                    r();
-                }))
-                .catch(error => reject(error));
-        });
-    }
-
-    /**
-     *
-     * @returns {Promise}
-     */
-    all() {
-        return new Promise((resolve, reject) => {
-            let frames = [];
-
-            new FrameCollection(this.config)
-                .forEach((frame, done) => {
-                    frames.push(frame);
-                    done();
-                })
-                .then(() => new Promise(r => {
-                    resolve({frames});
-                    r();
-                }))
-                .catch(error => reject(error));
-        });
-    }
-
-    /**
-     *
-     * @returns {Promise}
-     */
-    resume(frame) {
-        return new Promise((resolve, reject) => {
-            if (!frame) {
-                return reject("No task found to resume.");
+            try {
+                await this._addTime(frame, time);
+                if (callback) callback();
+                done();
+            } catch (error) {
+                done(`Could not update ${type} ${id} on ${project}`);
             }
-            this.start(frame.project, frame.resource.type, frame.resource.id, frame.note)
-                .then(frame => resolve(frame))
-                .catch(error => reject(error));
         });
+    }
+
+    async _addTime(frame, time) {
+        let resource = this.sync.resources[frame.project][frame.resource.type][frame.resource.id];
+
+        await resource.createTime(Math.ceil(time), frame._stop, frame.note);
+        await resource.getNotes();
+
+        if (frame.resource.new) {
+            delete frame.resource.new;
+            frame.resource.title = frame.resource.id;
+            frame.resource.id = resource.data.iid;
+        }
+
+        frame.notes.push({
+            id: resource.notes[0].id,
+            time: Math.ceil(time)
+        });
+
+        frame.write(true);
+    }
+
+    /**
+     *
+     * @returns {Promise}
+     */
+    async status() {
+        let id = this._currentId();
+
+        if (!id) return [];
+
+        return [Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json'))];
+    }
+
+    /**
+     *
+     * @returns {Promise}
+     */
+    async log() {
+        let frames = {},
+            times = {};
+
+        await new FrameCollection(this.config)
+            .forEach((frame, done) => {
+                if (frame.stop === false) return done();
+                let date = frame.date.format('YYYY-MM-DD');
+
+                if (!frames[date]) frames[date] = [];
+                if (!times[date]) times[date] = 0;
+
+                frames[date].push(frame);
+                times[date] += Math.ceil(frame.duration);
+
+                done();
+            });
+
+        return {frames, times};
+    }
+
+    /**
+     *
+     * @returns {Promise}
+     */
+    async all() {
+        let frames = [];
+
+        await new FrameCollection(this.config)
+            .forEach((frame, done) => {
+                frames.push(frame);
+                done();
+            });
+
+        return {frames};
+    }
+
+    /**
+     *
+     * @returns {Promise}
+     */
+    async resume(frame) {
+        if (!frame) {
+            throw "No task found to resume.";
+        }
+
+        return this.start(frame.project, frame.resource.type, frame.resource.id, frame.note);
     }
 
     list(project, type, state, my) {
@@ -241,54 +221,48 @@ class Timekeeper {
      * @param id
      * @returns {Promise}
      */
-    start(project, type, id, note) {
+    async start(project, type, id, note) {
         this.config.set('project', project);
 
-        return new Promise((resolve, reject) => {
-            if (this._currentId())
-                return reject("Already running. Please stop it first with 'gtt stop'.");
+        if (this._currentId())
+            throw "Already running. Please stop it first with 'gtt stop'.";
 
-            let frame = new Frame(this.config, id, type, note).startMe();
-            Fs.writeText(this._currentFile(), frame.id);
+        let frame = new Frame(this.config, id, type, note).startMe();
+        Fs.writeText(this._currentFile(), frame.id);
 
-            resolve(frame);
-        })
+        return frame;
     }
 
     /**
      *
      * @returns {Promise}
      */
-    stop() {
-        return new Promise((resolve, reject) => {
-            let id = this._currentId();
+    async stop() {
+        let id = this._currentId();
 
-            if (!id) return reject('No projects started.');
+        if (!id) throw 'No projects started.';
 
-            let frame = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json')).stopMe();
-            Fs.remove(this._currentFile());
+        let frame = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json')).stopMe();
+        Fs.remove(this._currentFile());
 
-            resolve([frame]);
-        });
+        return [frame];
     }
 
     /**
      *
      * @returns {Promise}
      */
-    cancel() {
-        return new Promise((resolve, reject) => {
-            let id = this._currentId();
+    async cancel() {
+        let id = this._currentId();
 
-            if (!id) return reject('No projects started.');
+        if (!id) throw 'No projects started.';
 
-            let file = Fs.join(this.config.frameDir, id + '.json');
-            let frame = Frame.fromFile(this.config, file);
-            Fs.remove(file);
-            Fs.remove(this._currentFile());
+        let file = Fs.join(this.config.frameDir, id + '.json');
+        let frame = Frame.fromFile(this.config, file);
+        Fs.remove(file);
+        Fs.remove(this._currentFile());
 
-            resolve([frame]);
-        });
+        return [frame];
     }
 }
 
