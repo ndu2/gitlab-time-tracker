@@ -38,8 +38,6 @@ class GitlabClient {
      * @returns {Promise}
      */
     post(path, data) {
-        data.private_token = this.token;
-
         return GitlabClient.throttle(async () => {
             const response = await fetch(`${this.url}${path}`, {
                 method: 'POST',
@@ -95,8 +93,7 @@ class GitlabClient {
      * @returns {Promise}
      */
     get(path, page = 1, perPage = this._perPage) {
-        path += (path.includes('?') ? '&' : '?') + `private_token=${this.token}`;
-        path += `&page=${page}&per_page=${perPage}`;
+        path += (path.includes('?') ? '&' : '?') + `page=${page}&per_page=${perPage}`;
 
         return GitlabClient.throttle(async () => {
             const response = await fetch(`${this.url}${path}`, {
