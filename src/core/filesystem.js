@@ -2,24 +2,23 @@ import _ from 'underscore';
 import fs from 'fs';
 import path from 'path';
 import open from 'open';
-import find from 'find-in-files';
 import child_process from 'child_process';
 
 class filesystem {
-    static find(pattern, dir) {
-        return new Promise((resolve, reject) => {
-            find.find(pattern, dir)
-                .then(results => resolve(_.keys(results)))
-                .catch(error => reject(error));
-        });
-    }
-
     static exists(file) {
         return fs.existsSync(file);
     }
 
     static remove(file) {
         return fs.unlinkSync(file);
+    }
+
+    static readText(file) {
+        return fs.readFileSync(file, 'utf8');
+    }
+
+    static writeText(file, data) {
+        return fs.writeFileSync(file, data);
     }
 
     static open(file) {
