@@ -32,16 +32,17 @@ class owner {
 
     /**
      * query and set the group
+     * @param fullPath group path, e.g. "group/subgroup"
      * @returns {Promise}
      */
-    getGroup() {
+    getGroup(fullPath = this.config.get('project')) {
         return new Promise((resolve, reject) => {
             this.client.get(`groups`)
                 .then(groups => {
                     if (groups.body.length === 0) return reject('Group not found');
                     groups = groups.body;
 
-                    let filtered = groups.filter(group => group.full_path === this.config.get('project'));
+                    let filtered = groups.filter(group => group.full_path === fullPath);
                     if (filtered.length === 0) return reject('Group not found');
                     this.groups = this.groups.concat(filtered);
                     resolve();

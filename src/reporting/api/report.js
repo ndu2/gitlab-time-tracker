@@ -66,10 +66,11 @@ class report {
 
     /**
      * query and set the project
+     * @param namespace project path, e.g. "group/project"
      * @returns {Promise}
      */
-    getProject() {
-        let promise = this.client.get(`projects/${encodeURIComponent(this.config.get('project'))}`);
+    getProject(namespace = this.config.get('project')) {
+        let promise = this.client.get(`projects/${encodeURIComponent(namespace)}`);
         promise.then(project => this.setProject(project.body));
 
         return promise;
