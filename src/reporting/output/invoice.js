@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import {markdownTable as Table} from 'markdown-table'
 import Output from './base.js';
 import { SwissQRBill } from "swissqrbill/svg";
@@ -78,15 +77,13 @@ class invoice extends Output {
 
         let stats = '';
 
-        _.each(this.stats, (time, name) => stats += `\n* **${name}**: ${time}`);
+        Object.entries(this.stats).forEach(([name, time]) => stats += `\n* **${name}**: ${time}`);
         stats += `\n`;
 
         if (this.projects.length > 1) {
-            _.each(this.projects, (time, name) => stats += `\n* **${name.red}**: ${time}`);
+            Object.entries(this.projects).forEach(([name, time]) => stats += `\n* **${name.red}**: ${time}`);
             stats += `\n`;
         }
-        // REMOVE
-        // _.each(this.users, (time, name) => stats += `\n* **${name}**: ${time}`);
         let to = this.concat(this.config.get('invoiceAddress'), '<br />');
         let from = this.concat(this.config.get('invoiceSettings')?.from, '<br />');
         let opening = this.concat(this.config.get('invoiceSettings')?.opening, '<br />');

@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import moment from 'moment';
 import Time from '../../core/time.js';
 import DayReport from './dayReport.js';
@@ -83,7 +82,7 @@ export default Base => class extends Base {
                 times.push(time);
             });
 
-        _.each(timeUsers, (time, name) => this[`time_${name}`] = Time.toHumanReadable(time, this.config.get('hoursPerDay'), timeFormat));
+        Object.entries(timeUsers).forEach(([name, time]) => this[`time_${name}`] = Time.toHumanReadable(time, this.config.get('hoursPerDay'), timeFormat));
         this.timeSpent = timeSpent;
         this.times = times;
     }

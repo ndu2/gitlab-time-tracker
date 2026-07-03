@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import moment from 'moment';
 import Fs from '../core/filesystem.js';
 import Frame from './storage/frame.js';
@@ -48,7 +47,7 @@ class Timekeeper {
         this.sync.frames = new FrameCollection(this.config);
 
         // filter out frames, that don't need an update
-        this.sync.frames.filter(frame => !(Math.ceil(frame.duration) === _.reduce(frame.notes, (n, m) => (n + m.time), 0)));
+        this.sync.frames.filter(frame => !(Math.ceil(frame.duration) === frame.notes.reduce((n, m) => (n + m.time), 0)));
     }
 
     /**
@@ -112,7 +111,7 @@ class Timekeeper {
                 id = frame.resource.id;
 
             if (frame.notes.length > 0)
-                time = Math.ceil(frame.duration) - parseInt(_.reduce(frame.notes, (n, m) => (n + m.time), 0));
+                time = Math.ceil(frame.duration) - parseInt(frame.notes.reduce((n, m) => (n + m.time), 0));
 
             try {
                 await this._addTime(frame, time);

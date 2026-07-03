@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import moment from 'moment';
 
 const defaultTimeFormat = '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]';
@@ -105,7 +104,7 @@ class time {
         let match, parsed;
 
         if ((match = regex.exec(string)) === null) return false;
-        parsed = _.object(mappings, match.map(i => i === undefined ? 0 : i));
+        parsed = Object.fromEntries(mappings.map((key, i) => [key, match[i] === undefined ? 0 : match[i]]));
 
         return (parsed.sign ? -1 : 1) * (parseInt(parsed.seconds)
             + (parseInt(parsed.minutes) * 60)

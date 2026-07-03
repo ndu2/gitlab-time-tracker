@@ -1,5 +1,4 @@
 import moment from 'moment';
-import _ from 'underscore';
 import Time from './time.js';
 import EventEmitter from 'events';
 
@@ -57,7 +56,7 @@ class config extends EventEmitter {
     constructor() {
         super();
 
-        this.data = _.extend({}, defaults);
+        this.data = {...defaults};
     }
 
     /**
@@ -87,7 +86,7 @@ class config extends EventEmitter {
         if (dates.includes(key))
             return moment(this.data[key]);
 
-        if (objectsWithDefaults.includes(key) && _.isObject(this.data[key]))
+        if (objectsWithDefaults.includes(key) && typeof this.data[key] === 'object' && this.data[key] !== null)
             return subKey && this.data[key][subKey] ? this.data[key][subKey] : defaults[key];
 
         return this.data[key];

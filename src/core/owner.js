@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import GitlabClient from './gitlab-client.js';
 import parallel from './parallel.js';
 

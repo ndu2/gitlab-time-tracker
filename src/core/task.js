@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import moment from 'moment';
 import GitlabClient from './gitlab-client.js';
 
@@ -42,9 +41,12 @@ class task {
     }
 
     get labels() {
-        let labels = _.difference(this.data.labels, this.config.get('excludeLabels'));
+        let excludeLabels = this.config.get('excludeLabels');
+        let labels = Array.isArray(excludeLabels)
+            ? (this.data.labels || []).filter(label => !excludeLabels.includes(label))
+            : (this.data.labels || []);
         let include = this.config.get('includeLabels');
-        return include.length > 0 ? _.intersection(labels, include) : labels;
+        return include.length > 0 ? labels.filter(label => include.includes(label)) : labels;
     }
 
     get milestone() {

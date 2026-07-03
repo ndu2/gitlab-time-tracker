@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import fs from 'fs';
 import path from 'path';
 import Csv from 'csv-string';
@@ -11,19 +10,19 @@ class csv extends Output {
     makeStats() {
         let stats = [[], []];
 
-        _.each(this.stats, (time, name) => {
+        Object.entries(this.stats).forEach(([name, time]) => {
             stats[0].push(name);
             stats[1].push(time);
         });
 
         if (this.projects.length > 1) {
-            _.each(this.projects, (time, name) => {
+            Object.entries(this.projects).forEach(([name, time]) => {
                 stats[0].push(name);
                 stats[1].push(time);
             });
         }
 
-        _.each(this.users, (time, name) => {
+        Object.entries(this.users).forEach(([name, time]) => {
             stats[0].push(name);
             stats[1].push(time);
         });
