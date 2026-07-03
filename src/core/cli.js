@@ -1,10 +1,11 @@
 import pc from 'picocolors';
 import confirm from '@inquirer/confirm';
-import spinnerFactory from 'node-spinner';
-const spinner = spinnerFactory();
 import cursor from 'cli-cursor';
 import progress from 'progress';
-spinner.set('|/-\\');
+
+const spinnerFrames = ['|', '/', '-', '\\'];
+let spinnerIndex = 0;
+const spinner = { next: () => spinnerFrames[spinnerIndex++ % spinnerFrames.length] };
 
 /**
  * Cli helper

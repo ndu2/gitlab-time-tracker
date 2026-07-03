@@ -49,12 +49,11 @@
     "env-paths": "^4.0.0",
     "hash-sum": "^2.0.0",
     "hashids": "^2.3.0",
+    "js-yaml": "^5.2.1",
     "markdown-table": "^3.0.4",
-    "node-spinner": "^0.0.4",
     "open": "^11.0.0",
     "picocolors": "^1.1.1",
     "progress": "^2.0.3",
-    "read-yaml": "^1.1.0",
     "swissqrbill": "^4.3.0",
     "tempfile": "^6.0.1",
     "throttled-queue": "^3.0.0"
