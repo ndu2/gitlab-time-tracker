@@ -1,6 +1,7 @@
 import _ from 'underscore';
 import moment from 'moment';
 import GitlabClient from '../../core/gitlab-client.js';
+import parallel from '../../core/parallel.js';
 import Issue from './issue.js';
 import MergeRequest from './mergeRequest.js';
 import Project from './project.js';
@@ -8,14 +9,15 @@ import Project from './project.js';
 /**
  * report model
  */
-class report extends GitlabClient {
+class report {
     /**
      * constructor.
      * @param config
      * @param project
      */
-    constructor(config, project) {
-        super(config);
+    constructor(config, project, client = new GitlabClient(config)) {
+        this.config = config;
+        this.client = client;
 
         this.projects = {};
         this.setProject(project);
@@ -60,7 +62,7 @@ class report extends GitlabClient {
         if (!project) return;
 
         this.projects[project.id] = project.path_with_namespace;
-        this.project = new Project(this.config, project)
+        this.project = new Project(this.config, project, this.client)
     }
 
     /**
@@ -68,7 +70,7 @@ class report extends GitlabClient {
      * @returns {Promise}
      */
     getProject() {
-        let promise = this.get(`projects/${encodeURIComponent(this.config.get('project'))}`);
+        let promise = this.client.get(`projects/${encodeURIComponent(this.config.get('project'))}`);
         promise.then(project => this.setProject(project.body));
 
         return promise;
@@ -79,7 +81,7 @@ class report extends GitlabClient {
      * @returns {Promise}
      */
     getMergeRequests() {
-        let promise = this.all(`projects/${this.project.id}/merge_requests${this.params()}`);
+        let promise = this.client.all(`projects/${this.project.id}/merge_requests${this.params()}`);
         let excludes = this.config.get('excludeByLabels');
         promise.then(mergeRequests => this.mergeRequests = mergeRequests.filter(mr => (
             (!excludes || excludes.filter(l=>mr.labels.includes(l)).length==0) // keep all merge requests not including a exclude label
@@ -93,7 +95,7 @@ class report extends GitlabClient {
      * @returns {Promise}
      */
     getIssues() {
-        let promise = this.all(`projects/${this.project.id}/issues${this.params()}`);
+        let promise = this.client.all(`projects/${this.project.id}/issues${this.params()}`);
         let excludes = this.config.get('excludeByLabels');
         promise.then(issues => this.issues = issues.filter(issue => (
             issue.moved_to_id == null && // filter moved issues in any case
@@ -172,7 +174,7 @@ class report extends GitlabClient {
             }
         };
 
-        let promise = this.graphQL(request);
+        let promise = this.client.graphQL(request);
         promise.then(response => {
             if (response.body.errors) {
                 this.timelogs = [];
@@ -232,9 +234,9 @@ class report extends GitlabClient {
     process(input, model, advance = false) {
         let collect = [];
 
-        let promise = this.parallel(this[input], (data, done) => {
+        let promise = parallel(this[input], (data, done) => {
 
-            let item = new model(this.config, data);
+            let item = new model(this.config, data, this.client);
             item.project_namespace = this.projects[item.project_id];
 
             item.recordTimelogs(this.timelogs.filter(
@@ -242,11 +244,7 @@ class report extends GitlabClient {
                     timelog[input].iid == data.iid &&
                     timelog[input].projectId == data.project_id));
             
-            item.getNotes()
-                .then(() => item.getTimes())
-                .catch(error => done(error))
-                .catch(error => done(error))
-                .then(() => item.getStats())
+            item.getStats()
                 .catch(error => done(error))
                 .then(() => {
                     if (this.config.get('showWithoutTimes') || item.times.length > 0) {
@@ -260,7 +258,7 @@ class report extends GitlabClient {
 
             // collect items, query times & stats
             collect.push();
-        });
+        }, this.config);
 
         promise.then(() => this[input] = this.filter(collect));
         return promise;

@@ -1,12 +1,14 @@
 import _ from 'underscore';
 import GitlabClient from './gitlab-client.js';
+import parallel from './parallel.js';
 
 /**
  * owner model
  */
-class owner extends GitlabClient {
-    constructor(config) {
-        super(config);
+class owner {
+    constructor(config, client = new GitlabClient(config)) {
+        this.config = config;
+        this.client = client;
         this.projects = [];
         this.groups = [];
         this.users = [];
@@ -20,7 +22,7 @@ class owner extends GitlabClient {
         if (!this.config.get('_checkToken')) return new Promise(r => r());
 
         return new Promise((resolve, reject) => {
-            this.get('broadcast_messages')
+            this.client.get('broadcast_messages')
                 .then(() => resolve())
                 .catch(e => {
                     if (e.statusCode === 403) resolve();
@@ -35,7 +37,7 @@ class owner extends GitlabClient {
      */
     getGroup() {
         return new Promise((resolve, reject) => {
-            this.get(`groups`)
+            this.client.get(`groups`)
                 .then(groups => {
                     if (groups.body.length === 0) return reject('Group not found');
                     groups = groups.body;
@@ -55,7 +57,7 @@ class owner extends GitlabClient {
      */
     getSubGroups() {
         return new Promise((resolve, reject) => {
-            this.get(`groups`)
+            this.client.get(`groups`)
                 .then(groups => {
                     if (groups.body.length === 0) return resolve();
 
@@ -119,14 +121,14 @@ class owner extends GitlabClient {
      * @returns {Promise}
      */
     getProjectsByGroup() {
-        return this.parallel(this.groups, (group, done) => {
-            this.all(`groups/${group.id}/projects`)
+        return parallel(this.groups, (group, done) => {
+            this.client.all(`groups/${group.id}/projects`)
                 .then(projects => {
                     this.projects = projects;
                     done();
                 })
                 .catch(e => done(e));
-        });
+        }, this.config);
     }
 }
 

@@ -1,25 +1,13 @@
-import CoreMergeRequest from '../../core/mergeRequest.js';
+import CoreTask from '../../core/task.js';
 import writable from './writable.js';
 
 /**
- * merge request with timekeeping write operation: make() (get-or-create).
+ * merge request with timekeeping write operations (make/createTime) provided
+ * by the writable mixin; make() targets merge_requests via the _type getter.
  */
-class mergeRequest extends writable(CoreMergeRequest) {
-    make(project, id, create = false) {
-        let promise;
-
-        if (create) {
-            promise = this.post(`projects/${encodeURIComponent(project)}/merge_requests`, {title: id});
-        } else {
-            promise = this.get(`projects/${encodeURIComponent(project)}/merge_requests/${id}`);
-        }
-
-        promise.then(issue => {
-            this.data = issue.body;
-            return promise;
-        });
-
-        return promise;
+class mergeRequest extends writable(CoreTask) {
+    constructor(config, data, client) {
+        super(config, data, client, 'merge_requests');
     }
 }
 

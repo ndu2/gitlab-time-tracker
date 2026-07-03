@@ -1,6 +1,6 @@
-import async from 'async';
 import crypto from 'crypto';
 import throttleFactory from 'throttled-queue';
+import parallel from './parallel.js';
 
 /**
  * GitLab REST/GraphQL client: owns the request throttle, single/parallel
@@ -154,22 +154,6 @@ class GitlabClient {
     }
 
     /**
-     * perform the given worker function on the given tasks in parallel
-     * @param tasks
-     * @param worker
-     * @param runners
-     * @returns {Promise}
-     */
-    parallel(tasks, worker, runners = this._parallel) {
-        return new Promise((resolve, reject) => {
-            async.eachLimit(Array.from(tasks), runners, worker, error => {
-                if (error) return reject(error);
-                resolve();
-            });
-        });
-    }
-
-    /**
      * make multiple get requests by the given tasks and apply the
      * data to the given set
      * @param tasks
@@ -178,12 +162,12 @@ class GitlabClient {
      * @returns {Promise}
      */
     getParallel(tasks, collect = [], runners = this._parallel) {
-        return this.parallel(tasks, (task, done) => {
+        return parallel(tasks, (task, done) => {
             this.get(task.path, task.page, task.perPage).then((response) => {
                 response.body.forEach(item => collect.push(item));
                 done();
             }).catch(error => done(error));
-        }, runners);
+        }, this.config, runners);
     }
 
     /**

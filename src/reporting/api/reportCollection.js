@@ -1,15 +1,15 @@
-import GitlabClient from '../../core/gitlab-client.js';
+import parallel from '../../core/parallel.js';
 let projlist = [];
 
-class reportCollection extends GitlabClient {
+class reportCollection {
     constructor(config) {
-        super(config);
+        this.config = config;
 
         this.reports = [];
     }
 
     forEach(iterator) {
-        return this.parallel(this.reports, (report, done) => iterator(report, done));
+        return parallel(this.reports, (report, done) => iterator(report, done), this.config);
     }
 
     push(report) {

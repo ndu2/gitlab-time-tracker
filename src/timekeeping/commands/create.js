@@ -3,7 +3,7 @@ import moment from 'moment';
 import {Command} from 'commander';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
-import Tasks from '../storage/tasks.js';
+import Timekeeper from '../timekeeper.js';
 
 
 function create() {
@@ -16,7 +16,7 @@ function create() {
 Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd()),
-    tasks = new Tasks(config),
+    timekeeper = new Timekeeper(config),
     type = program.opts().type ? program.opts().type : 'issue',
     title = program.args.length === 1 ? program.args[0] : program.args[1],
     project = program.args.length === 2 ? program.args[0] : null;
@@ -27,7 +27,7 @@ if (program.args.length < 2 && !config.get('project'))
 if (!title)
     Cli.error('Wrong or missing title');
 
-tasks.start(project, type, title)
+timekeeper.start(project, type, title)
     .then(frame => console.log(`Starting project ${config.get('project').magenta} and create ${type} "${title.blue}" at ${moment().format('HH:mm').green}`))
     .catch(error => Cli.error(error));
 }

@@ -265,22 +265,6 @@ table th:nth-of-type(3) { width: 10%; }
 </style>`);
 
         this.write(Table(timesNew, { align: ['l', 'l', 'r'] }));
-
-
-
-        // warnings
-        let warnings = '';
-
-        this.timesWarnings.forEach( warning => {
-            let stats = this.config.toHumanReadable(warning.data.timeWarning.stats, 'stats');
-            let notes = this.config.toHumanReadable(warning.data.timeWarning.notes, 'stats');
-            warnings += `\n* ${warning.data.iid} ${warning.data.title}: Difference between stats and notes of ${warning.time}.`;
-            warnings += `<br/>Stats: ${stats}, Notes: ${notes}`
-        });
-        if(warnings != '') {
-            this.warningHeadline('Warnings');
-            this.warning(warnings+'\n');
-        }
     }
 
 }

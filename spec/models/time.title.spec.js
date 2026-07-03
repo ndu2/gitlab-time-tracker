@@ -2,14 +2,13 @@
 import moment from 'moment';
 import Config from '../../src/core/file-config.js';
 import Time from '../../src/core/time.js';
-import issue from '../../src/core/issue.js';
-import mergeRequest from '../../src/core/mergeRequest.js';
+import task from '../../src/core/task.js';
 import { expect } from 'chai';
 
 describe('time class', () => {
     it('Returns title of parent Issue', () => {
         const config = new Config(process.cwd());
-        const parent = new issue(config, {title: "Test title"})
+        const parent = new task(config, {title: "Test title"}, undefined, 'issues')
         const time = new Time('1h', moment(), {}, parent,  config);
 
         expect(time.title).to.be.equal("Test title");
@@ -17,7 +16,7 @@ describe('time class', () => {
 
     it('Returns title of parent MergeRequest', () => {
         const config = new Config(process.cwd());
-        const parent = new mergeRequest(config, {title: "Test title"})
+        const parent = new task(config, {title: "Test title"}, undefined, 'merge_requests')
         const time = new Time('1h', moment(), {}, parent,  config);
 
         expect(time.title).to.be.equal("Test title");
@@ -25,7 +24,7 @@ describe('time class', () => {
 
     it('Returns Null for missed title or parent', () => {
         const config = new Config(process.cwd());
-        const parent = new mergeRequest(config, {});
+        const parent = new task(config, {}, undefined, 'merge_requests');
         let time;
         time = new Time('1h', moment(), {}, parent,  config);
         expect(time.title).to.be.equal(null);

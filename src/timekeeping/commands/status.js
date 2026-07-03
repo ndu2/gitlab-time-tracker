@@ -3,7 +3,7 @@ import colors from 'colors';
 import moment from 'moment';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
-import Tasks from '../storage/tasks.js';
+import Timekeeper from '../timekeeper.js';
 
 
 function status() {
@@ -15,9 +15,9 @@ function status() {
 Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd()),
-    tasks = new Tasks(config);
+    timekeeper = new Timekeeper(config);
 
-tasks.status()
+timekeeper.status()
     .then(frames => {
         if (frames.length === 0) {
             if (program.opts().s) {
