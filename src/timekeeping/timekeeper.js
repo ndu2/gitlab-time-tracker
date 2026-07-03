@@ -82,7 +82,7 @@ class Timekeeper {
                 if (callback) callback();
                 done();
             } catch (error) {
-                done(`Could not resolve ${type} ${id} on "${project}"`);
+                done(new Error(`Could not resolve ${type} ${id} on "${project}": ${error.message ?? error}`));
             }
         })
     }
@@ -118,7 +118,7 @@ class Timekeeper {
                 if (callback) callback();
                 done();
             } catch (error) {
-                done(`Could not update ${type} ${id} on ${project}`);
+                done(new Error(`Could not update ${type} ${id} on ${project}: ${error.message ?? error}`));
             }
         });
     }
@@ -202,7 +202,7 @@ class Timekeeper {
      */
     async resume(frame) {
         if (!frame) {
-            throw "No task found to resume.";
+            throw new Error("No task found to resume.");
         }
 
         return this.start(frame.project, frame.resource.type, frame.resource.id, frame.note);
@@ -224,7 +224,7 @@ class Timekeeper {
         this.config.set('project', project);
 
         if (this._currentId())
-            throw "Already running. Please stop it first with 'gtt stop'.";
+            throw new Error("Already running. Please stop it first with 'gtt stop'.");
 
         let frame = new Frame(this.config, id, type, note).startMe();
         Fs.writeText(this._currentFile(), frame.id);
@@ -239,7 +239,7 @@ class Timekeeper {
     async stop() {
         let id = this._currentId();
 
-        if (!id) throw 'No projects started.';
+        if (!id) throw new Error('No projects started.');
 
         let frame = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json')).stopMe();
         Fs.remove(this._currentFile());
@@ -254,7 +254,7 @@ class Timekeeper {
     async cancel() {
         let id = this._currentId();
 
-        if (!id) throw 'No projects started.';
+        if (!id) throw new Error('No projects started.');
 
         let file = Fs.join(this.config.frameDir, id + '.json');
         let frame = Frame.fromFile(this.config, file);
