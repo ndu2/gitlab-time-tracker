@@ -1,5 +1,4 @@
 import fs from 'fs';
-import shell from 'shelljs';
 import path from 'path';
 import os from 'os';
 import config from './config.js';
@@ -22,7 +21,7 @@ class fileConfig extends config {
         this.assertGlobalConfig();
         this.workDir = workDir;
         this.data = Object.assign(this.data, this.localExists() ? this.parseLocal() : this.parseGlobal());
-        if (!fs.existsSync(this.frameDir)) shell.mkdir('-p', this.frameDir);
+        if (!fs.existsSync(this.frameDir)) fs.mkdirSync(this.frameDir, { recursive: true });
         this.cache = {
             delete: this._cacheDelete,
             get: this._cacheGet,
@@ -93,8 +92,8 @@ class fileConfig extends config {
 
 
 
-        if (!fs.existsSync(this.globalDir)) shell.mkdir('-p', this.globalDir);
-        if (!fs.existsSync(this.cacheDir)) shell.mkdir('-p', this.cacheDir);
+        if (!fs.existsSync(this.globalDir)) fs.mkdirSync(this.globalDir, { recursive: true });
+        if (!fs.existsSync(this.cacheDir)) fs.mkdirSync(this.cacheDir, { recursive: true });
         if (!fs.existsSync(this.global)) fs.appendFileSync(this.global, '');
     }
 
