@@ -274,10 +274,9 @@ gtt report example-group example-group-2 --type=group
 gtt report --output=table
 gtt report --output=markdown
 gtt report --output=csv
-gtt report --output=xlsx --file=filename.xlsx
 gtt report --output=invoice --file=invoice.md
 ```
-Defaults to `table`. `csv` and `markdown` can be printed to stdout, `xlsx` need the file parameter.
+Defaults to `table`. `csv` and `markdown` can be printed to stdout.
 
 pdf output was dropped. you can use 3rd party tools to convert markdown to pdf, e.g
 ```shell
@@ -599,7 +598,7 @@ timeFormat:
 timezone: "Europe/Berlin"
 
 # Output type
-# Available: csv, table, markdown, pdf, xlsx
+# Available: csv, table, markdown, invoice
 # defaults to table
 output: markdown
 

@@ -61,8 +61,7 @@
     "swissqrbill": "^4.3.0",
     "tempfile": "^6.0.1",
     "throttled-queue": "^3.0.0",
-    "underscore": "^1.13.8",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "underscore": "^1.13.8"
   },
   "devDependencies": {
     "@yao-pkg/pkg": "^6.21.0",
