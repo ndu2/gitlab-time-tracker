@@ -10,13 +10,12 @@ import ReportCollection from '../api/reportCollection.js';
 import GitlabClient from '../../core/gitlab-client.js';
 import parallel from '../../core/parallel.js';
 // output backends are imported lazily so timekeeping commands never pull in
-// the heavy deps (xlsx, swissqrbill, markdown-table, csv-string, cli-table)
+// the heavy deps (swissqrbill, markdown-table, csv-string, cli-table)
 const Output = {
     table: () => import('../output/table.js'),
     csv: () => import('../output/csv.js'),
     markdown: () => import('../output/markdown.js'),
-    invoice: () => import('../output/invoice.js'),
-    xlsx: () => import('../output/xlsx.js')
+    invoice: () => import('../output/invoice.js')
 };
 
 // this collects options
@@ -190,9 +189,6 @@ if (!config.get('from').isValid()) {
 }
 if (!config.get('to').isValid()) {
     Cli.error(`TO is not a in valid ISO date format.`);
-}
-if (config.get('output') === 'xlsx' && !config.get('file')) {
-    Cli.error(`Cannot output an xlsx to stdout. You probably forgot to use the --file parameter`);
 }
 
 // file prompt
