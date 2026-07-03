@@ -52,7 +52,7 @@ class GitlabClient {
                 body: JSON.stringify(data)
             }).then(response => {
                 if(!response.ok) {
-                    reject(`Error: response not OK`);
+                    return reject(`Error: response not OK`);
                 }
                 const isJson = response.headers.get("content-type").startsWith('application/json');
                 return (Promise.all([isJson ? response.json(): Promise.resolve(undefined), Promise.resolve(response.headers)]));
@@ -83,10 +83,10 @@ class GitlabClient {
                 body: JSON.stringify(data)
             }).then(response => {
                 if(!response.ok) {
-                    reject(`Error: response not OK`);
+                    return reject(`Error: response not OK`);
                 }
                 if(!response.headers.get("content-type").startsWith('application/json')) {
-                    reject(`Error: response not application/json`);
+                    return reject(`Error: response not application/json`);
                 }
                 return (Promise.all([response.json(), Promise.resolve(response.headers)]));
             }).then(response => {
@@ -115,10 +115,10 @@ class GitlabClient {
                 }
             }).then(response => {
                 if(!response.ok) {
-                    reject(`Error: response not OK`);
+                    return reject(`Error: response not OK`);
                 }
                 if(!response.headers.get("content-type").startsWith('application/json')) {
-                    reject(`Error: response not application/json`);
+                    return reject(`Error: response not application/json`);
                 }
                 return (Promise.all([response.json(), Promise.resolve(response.headers)]));
             }).then(response => {
