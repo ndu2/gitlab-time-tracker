@@ -24,7 +24,7 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
       the report parallel loop (only safe because runners = 1); pass the
       project into `Report` explicitly. Drop unused `EventEmitter` inheritance;
       reconsider magic special cases in `config.get()`.
-- [ ] Convert callback-style `forEach(item, done)` in `FrameCollection` /
+- [x] Convert callback-style `forEach(item, done)` in `FrameCollection` /
       `ReportCollection` to async iteration; removes try/done boilerplate.
 - [ ] Minor: capitalize class names (`config`, `frame`, `cli`); move
       `ReportCollection`'s module-level `projlist` into the instance

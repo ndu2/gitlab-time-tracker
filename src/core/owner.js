@@ -121,13 +121,8 @@ class owner {
      * @returns {Promise}
      */
     getProjectsByGroup() {
-        return parallel(this.groups, (group, done) => {
-            this.client.all(`groups/${group.id}/projects`)
-                .then(projects => {
-                    this.projects = projects;
-                    done();
-                })
-                .catch(e => done(e));
+        return parallel(this.groups, async group => {
+            this.projects = await this.client.all(`groups/${group.id}/projects`);
         }, this.config);
     }
 }

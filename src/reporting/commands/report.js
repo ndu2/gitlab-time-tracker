@@ -210,31 +210,26 @@ try {
 }
 
 try {
-    await parallel(projects, async (project, done) => {
-        try {
-            switch (config.get('type')) {
-                case 'project': {
-                    let report = new Report(config, undefined, client);
-                    try {
-                        await report.getProject(project);
-                    } catch (error) {
-                        Cli.x(`Project not found or no access rights "${projectLabels}".`, error);
-                    }
-                    reports.push(report);
-                    break;
+    await parallel(projects, async project => {
+        switch (config.get('type')) {
+            case 'project': {
+                let report = new Report(config, undefined, client);
+                try {
+                    await report.getProject(project);
+                } catch (error) {
+                    Cli.x(`Project not found or no access rights "${projectLabels}".`, error);
                 }
-
-                case 'group': {
-                    await owner.getGroup(project);
-                    if (config.get('subgroups')) await owner.getSubGroups();
-                    await owner.getProjectsByGroup();
-                    owner.projects.forEach(project => reports.push(new Report(config, project, client)));
-                    break;
-                }
+                reports.push(report);
+                break;
             }
-            done();
-        } catch (error) {
-            done(error);
+
+            case 'group': {
+                await owner.getGroup(project);
+                if (config.get('subgroups')) await owner.getSubGroups();
+                await owner.getProjectsByGroup();
+                owner.projects.forEach(project => reports.push(new Report(config, project, client)));
+                break;
+            }
         }
     }, config, 1);
 
@@ -243,18 +238,12 @@ try {
 
     // get members and user columns
     if (config.get('userColumns')) {
-        await reports.forEach(async (report, done) => {
-            try {
-                await report.project.members();
-                let columns = report.project.users.map(user => `time_${user}`);
+        await reports.forEach(async report => {
+            await report.project.members();
+            let columns = report.project.users.map(user => `time_${user}`);
 
-                config.set('issueColumns', [...new Set(config.get('issueColumns').concat(columns))]);
-                config.set('mergeRequestColumns', [...new Set(config.get('mergeRequestColumns').concat(columns))]);
-
-                done();
-            } catch (error) {
-                done(error);
-            }
+            config.set('issueColumns', [...new Set(config.get('issueColumns').concat(columns))]);
+            config.set('mergeRequestColumns', [...new Set(config.get('mergeRequestColumns').concat(columns))]);
         });
     }
 
@@ -268,14 +257,7 @@ if (config.get('query').includes('issues')) {
     Cli.list(`${Cli.fetch}  Fetching issues`);
 
     try {
-        await reports.forEach(async (report, done) => {
-            try {
-                await report.getIssues();
-                done();
-            } catch (error) {
-                done(error);
-            }
-        });
+        await reports.forEach(report => report.getIssues());
     } catch (error) {
         Cli.x(`could not fetch issues.`, error);
     }
@@ -288,14 +270,7 @@ if (config.get('query').includes('merge_requests')) {
     Cli.list(`${Cli.fetch}  Fetching merge requests`);
 
     try {
-        await reports.forEach(async (report, done) => {
-            try {
-                await report.getMergeRequests();
-                done();
-            } catch (error) {
-                done(error);
-            }
-        });
+        await reports.forEach(report => report.getMergeRequests());
     } catch (error) {
         Cli.x(`could not fetch merge requests.`, error);
     }
@@ -307,14 +282,7 @@ if (config.get('query').includes('merge_requests')) {
 Cli.list(`${Cli.fetch}  Loading timelogs`);
 
 try {
-    await reports.forEach(async (report, done) => {
-        try {
-            await report.getTimelogs();
-            done();
-        } catch (error) {
-            done(error);
-        }
-    });
+    await reports.forEach(report => report.getTimelogs());
 } catch (error) {
     Cli.x(`could not load timelogs.`, error);
 }
@@ -325,10 +293,7 @@ Cli.mark();
 Cli.list(`${Cli.merge}  Merging reports`);
 
 try {
-    await reports.forEach((report, done) => {
-        master.merge(report);
-        done();
-    });
+    await reports.forEach(report => master.merge(report));
 } catch (error) {
     Cli.x(`could not merge reports.`, error);
 }

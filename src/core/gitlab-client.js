@@ -169,14 +169,9 @@ class GitlabClient {
      * @returns {Promise}
      */
     getParallel(tasks, collect = [], runners = this._parallel) {
-        return parallel(tasks, async (task, done) => {
-            try {
-                const response = await this.get(task.path, task.page, task.perPage);
-                response.body.forEach(item => collect.push(item));
-                done();
-            } catch (error) {
-                done(error);
-            }
+        return parallel(tasks, async task => {
+            const response = await this.get(task.path, task.page, task.perPage);
+            response.body.forEach(item => collect.push(item));
         }, this.config, runners);
     }
 
