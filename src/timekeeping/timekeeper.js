@@ -229,9 +229,9 @@ class Timekeeper {
         });
     }
 
-    list(project, state, my) {
+    list(project, type, state, my) {
         this.config.set('project', project);
-        return classes['issue'].list(this.config, this.config.get('project'), state, my);
+        return classes[type].list(this.config, this.config.get('project'), state, my);
     }
 
     /**
