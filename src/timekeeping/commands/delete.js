@@ -3,6 +3,7 @@ import Frame from '../storage/frame.js';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Fs from '../../core/filesystem.js';
+import pc from 'picocolors';
 
 function delCmd() {
     const delCmd = new Command('delete', 'delete time record by the given id')
@@ -20,7 +21,7 @@ function delCmd() {
             } else {
                 let frame = Frame.fromFile(config, file).stopMe();
                 Fs.remove(file);
-                console.log(`Deleting record ${frame.id.magenta}`);
+                console.log(`Deleting record ${pc.magenta(frame.id)}`);
             }
         }
         );

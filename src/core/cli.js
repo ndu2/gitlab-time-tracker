@@ -1,4 +1,4 @@
-import colors from 'colors';
+import pc from 'picocolors';
 import confirm from '@inquirer/confirm';
 import spinnerFactory from 'node-spinner';
 const spinner = spinnerFactory();
@@ -74,7 +74,7 @@ class Cli {
      * print done message
      */
     static done() {
-        Cli.out(`\n${Cli.party}  Finished!\n`.green);
+        Cli.out(pc.green(`\n${Cli.party}  Finished!\n`));
     }
 
     /**
@@ -82,7 +82,7 @@ class Cli {
      * @param message
      */
     static warn(message) {
-        Cli.out(` Warning: ${message} `.bgWhite.black + "\n");
+        Cli.out(pc.bgWhite(pc.black(` Warning: ${message} `)) + "\n");
     }
 
     /**
@@ -98,7 +98,7 @@ class Cli {
 
         this.active = {
             started: new Date(),
-            message: `\r${message}... `.bold.grey,
+            message: pc.bold(pc.gray(`\r${message}... `)),
             bar: new progress(`${message} (:current/:total) [:bar] :percent - :minutesm left`, {
                 total,
                 clear: true,
@@ -152,9 +152,9 @@ class Cli {
     static list(message) {
         Cli.resolve(false);
 
-        this.active = {message: `\r${message}... `.bold.grey};
+        this.active = {message: pc.bold(pc.gray(`\r${message}... `))};
         this.active.interval = setInterval(() => {
-            Cli.out(Cli.active.message + spinner.next().bold.blue);
+            Cli.out(Cli.active.message + pc.bold(pc.blue(spinner.next())));
         }, 100);
 
         return Cli.promise();
@@ -166,7 +166,7 @@ class Cli {
      */
     static mark() {
         Cli.resolve();
-        if (Cli.active) Cli.out(`${Cli.active.message}` + `✓\n`.green);
+        if (Cli.active) Cli.out(`${Cli.active.message}` + pc.green(`✓\n`));
 
         return Cli.promise();
     }
@@ -179,7 +179,7 @@ class Cli {
      */
     static x(message = false, error = false) {
         Cli.resolve();
-        if (Cli.active) Cli.out(`${Cli.active.message}` + `✗\n`.red);
+        if (Cli.active) Cli.out(`${Cli.active.message}` + pc.red(`✗\n`));
 
         if (message) Cli.error(message, error);
         return Cli.promise();
@@ -207,7 +207,7 @@ class Cli {
             message = message.message;
         }
 
-        Cli.out(`Error: ${message.red}` + '\n');
+        Cli.out(`Error: ${pc.red(message)}` + '\n');
         if (error && Cli.verbose) console.log(error);
 
         process.exit(1);

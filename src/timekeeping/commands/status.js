@@ -1,5 +1,5 @@
 import {Command} from 'commander';
-import colors from 'colors';
+import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
@@ -28,9 +28,9 @@ timekeeper.status()
             return;
         }
         if (program.opts().s) {
-            frames.forEach(frame => console.log(`${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue} ${dayjs(frame.start).fromNow().green} (id: ${frame.id})`));
+            frames.forEach(frame => console.log(`${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))} ${pc.green(dayjs(frame.start).fromNow())} (id: ${frame.id})`));
         } else {
-            frames.forEach(frame => console.log(`Project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue} ${frame.note?frame.note:''} is running, started ${dayjs(frame.start).fromNow().green} (id: ${frame.id})`));
+            frames.forEach(frame => console.log(`Project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))} ${frame.note?frame.note:''} is running, started ${pc.green(dayjs(frame.start).fromNow())} (id: ${frame.id})`));
         }
     })
     .catch(error => Cli.error('Could not read frames.', error));

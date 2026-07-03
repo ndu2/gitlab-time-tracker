@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import colors from 'colors';
+import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
@@ -19,7 +19,7 @@ function column(str, n) {
 
 function resumeFrame(timekeeper, frame) {
     timekeeper.resume(frame)
-        .then(frame => console.log(`Starting project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue} ${frame.note?frame.note:''} at ${dayjs().format('HH:mm').green}`))
+        .then(frame => console.log(`Starting project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))} ${frame.note?frame.note:''} at ${pc.green(dayjs().format('HH:mm'))}`))
         .catch(error => Cli.error(error));
 }
 
@@ -52,12 +52,12 @@ function resume() {
                 let lastFramesDetails = lastFrames
                     .sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1))
                     .map((frame) => {
-                        let issue = `${(frame.resource.type + " #" + frame.resource.id).padEnd(20).blue
+                        let issue = `${pc.blue((frame.resource.type + " #" + frame.resource.id).padEnd(20))
                             }${column(frame.title != null ? frame.title : "", 50)}`;
                         return {
                             name:
-                                `  ${frame.id}  ${frame.start.clone().format("MMMM Do YYYY HH:mm").green} ${frame.stop ? "to " + frame.stop.clone().format("HH:mm").green : "(running)"}\t` +
-                                `${column(frame.project, 50).magenta}${issue}${frame.note != null ? frame.note : ""
+                                `  ${frame.id}  ${pc.green(frame.start.clone().format("MMMM Do YYYY HH:mm"))} ${frame.stop ? "to " + pc.green(frame.stop.clone().format("HH:mm")) : "(running)"}\t` +
+                                `${pc.magenta(column(frame.project, 50))}${issue}${frame.note != null ? frame.note : ""
                                 }`,
                             value: frame,
                         };

@@ -36,8 +36,8 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
       (biggest binary-size win for the pkg build).
 - [x] Drop `async` dependency: only `eachLimit` is used — replace with a small
       native concurrency limiter or `p-limit`.
-- [ ] Replace `colors` (abandoned, 2022 sabotage incident) with
-      `picocolors` or `chalk`.
+- [x] Replace `colors` (abandoned, 2022 sabotage incident) with
+      `picocolors`.
 - [ ] Replace `read-yaml` (ancient wrapper) with `js-yaml` directly;
       replace `node-spinner` 0.0.4 with a maintained alternative.
 - [ ] Align esbuild target (`node20`) with `engines`/pkg (`node24`).

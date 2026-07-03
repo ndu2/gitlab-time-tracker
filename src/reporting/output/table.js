@@ -1,10 +1,10 @@
 import Table from 'cli-table';
 import Output from './base.js';
-import Color from 'colors';
+import pc from 'picocolors';
 
 const format = {
-    headline: h => `\n${h.bold.underline}\n`,
-    warning: w => w.yellow
+    headline: h => `\n${pc.bold(pc.underline(h))}\n`,
+    warning: w => pc.yellow(w)
 };
 
 /**
@@ -21,15 +21,15 @@ class TableOutput extends Output {
 
         let stats = '';
 
-        Object.entries(this.stats).forEach(([name, time]) => stats += `\n* ${name.red}: ${time}`);
+        Object.entries(this.stats).forEach(([name, time]) => stats += `\n* ${pc.red(name)}: ${time}`);
         stats += `\n`;
 
         if (this.projects.length > 1) {
-            Object.entries(this.projects).forEach(([name, time]) => stats += `\n* ${name.red}: ${time}`);
+            Object.entries(this.projects).forEach(([name, time]) => stats += `\n* ${pc.red(name)}: ${time}`);
             stats += `\n`;
         }
 
-        Object.entries(this.users).forEach(([name, time]) => stats += `\n* ${name.red}: ${time}`);
+        Object.entries(this.users).forEach(([name, time]) => stats += `\n* ${pc.red(name)}: ${time}`);
 
         this.write(stats.substr(1));
     }

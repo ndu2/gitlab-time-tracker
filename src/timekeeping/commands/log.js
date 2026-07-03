@@ -1,5 +1,5 @@
 import {Command} from 'commander';
-import colors from 'colors';
+import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
@@ -51,27 +51,27 @@ const logCli =  (frames, times) => {
         let hpd = config.get('hoursPerDay');
         if(times[date] > hpd*3600*2)
         {
-            dayNote = ` - worked over ${hpd*2} hours`.red;
+            dayNote = pc.red(` - worked over ${hpd*2} hours`);
         }else if(times[date] > hpd*3600*1.5)
         {
-            dayNote = ` - worked over ${hpd*1.5} hours`.yellow;
+            dayNote = pc.yellow(` - worked over ${hpd*1.5} hours`);
         }else if(times[date] > hpd*3600*1.1)
         {
-            dayNote = ` - worked over ${hpd*1.1} hours`.green;
+            dayNote = pc.green(` - worked over ${hpd*1.1} hours`);
         }
         
 
-        console.log(`${dayjs(date).format('MMMM Do YYYY')} (${toHumanReadable(times[date])})`.green + dayNote);
+        console.log(pc.green(`${dayjs(date).format('MMMM Do YYYY')} (${toHumanReadable(times[date])})`) + dayNote);
         frames[date]
             .sort((a, b) => a.start.isBefore(b.start) ? -1 : 1)
             .forEach(frame => {
                 let toSync = (Math.ceil(frame.duration) - parseInt(frame.notes.reduce((n, m) => (n + m.time), 0))) != 0;
-                let durationText = toSync ? toHumanReadable(frame.duration).padEnd(14).yellow :  toHumanReadable(frame.duration).padEnd(14);
+                let durationText = toSync ? pc.yellow(toHumanReadable(frame.duration).padEnd(14)) :  toHumanReadable(frame.duration).padEnd(14);
                 let issue = frame.resource.new ? 
                 column(`(new ${frame.resource.type + ' "' + frame.resource.id}")`, 70).bgBlue:
-                `${(frame.resource.type + ' #' + frame.resource.id).padEnd(20).blue}${column(frame.title!=null?frame.title:'', 50)}`;
-                console.log(`  ${frame.id}  ${frame.start.clone().format('HH:mm').green} to ${frame.stop.clone().format('HH:mm').green}\t${durationText}`+
-                `${column(frame.project, 50).magenta}${issue}${frame.note!=null?frame.note:''}`);
+                `${pc.blue((frame.resource.type + ' #' + frame.resource.id).padEnd(20))}${column(frame.title!=null?frame.title:'', 50)}`;
+                console.log(`  ${frame.id}  ${pc.green(frame.start.clone().format('HH:mm'))} to ${pc.green(frame.stop.clone().format('HH:mm'))}\t${durationText}`+
+                `${pc.magenta(column(frame.project, 50))}${issue}${frame.note!=null?frame.note:''}`);
             });
     });
 };

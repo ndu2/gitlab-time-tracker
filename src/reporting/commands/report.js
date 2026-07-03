@@ -1,4 +1,5 @@
 import fs from 'fs';
+import pc from 'picocolors';
 import {Command} from 'commander';
 import dayjs from '../../core/dayjs.js';
 import Cli from '../../core/cli.js';
@@ -234,7 +235,7 @@ try {
     }, config, 1);
 
     config.set('project', projects);
-    Cli.out(`\r${Cli.look}  Selected projects: ${reports.reports.map(r => r.project.name.bold.blue).join(', ')}\n`);
+    Cli.out(`\r${Cli.look}  Selected projects: ${reports.reports.map(r => pc.bold(pc.blue(r.project.name))).join(', ')}\n`);
 
     // get members and user columns
     if (config.get('userColumns')) {
