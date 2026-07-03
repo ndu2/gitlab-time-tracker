@@ -1,4 +1,4 @@
-import config from '../../src/include/config.js';
+import config from '../../src/core/config.js';
 import { expect } from 'chai';
 
 describe('The config class', () => {

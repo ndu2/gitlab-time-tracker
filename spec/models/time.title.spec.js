@@ -1,9 +1,9 @@
 
 import moment from 'moment';
-import Config from '../../src/include/file-config.js';
-import Time from '../../src/models/time.js';
-import issue from '../../src/models/issue.js';
-import mergeRequest from '../../src/models/mergeRequest.js';
+import Config from '../../src/core/file-config.js';
+import Time from '../../src/core/time.js';
+import issue from '../../src/core/issue.js';
+import mergeRequest from '../../src/core/mergeRequest.js';
 import { expect } from 'chai';
 
 describe('time class', () => {
