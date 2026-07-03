@@ -9,7 +9,7 @@ class reportCollection {
     }
 
     forEach(iterator) {
-        return parallel(this.reports, (report, done) => iterator(report, done), this.config);
+        return parallel(this.reports, iterator, this.config);
     }
 
     push(report) {

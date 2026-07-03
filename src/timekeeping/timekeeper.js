@@ -59,7 +59,7 @@ class Timekeeper {
         this.sync.resources = {}
 
         // resolve issues and merge requests
-        return this.sync.frames.forEach(async (frame, done) => {
+        return this.sync.frames.forEach(async frame => {
             let project = frame.project,
                 type = frame.resource.type,
                 id = frame.resource.id;
@@ -73,17 +73,17 @@ class Timekeeper {
             }
 
             if(id in this.sync.resources[project][type]) {
-                return done();
+                return;
             }
             this.sync.resources[project][type][id] = new classes[type](this.config, {});
 
             try {
                 await this.sync.resources[project][type][id].make(project, id, frame.resource.new);
-                if (callback) callback();
-                done();
             } catch (error) {
-                done(new Error(`Could not resolve ${type} ${id} on "${project}": ${error.message ?? error}`));
+                throw new Error(`Could not resolve ${type} ${id} on "${project}": ${error.message ?? error}`);
             }
+
+            if (callback) callback();
         })
     }
 
@@ -91,7 +91,7 @@ class Timekeeper {
      * sync details to frames.
      */
      syncDetails(callback) {
-        return this.sync.frames.forEach((frame, done) => {
+        return this.sync.frames.forEach(frame => {
             let project = frame.project,
                 type = frame.resource.type,
                 id = frame.resource.id;
@@ -99,12 +99,11 @@ class Timekeeper {
             if(id in this.sync.resources[project][type]) {
                 frame.title = this.sync.resources[project][type][id].data.title;
             }
-            return done();
         });
     }
 
     syncUpdate(callback) {
-        return this.sync.frames.forEach(async (frame, done) => {
+        return this.sync.frames.forEach(async frame => {
             let time = frame.duration,
                 project = frame.project,
                 type = frame.resource.type,
@@ -115,11 +114,11 @@ class Timekeeper {
 
             try {
                 await this._addTime(frame, time);
-                if (callback) callback();
-                done();
             } catch (error) {
-                done(new Error(`Could not update ${type} ${id} on ${project}: ${error.message ?? error}`));
+                throw new Error(`Could not update ${type} ${id} on ${project}: ${error.message ?? error}`);
             }
+
+            if (callback) callback();
         });
     }
 
@@ -164,8 +163,8 @@ class Timekeeper {
             times = {};
 
         await new FrameCollection(this.config)
-            .forEach((frame, done) => {
-                if (frame.stop === false) return done();
+            .forEach(frame => {
+                if (frame.stop === false) return;
                 let date = frame.date.format('YYYY-MM-DD');
 
                 if (!frames[date]) frames[date] = [];
@@ -173,8 +172,6 @@ class Timekeeper {
 
                 frames[date].push(frame);
                 times[date] += Math.ceil(frame.duration);
-
-                done();
             });
 
         return {frames, times};
@@ -188,9 +185,8 @@ class Timekeeper {
         let frames = [];
 
         await new FrameCollection(this.config)
-            .forEach((frame, done) => {
+            .forEach(frame => {
                 frames.push(frame);
-                done();
             });
 
         return {frames};

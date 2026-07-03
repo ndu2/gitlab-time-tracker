@@ -234,8 +234,7 @@ class report {
     process(input, model, advance = false) {
         let collect = [];
 
-        let promise = parallel(this[input], (data, done) => {
-
+        let promise = parallel(this[input], async data => {
             let item = new model(this.config, data, this.client);
             item.project_namespace = this.projects[item.project_id];
 
@@ -243,21 +242,14 @@ class report {
                 timelog => timelog[input] &&
                     timelog[input].iid == data.iid &&
                     timelog[input].projectId == data.project_id));
-            
-            item.getStats()
-                .catch(error => done(error))
-                .then(() => {
-                    if (this.config.get('showWithoutTimes') || item.times.length > 0) {
-                        collect.push(item);
-                    }
 
-                    if (advance) advance();
-                    return done();
-                });
+            await item.getStats();
 
+            if (this.config.get('showWithoutTimes') || item.times.length > 0) {
+                collect.push(item);
+            }
 
-            // collect items, query times & stats
-            collect.push();
+            if (advance) advance();
         }, this.config);
 
         promise.then(() => this[input] = this.filter(collect));
