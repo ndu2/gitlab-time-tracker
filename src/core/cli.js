@@ -1,5 +1,5 @@
 import colors from 'colors';
-import prompt from 'prompt';
+import confirm from '@inquirer/confirm';
 import spinnerFactory from 'node-spinner';
 const spinner = spinnerFactory();
 import cursor from 'cli-cursor';
@@ -55,24 +55,10 @@ class cli {
      * @param message
      * @returns {Promise}
      */
-    static ask(message) {
-        return new Promise((resolve, reject) => {
-            prompt.start();
+    static async ask(message) {
+        let answer = await confirm({ message, default: true });
 
-            let question = {
-                name: 'yesno',
-                message: message,
-                validator: /y[es]*|n[o]?/,
-                warning: 'Must respond yes or no',
-                default: 'yes'
-            };
-
-            prompt.get(question, function (error, result) {
-                if (error || result.yesno === 'no' || result.yesno === 'n') return reject(error);
-
-                resolve();
-            });
-        });
+        if (!answer) throw new Error('Declined');
     }
 
     /**
