@@ -119,8 +119,18 @@ class frame {
         return this.timezone ? moment(this._start).tz(this.timezone) : moment(this._start);
     }
 
+    set start(value) {
+        this._start = moment.isMoment(value) ? value.format() : value;
+        this.validate();
+    }
+
     get stop() {
         return this.timezone ? this._stop ? moment(this._stop).tz(this.timezone) : false : (this._stop ? moment(this._stop) : false );
+    }
+
+    set stop(value) {
+        this._stop = value ? (moment.isMoment(value) ? value.format() : value) : false;
+        this.validate();
     }
 
     set title(title) {
