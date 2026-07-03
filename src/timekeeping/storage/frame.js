@@ -82,18 +82,14 @@ class frame {
     }
 
     /**
-     * assert file exists
-     */
-    assertFile() {
-        if (!fs.existsSync(this.file)) fs.appendFileSync(this.file, '');
-    }
-
-    /**
-     * write data to file
+     * write data to file atomically: write to a temp file in the same
+     * directory, then rename over the target so a crash can never leave
+     * a partially written or missing frame behind.
      */
     write(skipModified) {
-        if (fs.existsSync(this.file)) fs.unlinkSync(this.file);
-        fs.appendFileSync(this.file, JSON.stringify({
+        const tmpFile = `${this.file}.tmp`;
+
+        fs.writeFileSync(tmpFile, JSON.stringify({
             id: this.id,
             project: this.project,
             resource: this.resource,
@@ -105,6 +101,7 @@ class frame {
             title: this._title,
             note: this._note
         }, null, "\t"));
+        fs.renameSync(tmpFile, this.file);
     }
 
     get duration() {
