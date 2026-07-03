@@ -177,6 +177,27 @@ class Timekeeper {
      *
      * @returns {Promise}
      */
+    all() {
+        return new Promise((resolve, reject) => {
+            let frames = [];
+
+            new FrameCollection(this.config)
+                .forEach((frame, done) => {
+                    frames.push(frame);
+                    done();
+                })
+                .then(() => new Promise(r => {
+                    resolve({frames});
+                    r();
+                }))
+                .catch(error => reject(error));
+        });
+    }
+
+    /**
+     *
+     * @returns {Promise}
+     */
     resume(frame) {
         return new Promise((resolve, reject) => {
             if (!frame) {
