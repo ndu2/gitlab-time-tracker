@@ -1,5 +1,5 @@
 import {Command} from 'commander';
-import colors from 'colors';
+import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
@@ -19,9 +19,9 @@ timekeeper.cancel()
     .then(frames => {
         frames.forEach(frame => {
             if(!frame.resource.new)
-                return console.log(`Cancel project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue}, started ${dayjs(frame.start).fromNow().green}`)
+                return console.log(`Cancel project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))}, started ${pc.green(dayjs(frame.start).fromNow())}`)
 
-            console.log(`Cancel project ${frame.project.magenta} for new ${frame.resource.type} "${(frame.resource.id).blue}", started ${dayjs(frame.start).fromNow().green}`)
+            console.log(`Cancel project ${pc.magenta(frame.project)} for new ${frame.resource.type} "${pc.blue((frame.resource.id))}", started ${pc.green(dayjs(frame.start).fromNow())}`)
         })
     })
     .catch(error => Cli.error(error));

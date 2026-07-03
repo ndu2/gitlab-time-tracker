@@ -1,5 +1,5 @@
 import {Command} from 'commander';
-import colors from 'colors';
+import pc from 'picocolors';
 import Table from 'cli-table';
 
 
@@ -42,7 +42,7 @@ timekeeper.list(project, type, program.opts().closed ? 'closed' : 'opened', prog
       console.log("No issues or merge requests found.");
     }
     tasks.forEach(issue => {
-      table.push([issue.iid.toString().magenta, issue.title.green + "\n" + issue.data.web_url.gray, issue.state])
+      table.push([pc.magenta(issue.iid.toString()), pc.green(issue.title) + "\n" + pc.gray(issue.data.web_url), issue.state])
     })
     console.log(table.toString());
   })

@@ -1,6 +1,7 @@
 import {markdownTable as Table} from 'markdown-table'
 import Output from './base.js';
 import { SwissQRBill } from "swissqrbill/svg";
+import pc from 'picocolors';
 
 const format = {
     headline: h => `\n### ${h}\n`,
@@ -81,7 +82,7 @@ class InvoiceOutput extends Output {
         stats += `\n`;
 
         if (this.projects.length > 1) {
-            Object.entries(this.projects).forEach(([name, time]) => stats += `\n* **${name.red}**: ${time}`);
+            Object.entries(this.projects).forEach(([name, time]) => stats += `\n* **${pc.red(name)}**: ${time}`);
             stats += `\n`;
         }
         let to = this.concat(this.config.get('invoiceAddress'), '<br />');

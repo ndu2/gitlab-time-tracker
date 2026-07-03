@@ -1,5 +1,6 @@
 import {markdownTable as Table} from 'markdown-table'
 import Output from './base.js';
+import pc from 'picocolors';
 
 const format = {
     headline: h => `\n### ${h}\n`,
@@ -24,7 +25,7 @@ class MarkdownOutput extends Output {
         stats += `\n`;
 
         if (this.projects.length > 1) {
-            Object.entries(this.projects).forEach(([name, time]) => stats += `\n* **${name.red}**: ${time}`);
+            Object.entries(this.projects).forEach(([name, time]) => stats += `\n* **${pc.red(name)}**: ${time}`);
             stats += `\n`;
         }
 

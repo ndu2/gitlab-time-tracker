@@ -8,6 +8,7 @@ import select from '@inquirer/checkbox';
 import dayjs from '../../core/dayjs.js';
 import readline from 'readline';
 import Timekeeper from '../timekeeper.js';
+import pc from 'picocolors';
 
 const SHIFT_MINUTE = 1;
 const SHIFT_MINUTES = 15;
@@ -127,16 +128,16 @@ function showMenu() {
       }
       let lastFramesDetails = frames.map((frame) => {
         let issue = `${
-          (frame.resource.type + " #" + frame.resource.id).padEnd(20).blue
+          pc.blue((frame.resource.type + " #" + frame.resource.id).padEnd(20))
         }${column(frame.title != null ? frame.title : "", 50)}`;
         return {
           name:
-            `  ${frame.id}  ${frame.start.clone().format("MMMM Do YYYY HH:mm").green} ${
+            `  ${frame.id}  ${pc.green(frame.start.clone().format("MMMM Do YYYY HH:mm"))} ${
               frame.stop
-                ? "to " + frame.stop.clone().format("HH:mm").green
+                ? "to " + pc.green(frame.stop.clone().format("HH:mm"))
                 : "(running)"
             }\t` +
-            `${column(frame.project, 50).magenta}${issue}${
+            `${pc.magenta(column(frame.project, 50))}${issue}${
               frame.note != null ? frame.note : ""
             }`,
           value: frame.id,
