@@ -6,7 +6,7 @@ import Table from 'cli-table';
 
 import Config from '../../core/file-config.js';
 import cli from '../../core/cli.js';
-import Tasks from '../storage/tasks.js';
+import Timekeeper from '../timekeeper.js';
 
 function list() {
   const list = new Command('list', 'list all open issues')
@@ -17,11 +17,11 @@ function list() {
     .action((aproject, options, program) => {
 
 let config = new Config(process.cwd()),
-    tasks = new Tasks(config),
+    timekeeper = new Timekeeper(config),
     type = program.opts().type ? program.opts().type : 'issue',
     project = program.args[0];
 
-tasks.list(project, program.opts().closed ? 'closed' : 'opened', program.opts().my)
+timekeeper.list(project, program.opts().closed ? 'closed' : 'opened', program.opts().my)
   .then(issues => {
     let table = new Table({
       style : {compact : true, 'padding-left' : 1}

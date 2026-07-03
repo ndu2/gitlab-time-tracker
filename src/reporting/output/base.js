@@ -114,7 +114,6 @@ class Output {
         let users = {};
         let projects = {};
         let times = [];
-        let timesWarnings = [];
         let days = {};
         let daysMoment = {};
         let daysNew = {};
@@ -182,8 +181,6 @@ class Output {
                     }
                     times.push(time);
                 });
-                issue.timesWarnings.forEach(warning => timesWarnings.push(warning));
-
                 totalEstimate += parseInt(issue.stats.time_estimate);
                 totalSpent += parseInt(issue.stats.total_time_spent);
             });
@@ -218,7 +215,6 @@ class Output {
         this.spentFree = spentFree;
         this.spentHalfPrice = spentHalfPrice;
         this.totalSpent = totalSpent;
-        this.timesWarnings = timesWarnings;
         this.daysNew = daysNew;
     }
 

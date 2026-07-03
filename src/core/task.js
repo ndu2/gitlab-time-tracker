@@ -1,14 +1,21 @@
 import _ from 'underscore';
-import resource from './resource.js';
+import moment from 'moment';
+import GitlabClient from './gitlab-client.js';
 
 /**
- * merge request model — shared data/getters. Write ops (make/createTime) live in
- * timekeeping/api/mergeRequest.js; read/aggregation in reporting/api/mergeRequest.js.
+ * task model — shared data/getters for issues and merge requests, which differ
+ * only by their GitLab resource type. Write ops (make/createTime) and the
+ * list() query live in timekeeping/api/*; read/aggregation in reporting/api/*.
+ * @param type the GitLab resource type: 'issues' or 'merge_requests'
  */
-class mergeRequest extends resource {
-    constructor(config, data = {}) {
-        super(config);
+class task {
+    constructor(config, data = {}, client = new GitlabClient(config), type) {
+        this.config = config;
+        this.client = client;
+        this.times = [];
+        this.days = {};
         this.data = data;
+        this.type = type;
     }
 
     /*
@@ -52,6 +59,10 @@ class mergeRequest extends resource {
         return this.data.author.username;
     }
 
+    get closed() {
+        return this.data.state === 'closed';
+    }
+
     get updated_at() {
         return moment(this.data.updated_at);
     }
@@ -68,6 +79,10 @@ class mergeRequest extends resource {
         return this.config.toHumanReadable(this.timeSpent, this._type);
     }
 
+    get due_date() {
+        return this.data.due_date ? moment(this.data.due_date): null;
+    }
+
     get total_spent() {
         return this.stats ? this.config.toHumanReadable(this.stats.total_time_spent, this._type) : null;
     }
@@ -77,12 +92,12 @@ class mergeRequest extends resource {
     }
 
     get _type() {
-        return 'merge_requests';
+        return this.type;
     }
 
     get _typeSingular() {
-        return 'Merge Request';
+        return this.type === 'merge_requests' ? 'Merge Request' : 'Issue';
     }
 }
 
-export default mergeRequest;
+export default task;

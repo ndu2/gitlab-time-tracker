@@ -7,6 +7,8 @@ import Config from '../../core/file-config.js';
 import Report from '../api/report.js';
 import Owner from '../../core/owner.js';
 import ReportCollection from '../api/reportCollection.js';
+import GitlabClient from '../../core/gitlab-client.js';
+import parallel from '../../core/parallel.js';
 // output backends are imported lazily so timekeeping commands never pull in
 // the heavy deps (xlsx, swissqrbill, markdown-table, csv-string, cli-table)
 const Output = {
@@ -157,8 +159,9 @@ if(config.get('invoicePositionExtraText').length != config.get('invoicePositionE
 }
 
 // create stuff
-let reports = new ReportCollection(config),
-    master = new Report(config),
+let client = new GitlabClient(config),
+    reports = new ReportCollection(config),
+    master = new Report(config, undefined, client),
     projectLabels = _.isArray(config.get('project')) ? config.get('project').join('", "') : config.get('project'),
     projects = _.isArray(config.get('project')) ? config.get('project') : [config.get('project')],
     output;
@@ -206,16 +209,16 @@ new Promise(resolve => {
 // get project(s)
     .then(() => new Promise((resolve, reject) => {
         Cli.list(`${Cli.look}  Resolving "${projectLabels}"`);
-        let owner = new Owner(config);
+        let owner = new Owner(config, client);
 
         owner.authorized()
             .catch(e => Cli.x(`Invalid access token!`, e))
-            .then(() => owner.parallel(projects, (project, done) => {
+            .then(() => parallel(projects, (project, done) => {
                 config.set('project', project);
 
                 switch (config.get('type')) {
                     case 'project':
-                        let report = new Report(config);
+                        let report = new Report(config, undefined, client);
                         report.getProject()
                             .then(() =>  {
                                 reports.push(report);
@@ -232,13 +235,13 @@ new Promise(resolve => {
                             })
                             .then(() => owner.getProjectsByGroup()
                                 .then(() => {
-                                    owner.projects.forEach(project => reports.push(new Report(config, project)));
+                                    owner.projects.forEach(project => reports.push(new Report(config, project, client)));
                                     done();
                                 }))
                             .catch(e => done(e));
                         break;
                 }
-            }, 1))
+            }, config, 1))
             .catch(e => reject(e))
             .then(() => {
                 config.set('project', projects);

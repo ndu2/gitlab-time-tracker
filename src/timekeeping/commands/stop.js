@@ -3,7 +3,7 @@ import colors from 'colors';
 import moment from 'moment';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
-import Tasks from '../storage/tasks.js';
+import Timekeeper from '../timekeeper.js';
 
 
 function stop() {
@@ -14,9 +14,9 @@ function stop() {
 Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd()),
-    tasks = new Tasks(config);
+    timekeeper = new Timekeeper(config);
 
-tasks.stop()
+timekeeper.stop()
     .then(frames => {
         frames.forEach(frame => {
             if(!frame.resource.new)

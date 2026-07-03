@@ -1,10 +1,10 @@
 import _ from 'underscore';
 import moment from 'moment';
-import Fs from '../../core/filesystem.js';
-import Frame from './frame.js';
-import Issue from '../api/issue.js';
-import MergeRequest from '../api/mergeRequest.js';
-import FrameCollection from './frameCollection.js';
+import Fs from '../core/filesystem.js';
+import Frame from './storage/frame.js';
+import Issue from './api/issue.js';
+import MergeRequest from './api/mergeRequest.js';
+import FrameCollection from './storage/frameCollection.js';
 
 const classes = {
     issue: Issue,
@@ -16,7 +16,7 @@ const stop_condition = {
     flags: "i"
 };
 
-class tasks {
+class Timekeeper {
     constructor(config) {
         this.config = config;
         this.sync = {};
@@ -190,7 +190,7 @@ class tasks {
 
     list(project, state, my) {
         this.config.set('project', project);
-        return (new classes['issue'](this.config, {})).list(this.config.get('project'), state, my);
+        return classes['issue'].list(this.config, this.config.get('project'), state, my);
     }
 
     /**
@@ -257,4 +257,4 @@ class tasks {
     }
 }
 
-export default tasks;
+export default Timekeeper;

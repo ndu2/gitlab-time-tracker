@@ -3,7 +3,7 @@ import colors from 'colors';
 import moment from 'moment';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
-import Tasks from '../storage/tasks.js';
+import Timekeeper from '../timekeeper.js';
 import Fs from '../../core/filesystem.js';
 import Frame from '../storage/frame.js';
 import select from '@inquirer/select';
@@ -17,8 +17,8 @@ function column(str, n) {
     return str.padEnd(n);
 }
 
-function resumeFrame(tasks, frame) {
-    tasks.resume(frame)
+function resumeFrame(timekeeper, frame) {
+    timekeeper.resume(frame)
         .then(frame => console.log(`Starting project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue} ${frame.note?frame.note:''} at ${moment().format('HH:mm').green}`))
         .catch(error => Cli.error(error));
 }
@@ -33,7 +33,7 @@ function resume() {
             Cli.verbose = program.opts().verbose;
 
             let config = new Config(process.cwd()).set('project', project),
-                tasks = new Tasks(config);
+                timekeeper = new Timekeeper(config);
 
             if (!config.get('project'))
                 Cli.error('No project set');
@@ -47,7 +47,7 @@ function resume() {
             if (!options.ask) {
                 let project = config.get('project');
                 let filteredFrames = lastFrames.filter(frame => (!project) || frame.project === project);
-                resumeFrame(tasks, (filteredFrames.length > 0) ? filteredFrames[0] : undefined);
+                resumeFrame(timekeeper, (filteredFrames.length > 0) ? filteredFrames[0] : undefined);
             } else {
                 let lastFramesDetails = lastFrames
                     .sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1))
@@ -72,7 +72,7 @@ function resume() {
                         choices: lastFramesDetails,
                         pageSize: listSize,
                       }).then((answer) => {
-                        resumeFrame(tasks, answer);
+                        resumeFrame(timekeeper, answer);
                       });
                     }
             }

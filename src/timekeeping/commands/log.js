@@ -5,7 +5,7 @@ import moment from 'moment-timezone';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Time from '../../core/time.js';
-import Tasks from '../storage/tasks.js';
+import Timekeeper from '../timekeeper.js';
 import mergeRequest from '../api/mergeRequest.js';
 
 function log() {
@@ -19,7 +19,7 @@ function log() {
 Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd()).set('hoursPerDay', program.opts().hours_per_day),
-    tasks = new Tasks(config),
+    timekeeper = new Timekeeper(config),
     timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
 
 function toHumanReadable(input) {
@@ -79,7 +79,7 @@ const logCli =  (frames, times) => {
 
 const log = program.opts().csv? logCSV : logCli;
 
-tasks.log()
+timekeeper.log()
     .then(({frames, times}) => log(frames, times))
     .catch(error => Cli.error(error));
 

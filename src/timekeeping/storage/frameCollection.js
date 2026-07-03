@@ -1,10 +1,10 @@
-import GitlabClient from '../../core/gitlab-client.js';
+import parallel from '../../core/parallel.js';
 import Frame from './frame.js';
 import Fs from '../../core/filesystem.js';
 
-class frameCollection extends GitlabClient {
+class frameCollection {
     constructor(config) {
-        super(config);
+        this.config = config;
 
         this.frames =
             Fs.readDir(config.frameDir)
@@ -44,7 +44,7 @@ class frameCollection extends GitlabClient {
     }
 
     forEach(iterator) {
-        let promise = this.parallel(this.frames, iterator);
+        let promise = parallel(this.frames, iterator, this.config);
 
         return promise;
     }

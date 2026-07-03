@@ -3,14 +3,16 @@ import GitlabClient from '../../core/gitlab-client.js';
 /**
  * project model
  */
-class project extends GitlabClient {
+class project {
     /**
      * construct
      * @param config
      * @param data
+     * @param client
      */
-    constructor(config, data) {
-        super(config);
+    constructor(config, data, client = new GitlabClient(config)) {
+        this.config = config;
+        this.client = client;
         this.data = data;
         this.projectMembers = data.members ? data.members : [];
     }
@@ -20,7 +22,7 @@ class project extends GitlabClient {
      * @param name
      */
     make(name) {
-        let promise = this.get(`projects/${encodeURIComponent(name)}`);
+        let promise = this.client.get(`projects/${encodeURIComponent(name)}`);
         promise.then(project => this.data = project.body);
 
         return promise;
@@ -32,7 +34,7 @@ class project extends GitlabClient {
      */
     members() {
         return new Promise((resolve, reject) => {
-            this.get(`projects/${this.id}/members`)
+            this.client.get(`projects/${this.id}/members`)
                 .then(response => {
                     this.projectMembers = this.projectMembers.concat(response.body);
                     return new Promise(r => r());
@@ -40,7 +42,7 @@ class project extends GitlabClient {
                 .then(() => {
                     if (!this.data.namespace || !this.data.namespace.kind || this.data.namespace.kind !== "group") return resolve();
 
-                    this.get(`groups/${this.data.namespace.id}/members`)
+                    this.client.get(`groups/${this.data.namespace.id}/members`)
                         .then(response => {
                             this.projectMembers = this.projectMembers.concat(response.body);
                             resolve();

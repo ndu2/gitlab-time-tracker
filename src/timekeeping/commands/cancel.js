@@ -3,7 +3,7 @@ import colors from 'colors';
 import moment from 'moment';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
-import Tasks from '../storage/tasks.js';
+import Timekeeper from '../timekeeper.js';
 
 function cancel() {
   const cancel = new Command('cancel', 'cancel and discard active monitoring time')
@@ -13,9 +13,9 @@ function cancel() {
 Cli.verbose = program.opts().verbose;
 
 let config = new Config(process.cwd());
-let tasks = new Tasks(config);
+let timekeeper = new Timekeeper(config);
 
-tasks.cancel()
+timekeeper.cancel()
     .then(frames => {
         frames.forEach(frame => {
             if(!frame.resource.new)
