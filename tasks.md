@@ -40,4 +40,4 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
       `picocolors`.
 - [x] Replace `read-yaml` (ancient wrapper) with `js-yaml` directly;
       replace `node-spinner` 0.0.4 with a local four-frame spinner.
-- [ ] Align esbuild target (`node20`) with `engines`/pkg (`node24`).
+- [x] Align esbuild target (`node20`) with `engines`/pkg (`node24`).
