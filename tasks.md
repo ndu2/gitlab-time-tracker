@@ -34,7 +34,7 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
 
 - [x] Replace `moment` + `moment-timezone` with Luxon or dayjs
       (biggest binary-size win for the pkg build).
-- [ ] Drop `async` dependency: only `eachLimit` is used — replace with a small
+- [x] Drop `async` dependency: only `eachLimit` is used — replace with a small
       native concurrency limiter or `p-limit`.
 - [ ] Replace `colors` (abandoned, 2022 sabotage incident) with
       `picocolors` or `chalk`.
