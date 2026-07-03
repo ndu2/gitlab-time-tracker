@@ -63,21 +63,8 @@ describe('frame class', () => {
             timezone: 'UTC'
         };
 
-        let caught = null;
-        try {
-            Frame.fromJson(config, { ...json, start: 'not a date' });
-        } catch (error) {
-            caught = error;
-        }
-        expect(caught).to.match(/Start date/);
-
-        caught = null;
-        try {
-            Frame.fromJson(config, { ...json, stop: 'not a date' });
-        } catch (error) {
-            caught = error;
-        }
-        expect(caught).to.match(/Stop date/);
+        expect(() => Frame.fromJson(config, { ...json, start: 'not a date' })).to.throw(/Start date/);
+        expect(() => Frame.fromJson(config, { ...json, stop: 'not a date' })).to.throw(/Stop date/);
     });
 
     it('validates dates set through the setters', () => {

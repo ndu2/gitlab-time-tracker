@@ -48,13 +48,43 @@ class GitlabClient {
                 body: JSON.stringify(data)
             });
 
-            if (!response.ok) throw `Error: response not OK`;
+            await GitlabClient.assertOk(response, 'POST', path);
 
-            const isJson = response.headers.get("content-type").startsWith('application/json');
+            const isJson = (response.headers.get('content-type') ?? '').startsWith('application/json');
             const body = isJson ? await response.json() : undefined;
 
             return { body, headers: response.headers };
         });
+    }
+
+    /**
+     * throw a descriptive error if the response is not OK
+     * @param response
+     * @param method
+     * @param path
+     */
+    static async assertOk(response, method, path) {
+        if (response.ok) return;
+
+        let body = '';
+        try {
+            body = (await response.text()).slice(0, 512);
+        } catch { /* body is optional error context */ }
+
+        throw new Error(`${method} ${path} failed: ${response.status} ${response.statusText}${body ? ` — ${body}` : ''}`);
+    }
+
+    /**
+     * throw if the response is not JSON
+     * @param response
+     * @param method
+     * @param path
+     */
+    static assertJson(response, method, path) {
+        const contentType = response.headers.get('content-type') ?? '';
+
+        if (!contentType.startsWith('application/json'))
+            throw new Error(`${method} ${path} returned content-type "${contentType}", expected application/json`);
     }
 
 
@@ -77,8 +107,8 @@ class GitlabClient {
                 body: JSON.stringify(data)
             });
 
-            if (!response.ok) throw `Error: response not OK`;
-            if (!response.headers.get("content-type").startsWith('application/json')) throw `Error: response not application/json`;
+            await GitlabClient.assertOk(response, 'POST', path);
+            GitlabClient.assertJson(response, 'POST', path);
 
             return { body: await response.json(), headers: response.headers };
         });
@@ -102,8 +132,8 @@ class GitlabClient {
                 }
             });
 
-            if (!response.ok) throw `Error: response not OK`;
-            if (!response.headers.get("content-type").startsWith('application/json')) throw `Error: response not application/json`;
+            await GitlabClient.assertOk(response, 'GET', path);
+            GitlabClient.assertJson(response, 'GET', path);
 
             return { body: await response.json(), headers: response.headers };
         });

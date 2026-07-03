@@ -202,6 +202,11 @@ class cli {
     static error(message, error) {
         cli.resolve();
 
+        if (message instanceof Error) {
+            error = error ?? message;
+            message = message.message;
+        }
+
         cli.out(`Error: ${message.red}` + '\n');
         if (error && cli.verbose) console.log(error);
 

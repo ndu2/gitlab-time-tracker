@@ -52,10 +52,10 @@ class frame {
         moment.suppressDeprecationWarnings = true;
 
         if(!moment(this._start).isValid())
-            throw `Error: Start date is not in a valid ISO date format!`;
+            throw new Error(`Start date is not in a valid ISO date format!`);
 
         if(this._stop && !moment(this._stop).isValid())
-            throw `Error: Stop date is not in a valid ISO date format!`;
+            throw new Error(`Stop date is not in a valid ISO date format!`);
 
         moment.suppressDeprecationWarnings = false;
     }

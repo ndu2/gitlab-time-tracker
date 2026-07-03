@@ -13,7 +13,7 @@ class frameCollection {
                         return Frame.fromFile(this.config, Fs.join(this.config.frameDir, file.name));
                     } catch (e) {
                         console.log(e);
-                        throw `Error parsing frame file: ${file.name}`
+                        throw new Error(`Error parsing frame file: ${file.name}`)
                     }
                 })
                 .filter(frame => frame);
