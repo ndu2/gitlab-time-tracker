@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import moment from 'moment';
 import GitlabClient from '../../core/gitlab-client.js';
 import parallel from '../../core/parallel.js';

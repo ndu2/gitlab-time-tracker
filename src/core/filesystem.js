@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import fs from 'fs';
 import path from 'path';
 import open from 'open';
@@ -38,11 +37,16 @@ class filesystem {
     }
 
     static newest(dir) {
-        return _.max(filesystem.readDir(dir), file => (fs.statSync(path.join(dir, file.name)).ctime));
+        let files = filesystem.readDir(dir);
+        let ctime = file => fs.statSync(path.join(dir, file.name)).ctime;
+
+        return files.reduce((newest, file) => (ctime(file) > ctime(newest) ? file : newest), files[0] ?? -Infinity);
     }
 
     static all(dir) {
-        return _.sortBy(filesystem.readDir(dir), file => (fs.statSync(path.join(dir, file.name)).ctime));
+        let ctime = file => fs.statSync(path.join(dir, file.name)).ctime;
+
+        return filesystem.readDir(dir).sort((a, b) => ctime(a) - ctime(b));
     }
 
     static readDir(dir) {

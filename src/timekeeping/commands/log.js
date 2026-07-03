@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import {Command} from 'commander';
 import colors from 'colors';
 import moment from 'moment-timezone';
@@ -66,7 +65,7 @@ const logCli =  (frames, times) => {
         frames[date]
             .sort((a, b) => a.start.isBefore(b.start) ? -1 : 1)
             .forEach(frame => {
-                let toSync = (Math.ceil(frame.duration) - parseInt(_.reduce(frame.notes, (n, m) => (n + m.time), 0))) != 0;
+                let toSync = (Math.ceil(frame.duration) - parseInt(frame.notes.reduce((n, m) => (n + m.time), 0))) != 0;
                 let durationText = toSync ? toHumanReadable(frame.duration).padEnd(14).yellow :  toHumanReadable(frame.duration).padEnd(14);
                 let issue = frame.resource.new ? 
                 column(`(new ${frame.resource.type + ' "' + frame.resource.id}")`, 70).bgBlue:

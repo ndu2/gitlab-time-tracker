@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import fs from 'fs';
 import {Command} from 'commander';
 import moment from 'moment';
@@ -23,7 +22,7 @@ function collect(val, arr) {
     if (!arr) arr = [];
     arr.push(val);
 
-    return _.uniq(arr);
+    return [...new Set(arr)];
 }
 
 
@@ -161,8 +160,8 @@ if(config.get('invoicePositionExtraText').length != config.get('invoicePositionE
 let client = new GitlabClient(config),
     reports = new ReportCollection(config),
     master = new Report(config, undefined, client),
-    projectLabels = _.isArray(config.get('project')) ? config.get('project').join('", "') : config.get('project'),
-    projects = _.isArray(config.get('project')) ? config.get('project') : [config.get('project')],
+    projectLabels = Array.isArray(config.get('project')) ? config.get('project').join('", "') : config.get('project'),
+    projects = Array.isArray(config.get('project')) ? config.get('project') : [config.get('project')],
     output;
 
 // warnings
@@ -255,8 +254,8 @@ new Promise(resolve => {
                     .then(() => {
                         let columns = report.project.users.map(user => `time_${user}`);
 
-                        config.set('issueColumns', _.uniq(config.get('issueColumns').concat(columns)));
-                        config.set('mergeRequestColumns', _.uniq(config.get('mergeRequestColumns').concat(columns)));
+                        config.set('issueColumns', [...new Set(config.get('issueColumns').concat(columns))]);
+                        config.set('mergeRequestColumns', [...new Set(config.get('mergeRequestColumns').concat(columns))]);
 
                         done();
                     })

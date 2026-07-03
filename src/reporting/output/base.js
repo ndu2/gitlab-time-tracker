@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import fs from 'fs';
 import moment from 'moment';
 
@@ -202,8 +201,8 @@ class Output {
 
         this.days = days;
         this.daysMoment = daysMoment;
-        this.users = _.mapObject(users, user => this.config.toHumanReadable(user, 'stats'));
-        this.projects = _.mapObject(projects, project => this.config.toHumanReadable(project, 'stats'));
+        this.users = Object.fromEntries(Object.entries(users).map(([name, user]) => [name, this.config.toHumanReadable(user, 'stats')]));
+        this.projects = Object.fromEntries(Object.entries(projects).map(([name, project]) => [name, this.config.toHumanReadable(project, 'stats')]));
         this.stats = {
             'total estimate': this.config.toHumanReadable(totalEstimate, 'stats'),
             'total spent': this.config.toHumanReadable(totalSpent, 'stats'),

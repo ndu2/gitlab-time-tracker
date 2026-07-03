@@ -1,4 +1,3 @@
-import _ from 'underscore';
 import Table from 'cli-table';
 import Output from './base.js';
 import Color from 'colors';
@@ -22,15 +21,15 @@ class table extends Output {
 
         let stats = '';
 
-        _.each(this.stats, (time, name) => stats += `\n* ${name.red}: ${time}`);
+        Object.entries(this.stats).forEach(([name, time]) => stats += `\n* ${name.red}: ${time}`);
         stats += `\n`;
 
         if (this.projects.length > 1) {
-            _.each(this.projects, (time, name) => stats += `\n* ${name.red}: ${time}`);
+            Object.entries(this.projects).forEach(([name, time]) => stats += `\n* ${name.red}: ${time}`);
             stats += `\n`;
         }
 
-        _.each(this.users, (time, name) => stats += `\n* ${name.red}: ${time}`);
+        Object.entries(this.users).forEach(([name, time]) => stats += `\n* ${name.red}: ${time}`);
 
         this.write(stats.substr(1));
     }

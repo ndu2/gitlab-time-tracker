@@ -2,7 +2,6 @@ import {Command} from 'commander';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Fs from '../../core/filesystem.js';
-import _ from 'underscore';
 import Time from '../../core/time.js';
 import Frame from '../storage/frame.js';
 import select from '@inquirer/checkbox';
