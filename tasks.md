@@ -15,7 +15,7 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
       `gitlab-client.js`, `frameCollection.js`); include HTTP status, path and
       GitLab error body in `GitlabClient` errors. Then switch the frame specs
       to idiomatic `expect(...).to.throw(/Start date/)`.
-- [ ] Make `frame.write()` atomic: replace `unlinkSync` + `appendFileSync` with
+- [x] Make `frame.write()` atomic: replace `unlinkSync` + `appendFileSync` with
       `writeFileSync` (or temp file + rename).
 - [ ] Extract billing/aggregation logic (`calculate()`) out of the `Output`
       base class into a report model; presentation layer should only render.
