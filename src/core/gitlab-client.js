@@ -35,64 +35,55 @@ class GitlabClient {
      * query the given path
      * @param path
      * @param data
-     * @returns {*}
+     * @returns {Promise}
      */
     post(path, data) {
-
         data.private_token = this.token;
 
-
-        return new Promise((resolve, reject) => GitlabClient.throttle(() => {
-            fetch(`${this.url}${path}`, {
+        return GitlabClient.throttle(async () => {
+            const response = await fetch(`${this.url}${path}`, {
                 method: 'POST',
                 headers: {
                     'PRIVATE-TOKEN': this.token,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
-            }).then(response => {
-                if(!response.ok) {
-                    return reject(`Error: response not OK`);
-                }
-                const isJson = response.headers.get("content-type").startsWith('application/json');
-                return (Promise.all([isJson ? response.json(): Promise.resolve(undefined), Promise.resolve(response.headers)]));
-            }).then(response => {
-                resolve({body: response[0], headers: response[1]});
-            }).catch(e => reject(e));
-        }));
+            });
+
+            if (!response.ok) throw `Error: response not OK`;
+
+            const isJson = response.headers.get("content-type").startsWith('application/json');
+            const body = isJson ? await response.json() : undefined;
+
+            return { body, headers: response.headers };
+        });
     }
 
 
     /**
      * query the given path
-     * @param path
      * @param data
-     * @returns {*}
+     * @returns {Promise}
      */
-     graphQL(data) {
+    graphQL(data) {
         // remove v4/ from url, add graphql
         const path = this.url.substr(0, this.url.length-3) + 'graphql';
-        
-        return new Promise((resolve, reject) => GitlabClient.throttle(() => {
-            fetch(`${path}`, {
+
+        return GitlabClient.throttle(async () => {
+            const response = await fetch(`${path}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': 'Bearer '+this.token, 
+                    'Authorization': 'Bearer '+this.token,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(data)
-            }).then(response => {
-                if(!response.ok) {
-                    return reject(`Error: response not OK`);
-                }
-                if(!response.headers.get("content-type").startsWith('application/json')) {
-                    return reject(`Error: response not application/json`);
-                }
-                return (Promise.all([response.json(), Promise.resolve(response.headers)]));
-            }).then(response => {
-                resolve({body: response[0], headers: response[1]});
-            }).catch(e => reject(e));
-        }));
+            });
+
+            if (!response.ok) throw `Error: response not OK`;
+            if (!response.headers.get("content-type").startsWith('application/json')) throw `Error: response not application/json`;
+
+            return { body: await response.json(), headers: response.headers };
+        });
     }
 
 
@@ -104,27 +95,21 @@ class GitlabClient {
      * @returns {Promise}
      */
     get(path, page = 1, perPage = this._perPage) {
-
         path += (path.includes('?') ? '&' : '?') + `private_token=${this.token}`;
         path += `&page=${page}&per_page=${perPage}`;
 
-        return new Promise((resolve, reject) => GitlabClient.throttle(() => {
-            fetch(`${this.url}${path}`, {
+        return GitlabClient.throttle(async () => {
+            const response = await fetch(`${this.url}${path}`, {
                 headers: {
                     'PRIVATE-TOKEN': this.token
                 }
-            }).then(response => {
-                if(!response.ok) {
-                    return reject(`Error: response not OK`);
-                }
-                if(!response.headers.get("content-type").startsWith('application/json')) {
-                    return reject(`Error: response not application/json`);
-                }
-                return (Promise.all([response.json(), Promise.resolve(response.headers)]));
-            }).then(response => {
-                resolve({body: response[0], headers: response[1]});
-            }).catch(e => reject(e));
-        }));
+            });
+
+            if (!response.ok) throw `Error: response not OK`;
+            if (!response.headers.get("content-type").startsWith('application/json')) throw `Error: response not application/json`;
+
+            return { body: await response.json(), headers: response.headers };
+        });
     }
 
     /**
@@ -135,22 +120,17 @@ class GitlabClient {
      * @param runners
      * @returns {Promise}
      */
-    all(path, perPage = this._perPage, runners = this._parallel) {
-        return new Promise((resolve, reject) => {
-            let collect = [];
+    async all(path, perPage = this._perPage, runners = this._parallel) {
+        const response = await this.get(path, 1, perPage);
+        const collect = [...response.body];
+        const pages = parseInt(response.headers.get('x-total-pages'));
 
-            this.get(path, 1, perPage).then((response) => {
-                response.body.forEach(item => collect.push(item));
-                let pages = parseInt(response.headers.get('x-total-pages'));
+        if (pages === 1) return collect;
 
-                if (pages === 1) return resolve(collect);
+        const tasks = GitlabClient.createGetTasks(path, pages, 2, perPage);
+        await this.getParallel(tasks, collect, runners);
 
-                let tasks = GitlabClient.createGetTasks(path, pages, 2, perPage);
-                this.getParallel(tasks, collect, runners).then(() => {
-                    resolve(collect);
-                }).catch(error => reject(error));
-            }).catch(err => reject(err));
-        });
+        return collect;
     }
 
     /**
@@ -162,11 +142,14 @@ class GitlabClient {
      * @returns {Promise}
      */
     getParallel(tasks, collect = [], runners = this._parallel) {
-        return parallel(tasks, (task, done) => {
-            this.get(task.path, task.page, task.perPage).then((response) => {
+        return parallel(tasks, async (task, done) => {
+            try {
+                const response = await this.get(task.path, task.page, task.perPage);
                 response.body.forEach(item => collect.push(item));
                 done();
-            }).catch(error => done(error));
+            } catch (error) {
+                done(error);
+            }
         }, this.config, runners);
     }
 
