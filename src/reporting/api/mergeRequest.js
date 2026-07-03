@@ -4,10 +4,10 @@ import reportable from './reportable.js';
 /**
  * merge request with reporting read/aggregation (getStats, recordTimelogs).
  */
-class mergeRequest extends reportable(CoreTask) {
+class MergeRequest extends reportable(CoreTask) {
     constructor(config, data, client) {
         super(config, data, client, 'merge_requests');
     }
 }
 
-export default mergeRequest;
+export default MergeRequest;

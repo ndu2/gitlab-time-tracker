@@ -6,7 +6,7 @@ import Output from './base.js';
 /**
  * csv output
  */
-class csv extends Output {
+class CsvOutput extends Output {
     makeStats() {
         let stats = [[], []];
 
@@ -99,4 +99,4 @@ class csv extends Output {
     }
 }
 
-export default csv;
+export default CsvOutput;

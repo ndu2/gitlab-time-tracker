@@ -4,7 +4,7 @@ import moment from 'moment-timezone';
 import Hashids from 'hashids';
 const hashids = new Hashids();
 
-class frame {
+class Frame {
     /**
      * constructor.
      * @param config
@@ -20,7 +20,7 @@ class frame {
         if(typeof id === 'string' || id instanceof String)
             this.resource.new = true;
 
-        this.id = frame.generateId();
+        this.id = Frame.generateId();
         this._start = false;
         this._stop = false;
         this.timezone = config.get('timezone');
@@ -30,7 +30,7 @@ class frame {
     }
 
     static fromFile(config, file) {
-        return frame.fromJson(config, JSON.parse(fs.readFileSync(file)));
+        return Frame.fromJson(config, JSON.parse(fs.readFileSync(file)));
     }
 
     static fromJson(config, json) {
@@ -155,4 +155,4 @@ class frame {
     }
 }
 
-export default frame;
+export default Frame;

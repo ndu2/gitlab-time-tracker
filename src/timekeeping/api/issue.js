@@ -7,7 +7,7 @@ import writable from './writable.js';
  * mixin). The collection-level list() query is a static — it needs no
  * instance state.
  */
-class issue extends writable(CoreTask) {
+class Issue extends writable(CoreTask) {
     constructor(config, data, client) {
         super(config, data, client, 'issues');
     }
@@ -27,4 +27,4 @@ class issue extends writable(CoreTask) {
     }
 }
 
-export default issue;
+export default Issue;

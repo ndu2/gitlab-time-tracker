@@ -8,7 +8,7 @@ import Project from './project.js';
 /**
  * report model
  */
-class report {
+class Report {
     /**
      * constructor.
      * @param config
@@ -289,4 +289,4 @@ class report {
     }
 }
 
-export default report;
+export default Report;

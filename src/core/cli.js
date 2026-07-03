@@ -7,9 +7,9 @@ import progress from 'progress';
 spinner.set('|/-\\');
 
 /**
- * cli helper
+ * Cli helper
  */
-class cli {
+class Cli {
     constructor(args) {
         this.args = args;
         this.data = [];
@@ -66,7 +66,7 @@ class cli {
      * @param string
      */
     static out(string) {
-        if (cli.quiet) return;
+        if (Cli.quiet) return;
         process.stdout.write(string);
     }
 
@@ -74,7 +74,7 @@ class cli {
      * print done message
      */
     static done() {
-        cli.out(`\n${cli.party}  Finished!\n`.green);
+        Cli.out(`\n${Cli.party}  Finished!\n`.green);
     }
 
     /**
@@ -82,7 +82,7 @@ class cli {
      * @param message
      */
     static warn(message) {
-        cli.out(` Warning: ${message} `.bgWhite.black + "\n");
+        Cli.out(` Warning: ${message} `.bgWhite.black + "\n");
     }
 
     /**
@@ -92,9 +92,9 @@ class cli {
      * @returns {*}
      */
     static bar(message, total) {
-        cli.resolve(false);
+        Cli.resolve(false);
 
-        if (cli.quiet) return cli.promise();
+        if (Cli.quiet) return Cli.promise();
 
         this.active = {
             started: new Date(),
@@ -106,13 +106,13 @@ class cli {
                 renderThrottle: 100
             }),
             interval: setInterval(() => {
-                if (!cli.active.bar || cli.active.bar.complete) return clearInterval(cli.active.interval);
-                cli.tick(0);
+                if (!Cli.active.bar || Cli.active.bar.complete) return clearInterval(Cli.active.interval);
+                Cli.tick(0);
             }, 1000)
         };
 
         this.tick();
-        return cli.promise();
+        return Cli.promise();
     }
 
     /**
@@ -120,19 +120,19 @@ class cli {
      * @param amount
      */
     static tick(amount = 0) {
-        if (!cli.active.bar || !cli.active.started) return;
+        if (!Cli.active.bar || !Cli.active.started) return;
 
         let left;
 
-        if (cli.active.bar.curr > 0) {
-            let elapsed = Math.ceil((new Date() - cli.active.started) / 1000);
-            left = ((elapsed / cli.active.bar.curr) * (cli.active.bar.total - cli.active.bar.curr)) / 60;
+        if (Cli.active.bar.curr > 0) {
+            let elapsed = Math.ceil((new Date() - Cli.active.started) / 1000);
+            left = ((elapsed / Cli.active.bar.curr) * (Cli.active.bar.total - Cli.active.bar.curr)) / 60;
             left = left < 1 ? `<1` : Math.ceil(left);
         } else {
             left = 0;
         }
 
-        cli.active.bar.tick(amount, {
+        Cli.active.bar.tick(amount, {
             minutes: left
         });
     }
@@ -141,7 +141,7 @@ class cli {
      * advance an existing bar
      */
     static advance() {
-        cli.tick(1);
+        Cli.tick(1);
     }
 
     /**
@@ -150,14 +150,14 @@ class cli {
      * @returns {*}
      */
     static list(message) {
-        cli.resolve(false);
+        Cli.resolve(false);
 
         this.active = {message: `\r${message}... `.bold.grey};
         this.active.interval = setInterval(() => {
-            cli.out(cli.active.message + spinner.next().bold.blue);
+            Cli.out(Cli.active.message + spinner.next().bold.blue);
         }, 100);
 
-        return cli.promise();
+        return Cli.promise();
     }
 
     /**
@@ -165,10 +165,10 @@ class cli {
      * @returns {*}
      */
     static mark() {
-        cli.resolve();
-        if (cli.active) cli.out(`${cli.active.message}` + `✓\n`.green);
+        Cli.resolve();
+        if (Cli.active) Cli.out(`${Cli.active.message}` + `✓\n`.green);
 
-        return cli.promise();
+        return Cli.promise();
     }
 
     /**
@@ -178,11 +178,11 @@ class cli {
      * @returns {*}
      */
     static x(message = false, error = false) {
-        cli.resolve();
-        if (cli.active) cli.out(`${cli.active.message}` + `✗\n`.red);
+        Cli.resolve();
+        if (Cli.active) Cli.out(`${Cli.active.message}` + `✗\n`.red);
 
-        if (message) cli.error(message, error);
-        return cli.promise();
+        if (message) Cli.error(message, error);
+        return Cli.promise();
     }
 
     /**
@@ -190,7 +190,7 @@ class cli {
      */
     static resolve(show = true) {
         cursor.toggle(show);
-        if (cli.active && cli.active.interval) clearInterval(cli.active.interval);
+        if (Cli.active && Cli.active.interval) clearInterval(Cli.active.interval);
     }
 
     /**
@@ -200,15 +200,15 @@ class cli {
      * @returns {*}
      */
     static error(message, error) {
-        cli.resolve();
+        Cli.resolve();
 
         if (message instanceof Error) {
             error = error ?? message;
             message = message.message;
         }
 
-        cli.out(`Error: ${message.red}` + '\n');
-        if (error && cli.verbose) console.log(error);
+        Cli.out(`Error: ${message.red}` + '\n');
+        if (error && Cli.verbose) console.log(error);
 
         process.exit(1);
     }
@@ -259,4 +259,4 @@ class cli {
     }
 }
 
-export default cli;
+export default Cli;

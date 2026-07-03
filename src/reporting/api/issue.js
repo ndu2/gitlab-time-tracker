@@ -4,10 +4,10 @@ import reportable from './reportable.js';
 /**
  * issue with reporting read/aggregation (getStats, recordTimelogs).
  */
-class issue extends reportable(CoreTask) {
+class Issue extends reportable(CoreTask) {
     constructor(config, data, client) {
         super(config, data, client, 'issues');
     }
 }
 
-export default issue;
+export default Issue;

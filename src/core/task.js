@@ -7,7 +7,7 @@ import GitlabClient from './gitlab-client.js';
  * list() query live in timekeeping/api/*; read/aggregation in reporting/api/*.
  * @param type the GitLab resource type: 'issues' or 'merge_requests'
  */
-class task {
+class Task {
     constructor(config, data = {}, client = new GitlabClient(config), type) {
         this.config = config;
         this.client = client;
@@ -102,4 +102,4 @@ class task {
     }
 }
 
-export default task;
+export default Task;

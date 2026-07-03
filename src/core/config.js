@@ -48,7 +48,7 @@ const defaults = {
 /**
  * basic config
  */
-class config {
+class Config {
     /**
      * construct
      */
@@ -63,7 +63,7 @@ class config {
      * @param key
      * @param value
      * @param force
-     * @returns {config}
+     * @returns {Config}
      */
     set(key, value, force = false) {
         if (!force && (value === null || value === undefined)) return this;
@@ -100,4 +100,4 @@ class config {
     }
 }
 
-export default config;
+export default Config;

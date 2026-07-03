@@ -10,7 +10,7 @@ const format = {
 /**
  * stdout table output
  */
-class table extends Output {
+class TableOutput extends Output {
     constructor(config, report) {
         super(config, report);
         this.format = format;
@@ -94,4 +94,4 @@ class table extends Output {
     }
 }
 
-export default table;
+export default TableOutput;
