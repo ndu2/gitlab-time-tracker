@@ -2,7 +2,7 @@
 /**
  * day model of one item
  */
-class dayReport {
+class DayReport {
     constructor(iid, title, spentAt, chargeRatio) {
       this.iid = iid;
       this.title = title;
@@ -50,4 +50,4 @@ class dayReport {
 
   }
 
-export default dayReport;
+export default DayReport;

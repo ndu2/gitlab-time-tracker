@@ -3,7 +3,7 @@ import path from 'path';
 import open from 'open';
 import child_process from 'child_process';
 
-class filesystem {
+class Filesystem {
     static exists(file) {
         return fs.existsSync(file);
     }
@@ -37,7 +37,7 @@ class filesystem {
     }
 
     static newest(dir) {
-        let files = filesystem.readDir(dir);
+        let files = Filesystem.readDir(dir);
         let ctime = file => fs.statSync(path.join(dir, file.name)).ctime;
 
         return files.reduce((newest, file) => (ctime(file) > ctime(newest) ? file : newest), files[0] ?? -Infinity);
@@ -46,7 +46,7 @@ class filesystem {
     static all(dir) {
         let ctime = file => fs.statSync(path.join(dir, file.name)).ctime;
 
-        return filesystem.readDir(dir).sort((a, b) => ctime(a) - ctime(b));
+        return Filesystem.readDir(dir).sort((a, b) => ctime(a) - ctime(b));
     }
 
     static readDir(dir) {
@@ -54,4 +54,4 @@ class filesystem {
     }
 }
 
-export default filesystem;
+export default Filesystem;

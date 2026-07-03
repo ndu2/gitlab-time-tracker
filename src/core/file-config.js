@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import os from 'os';
-import config from './config.js';
+import Config from './config.js';
 import yaml from 'read-yaml';
 import hash from 'hash-sum';
 import Fs from './filesystem.js';
@@ -11,7 +11,7 @@ import envPaths from 'env-paths';
 /**
  * file config with local and global configuration files
  */
-class fileConfig extends config {
+class FileConfig extends Config {
     /**
      * construct
      * @param workDir
@@ -156,4 +156,4 @@ class fileConfig extends config {
     }
 }
 
-export default fileConfig;
+export default FileConfig;

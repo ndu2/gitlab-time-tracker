@@ -4,7 +4,7 @@ import parallel from './parallel.js';
 /**
  * owner model
  */
-class owner {
+class Owner {
     constructor(config, client = new GitlabClient(config)) {
         this.config = config;
         this.client = client;
@@ -127,4 +127,4 @@ class owner {
     }
 }
 
-export default owner;
+export default Owner;

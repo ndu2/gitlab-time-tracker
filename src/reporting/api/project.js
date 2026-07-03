@@ -3,7 +3,7 @@ import GitlabClient from '../../core/gitlab-client.js';
 /**
  * project model
  */
-class project {
+class Project {
     /**
      * construct
      * @param config
@@ -69,4 +69,4 @@ class project {
     }
 }
 
-export default project;
+export default Project;

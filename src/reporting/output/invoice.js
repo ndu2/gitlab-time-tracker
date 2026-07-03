@@ -10,7 +10,7 @@ const format = {
 /**
  * invoice, code heavily based on markdown.js
  */
-class invoice extends Output {
+class InvoiceOutput extends Output {
     constructor(config, report) {
         super(config, report);
         this.format = format;
@@ -266,4 +266,4 @@ table th:nth-of-type(3) { width: 10%; }
 
 }
 
-export default invoice;
+export default InvoiceOutput;

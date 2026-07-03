@@ -26,7 +26,7 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
       reconsider magic special cases in `config.get()`.
 - [x] Convert callback-style `forEach(item, done)` in `FrameCollection` /
       `ReportCollection` to async iteration; removes try/done boilerplate.
-- [ ] Minor: capitalize class names (`config`, `frame`, `cli`); move
+- [x] Minor: capitalize class names (`config`, `frame`, `cli`); move
       `ReportCollection`'s module-level `projlist` into the instance
       (currently leaks state across instances).
 

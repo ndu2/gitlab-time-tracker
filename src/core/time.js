@@ -15,7 +15,7 @@ Number.prototype.padLeft = function (n, str) {
 /**
  * time model
  */
-class time {
+class Time {
     /**
      * construct
      * @param timeString
@@ -33,7 +33,7 @@ class time {
             return;
         }
 
-        this.seconds = time.parse(timeString, this._hoursPerDay, this._daysPerWeek, this._weeksPerMonth);
+        this.seconds = Time.parse(timeString, this._hoursPerDay, this._daysPerWeek, this._weeksPerMonth);
     }
 
     /*
@@ -64,7 +64,7 @@ class time {
     }
 
     get time() {
-        return time.toHumanReadable(this.seconds, this._hoursPerDay, this._timeFormat);
+        return Time.toHumanReadable(this.seconds, this._hoursPerDay, this._timeFormat);
     }
 
     /**
@@ -121,7 +121,7 @@ class time {
      * @param format
      * @returns {string}
      */
-    static toHumanReadable(input, hoursPerDay = 8, format = time.defaultTimeFormat) {
+    static toHumanReadable(input, hoursPerDay = 8, format = Time.defaultTimeFormat) {
         let sign = parseInt(input) < 0 ? '-' : '', output = format, match;
         input = Math.abs(input);
 
@@ -179,4 +179,4 @@ class time {
     }
 }
 
-export default time;
+export default Time;

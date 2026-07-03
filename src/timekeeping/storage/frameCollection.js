@@ -2,7 +2,7 @@ import parallel from '../../core/parallel.js';
 import Frame from './frame.js';
 import Fs from '../../core/filesystem.js';
 
-class frameCollection {
+class FrameCollection {
     constructor(config) {
         this.config = config;
 
@@ -54,4 +54,4 @@ class frameCollection {
     }
 }
 
-export default frameCollection;
+export default FrameCollection;

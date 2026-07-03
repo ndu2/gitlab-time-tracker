@@ -9,7 +9,7 @@ const format = {
 /**
  * stdout table output
  */
-class markdown extends Output {
+class MarkdownOutput extends Output {
     constructor(config, report) {
         super(config, report);
         this.format = format;
@@ -67,4 +67,4 @@ class markdown extends Output {
     }
 }
 
-export default markdown;
+export default MarkdownOutput;
