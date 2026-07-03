@@ -4,19 +4,19 @@ import version from './version.js';
 
 import { program } from 'commander';
 
-import start from './gtt-start.js';
-import create from './gtt-create.js';
-import status from './gtt-status.js';
-import stop from './gtt-stop.js';
-import resume from './gtt-resume.js';
-import cancel from './gtt-cancel.js';
-import list from './gtt-list.js';
-import log from './gtt-log.js';
-import sync from './gtt-sync.js';
-import edit from './gtt-edit.js';
-import delCmd from './gtt-delete.js';
-import report from './gtt-report.js';
-import config from './gtt-config.js';
+import start from './timekeeping/commands/start.js';
+import create from './timekeeping/commands/create.js';
+import status from './timekeeping/commands/status.js';
+import stop from './timekeeping/commands/stop.js';
+import resume from './timekeeping/commands/resume.js';
+import cancel from './timekeeping/commands/cancel.js';
+import list from './timekeeping/commands/list.js';
+import log from './timekeeping/commands/log.js';
+import sync from './timekeeping/commands/sync.js';
+import edit from './timekeeping/commands/edit.js';
+import delCmd from './timekeeping/commands/delete.js';
+import config from './timekeeping/commands/config.js';
+import report from './reporting/commands/report.js';
 
 program
     .version(version)
