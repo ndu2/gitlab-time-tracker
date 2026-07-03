@@ -2,10 +2,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import Config from './config.js';
-import yaml from 'read-yaml';
+import { load as yamlLoad } from 'js-yaml';
 import hash from 'hash-sum';
 import Fs from './filesystem.js';
 import envPaths from 'env-paths';
+
+const readYaml = file => yamlLoad(fs.readFileSync(file, 'utf8'));
 
 
 /**
@@ -36,7 +38,7 @@ class FileConfig extends Config {
      */
     parseGlobal() {
         try {
-            return yaml.sync(this.global, {});
+            return readYaml(this.global);
         } catch (e) {
             console.log(`Error parsing configuration: "${this.global}"`);
             process.exit(1);
@@ -49,14 +51,14 @@ class FileConfig extends Config {
      */
     parseLocal() {
         try {
-            let local = Object.assign({extend: true}, yaml.sync(this.local, {}));
+            let local = Object.assign({extend: true}, readYaml(this.local));
 
             if (local.extend === true) {
                 let global = this.parseGlobal();
                 local = Object.assign(global ? global : {}, local);
             } else if (local.extend) {
                 try {
-                    local = Object.assign(yaml.sync(local.extend, {}), local);
+                    local = Object.assign(readYaml(local.extend), local);
                 } catch (e) {
                     console.log(`Error parsing configuration: "${local.extend}"`);
                     process.exit(1);

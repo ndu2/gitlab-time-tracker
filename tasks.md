@@ -38,6 +38,6 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
       native concurrency limiter or `p-limit`.
 - [x] Replace `colors` (abandoned, 2022 sabotage incident) with
       `picocolors`.
-- [ ] Replace `read-yaml` (ancient wrapper) with `js-yaml` directly;
-      replace `node-spinner` 0.0.4 with a maintained alternative.
+- [x] Replace `read-yaml` (ancient wrapper) with `js-yaml` directly;
+      replace `node-spinner` 0.0.4 with a local four-frame spinner.
 - [ ] Align esbuild target (`node20`) with `engines`/pkg (`node24`).
