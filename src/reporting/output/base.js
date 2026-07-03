@@ -1,5 +1,6 @@
 import fs from 'fs';
 import moment from 'moment';
+import calculateStats from '../stats.js';
 
 const defaultFormats = {
     headline: h => `${h}\n`,
@@ -8,7 +9,7 @@ const defaultFormats = {
 };
 
 /**
- * Base output renderer: takes a report, aggregates it via calculate(), and
+ * Base output renderer: renders a report aggregated by calculateStats and
  * exposes write/headline/toStdOut/toFile. Root of the output-format hierarchy.
  */
 class Output {
@@ -22,7 +23,7 @@ class Output {
         this.report = report;
         this.out = '';
         this.formats = defaultFormats;
-        this.calculate();
+        Object.assign(this, calculateStats(config, report));
     }
 
     set format(value) {
@@ -99,122 +100,6 @@ class Output {
     toFile(file, resolve) {
         fs.writeFileSync(file, this.out);
         if (resolve) resolve();
-    }
-
-    /**
-     * calculate stats
-     */
-    calculate() {
-        let totalEstimate = 0;
-        let totalSpent = 0;
-        let spent = 0;
-        let spentFree = 0;
-        let spentHalfPrice = 0;
-        let users = {};
-        let projects = {};
-        let times = [];
-        let days = {};
-        let daysMoment = {};
-        let daysNew = {};
-
-        let spentFreeLabels = this.config.get('freeLabels');
-        if(undefined === spentFreeLabels) {
-            spentFreeLabels = [];
-        }
-        let spentHalfPriceLabels = this.config.get('halfPriceLabels');
-        if(undefined === spentHalfPriceLabels) {
-            spentHalfPriceLabels = [];
-        }
-
-        ['issues', 'mergeRequests'].forEach(type => {
-            this.report[type].forEach(issue => {
-
-                let free = false;
-                let halfPrice = false;
-                issue.labels.forEach(label => {
-                        spentFreeLabels.forEach(freeLabel => {
-                            free |= (freeLabel == label);
-                        });
-                    });
-                issue.labels.forEach(label => {
-                        spentHalfPriceLabels.forEach(halfPriceLabel => {
-                            halfPrice |= (halfPriceLabel == label);
-                        });
-                    });
-
-                // consolidate all issues back in one day
-                Object.keys(issue.days).forEach((key) => {
-                    if(!daysNew[key]) {
-                        daysNew[key] = [];
-                    }
-                    daysNew[key].push(issue.days[key]);
-                });
-
-                issue.times.forEach(time => {
-                    let dateGrp = time.date.format(this.config.get('dateFormatGroupReport'));
-                    if (!users[time.user]) users[time.user] = 0;
-                    if (!projects[time.project_namespace]) projects[time.project_namespace] = 0;
-                    if (!days[dateGrp]) {
-                        days[dateGrp] = {}
-                        daysMoment[dateGrp] = time.date;
-                    };
-                    if(!days[dateGrp][time.project_namespace]) {
-                        days[dateGrp][time.project_namespace] = {};
-                    }
-                    if(!days[dateGrp][time.project_namespace][time.iid]) {
-                        days[dateGrp][time.project_namespace][time.iid] = 0;
-                    }
-
-
-                    users[time.user] += time.seconds;
-                    projects[time.project_namespace] += time.seconds;
-                    days[dateGrp][time.project_namespace][time.iid] += time.seconds;
-
-                    spent += time.seconds;
-                        
-                    if(free) {
-                        spentFree += time.seconds;
-                    }
-                    if(halfPrice) {
-                        spentHalfPrice += time.seconds;
-                    }
-                    times.push(time);
-                });
-                totalEstimate += parseInt(issue.stats.time_estimate);
-                totalSpent += parseInt(issue.stats.total_time_spent);
-            });
-
-            this.report[type].sort((a, b) => {
-                if (a.iid === b.iid) return 0;
-
-                return (a.iid - b.iid) < 0 ? 1 : -1;
-            });
-        });
-
-
-        this.times = times;
-        this.times.sort((a, b) => {
-            if (a.date.isSame(b.date)) return 0;
-
-            return a.date.isBefore(b.date) ? 1 : -1;
-        });
-
-        this.days = days;
-        this.daysMoment = daysMoment;
-        this.users = Object.fromEntries(Object.entries(users).map(([name, user]) => [name, this.config.toHumanReadable(user, 'stats')]));
-        this.projects = Object.fromEntries(Object.entries(projects).map(([name, project]) => [name, this.config.toHumanReadable(project, 'stats')]));
-        this.stats = {
-            'total estimate': this.config.toHumanReadable(totalEstimate, 'stats'),
-            'total spent': this.config.toHumanReadable(totalSpent, 'stats'),
-            'spent': this.config.toHumanReadable(spent, 'stats'),
-            'spent free': this.config.toHumanReadable(spentFree, 'stats'),
-        };
-        this.totalEstimate = totalEstimate;
-        this.spent = spent;
-        this.spentFree = spentFree;
-        this.spentHalfPrice = spentHalfPrice;
-        this.totalSpent = totalSpent;
-        this.daysNew = daysNew;
     }
 
     /**

@@ -2,6 +2,7 @@ import moment from 'moment';
 import { expect } from 'chai';
 import Config from '../../src/core/config.js';
 import Output from '../../src/reporting/output/base.js';
+import calculateStats from '../../src/reporting/stats.js';
 
 function makeTime({ user = 'alice', seconds = 0, date = '2026-01-05T10:00:00Z', iid = 1, project = 'group/project' } = {}) {
     return { user, seconds, iid, project_namespace: project, date: moment(date) };
@@ -17,7 +18,7 @@ function makeIssue({ iid = 1, labels = [], times = [], days = {}, estimate = 0, 
     };
 }
 
-describe('Output.calculate', () => {
+describe('calculateStats', () => {
     let config;
 
     beforeEach(() => {
@@ -25,7 +26,7 @@ describe('Output.calculate', () => {
     });
 
     function calculate(issues = [], mergeRequests = []) {
-        return new Output(config, { issues, mergeRequests });
+        return calculateStats(config, { issues, mergeRequests });
     }
 
     it('aggregates spent time per user and per project', () => {
@@ -94,7 +95,7 @@ describe('Output.calculate', () => {
             ],
             mergeRequests: []
         };
-        const output = new Output(config, report);
+        const output = calculateStats(config, report);
 
         expect(report.issues.map(issue => issue.iid)).to.deep.equal([3, 2, 1]);
         expect(output.times.map(time => time.date.format('YYYY-MM-DD'))).to.deep.equal([

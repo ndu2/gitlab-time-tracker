@@ -17,7 +17,7 @@ From the design & tech-stack review (2026-07-04), branch `dropXlsOutput`.
       to idiomatic `expect(...).to.throw(/Start date/)`.
 - [x] Make `frame.write()` atomic: replace `unlinkSync` + `appendFileSync` with
       `writeFileSync` (or temp file + rename).
-- [ ] Extract billing/aggregation logic (`calculate()`) out of the `Output`
+- [x] Extract billing/aggregation logic (`calculate()`) out of the `Output`
       base class into a report model; presentation layer should only render.
       Behavior is pinned by `spec/output/base.spec.js`.
 - [ ] Remove shared `Config` mutation: stop `config.set('project', ...)` inside
