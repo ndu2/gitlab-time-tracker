@@ -5,7 +5,7 @@ import Fs from '../../core/filesystem.js';
 import Time from '../../core/time.js';
 import Frame from '../storage/frame.js';
 import select from '@inquirer/checkbox';
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import readline from 'readline';
 import Timekeeper from '../timekeeper.js';
 

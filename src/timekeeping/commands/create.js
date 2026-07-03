@@ -1,5 +1,5 @@
 import colors from 'colors';
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import {Command} from 'commander';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
@@ -28,7 +28,7 @@ if (!title)
     Cli.error('Wrong or missing title');
 
 timekeeper.start(project, type, title)
-    .then(frame => console.log(`Starting project ${config.get('project').magenta} and create ${type} "${title.blue}" at ${moment().format('HH:mm').green}`))
+    .then(frame => console.log(`Starting project ${config.get('project').magenta} and create ${type} "${title.blue}" at ${dayjs().format('HH:mm').green}`))
     .catch(error => Cli.error(error));
 }
 );

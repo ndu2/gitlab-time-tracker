@@ -1,6 +1,6 @@
 import { Command } from 'commander';
 import colors from 'colors';
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
@@ -19,7 +19,7 @@ function column(str, n) {
 
 function resumeFrame(timekeeper, frame) {
     timekeeper.resume(frame)
-        .then(frame => console.log(`Starting project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue} ${frame.note?frame.note:''} at ${moment().format('HH:mm').green}`))
+        .then(frame => console.log(`Starting project ${frame.project.magenta} ${frame.resource.type.blue} ${('#' + frame.resource.id).blue} ${frame.note?frame.note:''} at ${dayjs().format('HH:mm').green}`))
         .catch(error => Cli.error(error));
 }
 
@@ -42,7 +42,7 @@ function resume() {
             lastFrames = lastFrames.map((file) =>
                 Frame.fromFile(config, Fs.join(config.frameDir, file.name))
             );
-            lastFrames = lastFrames.sort((a, b) => moment(a.stop || moment()).isBefore(moment(b.stop || moment())) ? 1 : -1);
+            lastFrames = lastFrames.sort((a, b) => dayjs(a.stop || dayjs()).isBefore(dayjs(b.stop || dayjs())) ? 1 : -1);
 
             if (!options.ask) {
                 let project = config.get('project');

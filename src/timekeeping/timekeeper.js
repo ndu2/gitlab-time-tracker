@@ -1,4 +1,3 @@
-import moment from 'moment';
 import Fs from '../core/filesystem.js';
 import Frame from './storage/frame.js';
 import Issue from './api/issue.js';

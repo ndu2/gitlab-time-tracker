@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from './dayjs.js';
 import GitlabClient from './gitlab-client.js';
 
 /**
@@ -66,11 +66,11 @@ class Task {
     }
 
     get updated_at() {
-        return moment(this.data.updated_at);
+        return dayjs(this.data.updated_at);
     }
 
     get created_at() {
-        return moment(this.data.created_at);
+        return dayjs(this.data.created_at);
     }
 
     get state() {
@@ -82,7 +82,7 @@ class Task {
     }
 
     get due_date() {
-        return this.data.due_date ? moment(this.data.due_date): null;
+        return this.data.due_date ? dayjs(this.data.due_date): null;
     }
 
     get total_spent() {

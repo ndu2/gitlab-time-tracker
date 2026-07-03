@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import GitlabClient from '../../core/gitlab-client.js';
 import parallel from '../../core/parallel.js';
 import Issue from './issue.js';
@@ -169,8 +169,8 @@ class Report {
                 "project": this.project.data.path_with_namespace,
                 "after": (cursor===undefined)?'':cursor,
                 "entryPerPage": 30,
-                "startTime": this.config.get('from').format("Y-M-D"),
-                "endTime": this.config.get('to').format("Y-M-D")
+                "startTime": this.config.get('from').format("YYYY-M-D"),
+                "endTime": this.config.get('to').format("YYYY-M-D")
             }
         };
 

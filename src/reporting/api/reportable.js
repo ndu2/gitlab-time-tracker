@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import Time from '../../core/time.js';
 import DayReport from './dayReport.js';
 
@@ -52,7 +52,7 @@ export default Base => class extends Base {
 
         timelogs.forEach(
             (timelog) => {
-                let spentAt = moment(timelog.spentAt);
+                let spentAt = dayjs(timelog.spentAt);
                 let dateGrp = spentAt.format(this.config.get('dateFormatGroupReport'));
                 if(!this.days[dateGrp])
                 {

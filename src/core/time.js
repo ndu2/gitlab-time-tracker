@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from './dayjs.js';
 
 const defaultTimeFormat = '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]';
 const mappings = ['complete', 'sign', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'];
@@ -48,7 +48,7 @@ class Time {
     }
 
     get date() {
-        return this._date ? moment(this._date) : moment(this.data.created_at);
+        return this._date ? dayjs(this._date) : dayjs(this.data.created_at);
     }
 
     get type() {

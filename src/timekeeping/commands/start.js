@@ -1,5 +1,5 @@
 import colors from 'colors';
-import moment from 'moment';
+import dayjs from '../../core/dayjs.js';
 import {Command} from 'commander';
 import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
@@ -41,7 +41,7 @@ if (!id)
     Cli.error('Wrong or missing issue/merge_request id');
 
 timekeeper.start(project, type, id, note)
-    .then(frame => console.log(`Starting project ${config.get('project').magenta} ${type.blue} ${('#' + id).blue} at ${moment().format('HH:mm').green}`))
+    .then(frame => console.log(`Starting project ${config.get('project').magenta} ${type.blue} ${('#' + id).blue} at ${dayjs().format('HH:mm').green}`))
     .catch(error => Cli.error(error));
 }
 );
