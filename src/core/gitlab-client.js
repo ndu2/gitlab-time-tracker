@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import throttleFactory from 'throttled-queue';
+import { throttledQueue } from 'throttled-queue';
 import parallel from './parallel.js';
 
 /**
@@ -11,7 +11,7 @@ class GitlabClient {
 
     static init(config) {
         if(GitlabClient.throttle == undefined){
-            GitlabClient.throttle = throttleFactory(config.data.throttleMaxRequestsPerInterval, config.data.throttleInterval);
+            GitlabClient.throttle = throttledQueue(config.data.throttleMaxRequestsPerInterval, config.data.throttleInterval);
         }
     }
 
