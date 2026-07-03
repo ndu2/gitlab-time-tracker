@@ -76,7 +76,7 @@ function report() {
     .option('--invoicePositionExtra <text>', 'extra invoice position: header text')
     .option('--invoicePositionExtraText <text>', 'extra invoice position: text')
     .option('--invoicePositionExtraValue <number>', 'extra invoice position: value')
-    .action((project, ids, options, program) => {
+    .action(async (project, ids, options, program) => {
 
 // init helpers
 let config = new Config(process.cwd());
@@ -191,197 +191,212 @@ if (!config.get('to').isValid()) {
 }
 
 // file prompt
-new Promise(resolve => {
-    if (config.get('file') && fs.existsSync(config.get('file'))) {
-        Cli.ask(`The file "${config.get('file')}" already exists. Overwrite?`)
-            .then(() => resolve())
-            .catch(error => Cli.error(`can't write file.`, error));
-    } else {
-        resolve();
+if (config.get('file') && fs.existsSync(config.get('file'))) {
+    try {
+        await Cli.ask(`The file "${config.get('file')}" already exists. Overwrite?`);
+    } catch (error) {
+        Cli.error(`can't write file.`, error);
     }
-})
+}
 
 // get project(s)
-    .then(() => new Promise((resolve, reject) => {
-        Cli.list(`${Cli.look}  Resolving "${projectLabels}"`);
-        let owner = new Owner(config, client);
+Cli.list(`${Cli.look}  Resolving "${projectLabels}"`);
+let owner = new Owner(config, client);
 
-        owner.authorized()
-            .catch(e => Cli.x(`Invalid access token!`, e))
-            .then(() => parallel(projects, (project, done) => {
-                config.set('project', project);
+try {
+    await owner.authorized();
+} catch (error) {
+    Cli.x(`Invalid access token!`, error);
+}
 
-                switch (config.get('type')) {
-                    case 'project':
-                        let report = new Report(config, undefined, client);
-                        report.getProject()
-                            .then(() =>  {
-                                reports.push(report);
-                                done();
-                            })
-                            .catch(e => Cli.x(`Project not found or no access rights "${projectLabels}".`, e));
-                        break;
+try {
+    await parallel(projects, async (project, done) => {
+        config.set('project', project);
 
-                    case 'group':
-                        owner.getGroup()
-                            .then(() => {
-                                if (!config.get('subgroups')) return new Promise(r => r());
-                                return owner.getSubGroups();
-                            })
-                            .then(() => owner.getProjectsByGroup()
-                                .then(() => {
-                                    owner.projects.forEach(project => reports.push(new Report(config, project, client)));
-                                    done();
-                                }))
-                            .catch(e => done(e));
-                        break;
+        try {
+            switch (config.get('type')) {
+                case 'project': {
+                    let report = new Report(config, undefined, client);
+                    try {
+                        await report.getProject();
+                    } catch (error) {
+                        Cli.x(`Project not found or no access rights "${projectLabels}".`, error);
+                    }
+                    reports.push(report);
+                    break;
                 }
-            }, config, 1))
-            .catch(e => reject(e))
-            .then(() => {
-                config.set('project', projects);
-                resolve();
-            });
-    }))
-    .then(() => Cli.out(`\r${Cli.look}  Selected projects: ${reports.reports.map(r => r.project.name.bold.blue).join(', ')}\n`))
+
+                case 'group': {
+                    await owner.getGroup();
+                    if (config.get('subgroups')) await owner.getSubGroups();
+                    await owner.getProjectsByGroup();
+                    owner.projects.forEach(project => reports.push(new Report(config, project, client)));
+                    break;
+                }
+            }
+            done();
+        } catch (error) {
+            done(error);
+        }
+    }, config, 1);
+
+    config.set('project', projects);
+    Cli.out(`\r${Cli.look}  Selected projects: ${reports.reports.map(r => r.project.name.bold.blue).join(', ')}\n`);
 
     // get members and user columns
-    .then(() => new Promise(resolve => {
-        if (!config.get('userColumns')) return resolve();
-        reports
-            .forEach((report, done) => {
-                report.project.members()
-                    .then(() => {
-                        let columns = report.project.users.map(user => `time_${user}`);
+    if (config.get('userColumns')) {
+        await reports.forEach(async (report, done) => {
+            try {
+                await report.project.members();
+                let columns = report.project.users.map(user => `time_${user}`);
 
-                        config.set('issueColumns', [...new Set(config.get('issueColumns').concat(columns))]);
-                        config.set('mergeRequestColumns', [...new Set(config.get('mergeRequestColumns').concat(columns))]);
+                config.set('issueColumns', [...new Set(config.get('issueColumns').concat(columns))]);
+                config.set('mergeRequestColumns', [...new Set(config.get('mergeRequestColumns').concat(columns))]);
 
-                        done();
-                    })
-                    .catch(error => done(error));
-            })
-            .catch(error => Cli.x(`could not fetch project.`, error))
-            .then(() => resolve());
-    }))
-    .then(() => Cli.mark())
-    .catch(error => Cli.x(`Could not resolve "${projectLabels}"`, error))
-
-    // get issues
-    .then(() => new Promise(resolve => {
-        if (!config.get('query').includes('issues')) return resolve();
-
-        Cli.list(`${Cli.fetch}  Fetching issues`);
-
-        reports
-            .forEach((report, done) => {
-                report.getIssues()
-                    .then(() => done());
-            })
-            .catch(error => Cli.x(`could not fetch issues.`, error))
-            .then(() => Cli.mark())
-            .then(() => resolve());
-    }))
-
-    // get merge requests
-    .then(() => new Promise(resolve => {
-        if (!config.get('query').includes('merge_requests')) return resolve();
-
-        Cli.list(`${Cli.fetch}  Fetching merge requests`);
-
-        reports
-            .forEach((report, done) => {
-                report.getMergeRequests()
-                    .catch(error => done(error))
-                    .then(() => done());
-            })
-            .catch(error => Cli.x(`could not fetch merge requests.`, error))
-            .then(() => Cli.mark())
-            .then(() => resolve());
-    }))
-
-    // get timelogs
-    .then(() => new Promise(resolve => {
-        Cli.list(`${Cli.fetch}  Loading timelogs`);
-
-        reports
-            .forEach((report, done) => {
-                report.getTimelogs()
-                    .catch(error => done(error))
-                    .then(() => done());
-            })
-            .catch(error => Cli.x(`could not load timelogs.`, error))
-            .then(() => Cli.mark())
-            .then(() => resolve());
-    }))
-
-    // merge reports
-    .then(() => new Promise(resolve => {
-        Cli.list(`${Cli.merge}  Merging reports`);
-
-        reports
-            .forEach((report, done) => {
-                master.merge(report);
                 done();
-            })
-            .catch(error => Cli.x(`could not merge reports.`, error))
-            .then(() => Cli.mark())
-            .then(() => resolve());
-    }))
+            } catch (error) {
+                done(error);
+            }
+        });
+    }
 
-    // process issues
-    .then(() => new Promise(resolve => {
-        if (!config.get('query').includes('issues') || master.issues.length === 0) return resolve();
-
-        Cli.bar(`${Cli.process}️  Processing issues`, master.issues.length);
-        master.processIssues(() => Cli.advance())
-            .then(() => Cli.mark())
-            .catch(error => Cli.x(`could not process issues.`, error))
-            .then(() => resolve());
-    }))
-
-    // process merge requests
-    .then(() => new Promise(resolve => {
-        if (!config.get('query').includes('merge_requests') || master.mergeRequests.length === 0) return resolve();
-
-        Cli.bar(`${Cli.process}️️  Processing merge requests`, master.mergeRequests.length);
-        master.processMergeRequests(() => Cli.advance())
-            .then(() => Cli.mark())
-            .catch(error => Cli.x(`could not process merge requests.`, error))
-            .then(() => resolve());
-    }))
-
-    // make report
-    .then(() => Output[config.get('output')]())
-    .then(module => new Promise(resolve => {
-        if (master.issues.length === 0 && master.mergeRequests.length === 0)
-            Cli.error('No issues or merge requests matched your criteria.');
-
-        Cli.list(`${Cli.output}  Making report`);
-        output = new module.default(config, master);
-        output.make();
-        Cli.mark();
-        resolve();
-    }))
-    .catch(error => Cli.x(`could not make report.`, error))
-
-    // print report
-    .then(() => new Promise(resolve => {
-        Cli.list(`${Cli.print}  Printing report`);
-        if (config.get('file')) {
-            output.toFile(config.get('file'), resolve);
-        } else {
-            output.toStdOut();
-            resolve();
-        }
-    }))
-    .catch(error => Cli.x(`could not print report.`, error))
-    .then(() => Cli.mark())
-
-    // time for a beer
-    .then(() => Cli.done());
+    Cli.mark();
+} catch (error) {
+    Cli.x(`Could not resolve "${projectLabels}"`, error);
 }
-);
+
+// get issues
+if (config.get('query').includes('issues')) {
+    Cli.list(`${Cli.fetch}  Fetching issues`);
+
+    try {
+        await reports.forEach(async (report, done) => {
+            try {
+                await report.getIssues();
+                done();
+            } catch (error) {
+                done(error);
+            }
+        });
+    } catch (error) {
+        Cli.x(`could not fetch issues.`, error);
+    }
+
+    Cli.mark();
+}
+
+// get merge requests
+if (config.get('query').includes('merge_requests')) {
+    Cli.list(`${Cli.fetch}  Fetching merge requests`);
+
+    try {
+        await reports.forEach(async (report, done) => {
+            try {
+                await report.getMergeRequests();
+                done();
+            } catch (error) {
+                done(error);
+            }
+        });
+    } catch (error) {
+        Cli.x(`could not fetch merge requests.`, error);
+    }
+
+    Cli.mark();
+}
+
+// get timelogs
+Cli.list(`${Cli.fetch}  Loading timelogs`);
+
+try {
+    await reports.forEach(async (report, done) => {
+        try {
+            await report.getTimelogs();
+            done();
+        } catch (error) {
+            done(error);
+        }
+    });
+} catch (error) {
+    Cli.x(`could not load timelogs.`, error);
+}
+
+Cli.mark();
+
+// merge reports
+Cli.list(`${Cli.merge}  Merging reports`);
+
+try {
+    await reports.forEach((report, done) => {
+        master.merge(report);
+        done();
+    });
+} catch (error) {
+    Cli.x(`could not merge reports.`, error);
+}
+
+Cli.mark();
+
+// process issues
+if (config.get('query').includes('issues') && master.issues.length > 0) {
+    Cli.bar(`${Cli.process}️  Processing issues`, master.issues.length);
+
+    try {
+        await master.processIssues(() => Cli.advance());
+    } catch (error) {
+        Cli.x(`could not process issues.`, error);
+    }
+
+    Cli.mark();
+}
+
+// process merge requests
+if (config.get('query').includes('merge_requests') && master.mergeRequests.length > 0) {
+    Cli.bar(`${Cli.process}️️  Processing merge requests`, master.mergeRequests.length);
+
+    try {
+        await master.processMergeRequests(() => Cli.advance());
+    } catch (error) {
+        Cli.x(`could not process merge requests.`, error);
+    }
+
+    Cli.mark();
+}
+
+// make report
+if (master.issues.length === 0 && master.mergeRequests.length === 0)
+    Cli.error('No issues or merge requests matched your criteria.');
+
+try {
+    let module = await Output[config.get('output')]();
+
+    Cli.list(`${Cli.output}  Making report`);
+    output = new module.default(config, master);
+    output.make();
+} catch (error) {
+    Cli.x(`could not make report.`, error);
+}
+
+Cli.mark();
+
+// print report
+Cli.list(`${Cli.print}  Printing report`);
+
+try {
+    if (config.get('file')) {
+        output.toFile(config.get('file'));
+    } else {
+        output.toStdOut();
+    }
+} catch (error) {
+    Cli.x(`could not print report.`, error);
+}
+
+Cli.mark();
+
+// time for a beer
+Cli.done();
+});
 return report;
 }
 
