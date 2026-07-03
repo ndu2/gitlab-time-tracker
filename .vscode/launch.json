@@ -12,7 +12,7 @@
             "args": ["log"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         },
         {
             "type": "node",
@@ -24,7 +24,7 @@
             "args": ["config"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         },
         {
             "type": "node",
@@ -36,7 +36,7 @@
             "args": ["edit"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         },
         {
             "type": "node",
@@ -48,7 +48,7 @@
             "args": ["resume", "--ask"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         },
         {
             "type": "node",
@@ -60,7 +60,7 @@
             "args": ["stop"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         },
         {
             "type": "node",
@@ -72,7 +72,7 @@
             "args": ["delete"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         },
         {
             "type": "node",
@@ -84,7 +84,7 @@
             "args": ["config"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         },
         {
             "type": "node",
@@ -96,7 +96,7 @@
             "args": ["report", "--last_month", "--query=issues"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         },
         {
             "type": "node",
@@ -111,7 +111,7 @@
             "--invoiceCurrency", "EUR", "--invoiceCurrencyPerHour", "50", "--invoiceVAT", "0.15", "--invoiceDate", "1.03.2021", "--invoicePositionText", "Position Text"],
             "program": "${workspaceFolder}/src/gtt.js",
             "console": "integratedTerminal",
-            "runtimeExecutable": "${userHome}/.nvm/versions/node/v20.10.0/bin/node"
+            "runtimeExecutable": "${userHome}/.nvm/versions/node/v24.18.0/bin/node"
         }
     ],
 }
