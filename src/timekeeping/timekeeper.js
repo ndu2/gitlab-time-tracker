@@ -11,15 +11,33 @@ const classes = {
     merge_request: MergeRequest
 };
 
-const stop_condition = {
-    term: `"stop" ?: ?false`,
-    flags: "i"
-};
+const CURRENT_FILE = 'current.txt';
 
 class Timekeeper {
     constructor(config) {
         this.config = config;
         this.sync = {};
+    }
+
+    /**
+     * Path to the pointer file that names the currently
+     * active (not yet stopped) frame, if any.
+     */
+    _currentFile() {
+        return Fs.join(this.config.frameDir, CURRENT_FILE);
+    }
+
+    /**
+     * id of the currently active frame, or null if none is running.
+     * Only one frame can be active at a time, so this is a direct
+     * lookup instead of scanning every frame file.
+     */
+    _currentId() {
+        if (!Fs.exists(this._currentFile())) return null;
+
+        let id = Fs.readText(this._currentFile()).trim();
+
+        return id || null;
     }
 
     /**
@@ -137,9 +155,11 @@ class Timekeeper {
      */
     status() {
         return new Promise((resolve, reject) => {
-            Fs.find(stop_condition, this.config.frameDir)
-                .then(frames => resolve(frames.map(file => Frame.fromFile(this.config, file))))
-                .catch(error => reject(error));
+            let id = this._currentId();
+
+            if (!id) return resolve([]);
+
+            resolve([Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json'))]);
         });
     }
 
@@ -225,14 +245,13 @@ class Timekeeper {
         this.config.set('project', project);
 
         return new Promise((resolve, reject) => {
-            Fs.find(stop_condition, this.config.frameDir)
-                .then(frames => {
-                    if (frames.length > 0)
-                        return reject("Already running. Please stop it first with 'gtt stop'.");
+            if (this._currentId())
+                return reject("Already running. Please stop it first with 'gtt stop'.");
 
-                    resolve(new Frame(this.config, id, type, note).startMe());
-                })
-                .catch(error => reject(error));
+            let frame = new Frame(this.config, id, type, note).startMe();
+            Fs.writeText(this._currentFile(), frame.id);
+
+            resolve(frame);
         })
     }
 
@@ -242,16 +261,14 @@ class Timekeeper {
      */
     stop() {
         return new Promise((resolve, reject) => {
-            Fs.find(stop_condition, this.config.frameDir)
-                .then(frames => {
-                    if (frames.length === 0)
-                        return reject('No projects started.');
+            let id = this._currentId();
 
-                    resolve(frames.map(file => {
-                        return Frame.fromFile(this.config, file).stopMe();
-                    }));
-                })
-                .catch(error => reject(error));
+            if (!id) return reject('No projects started.');
+
+            let frame = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json')).stopMe();
+            Fs.remove(this._currentFile());
+
+            resolve([frame]);
         });
     }
 
@@ -261,19 +278,16 @@ class Timekeeper {
      */
     cancel() {
         return new Promise((resolve, reject) => {
-            Fs.find(stop_condition, this.config.frameDir)
-                .then(frames => {
-                    if (frames.length === 0)
-                        return reject('No projects started.');
+            let id = this._currentId();
 
-                    resolve(frames.map(file => {
-                        let frame = Frame.fromFile(this.config, file);
-                        Fs.remove(file);
+            if (!id) return reject('No projects started.');
 
-                        return frame;
-                    }));
-                })
-                .catch(error => reject(error));
+            let file = Fs.join(this.config.frameDir, id + '.json');
+            let frame = Frame.fromFile(this.config, file);
+            Fs.remove(file);
+            Fs.remove(this._currentFile());
+
+            resolve([frame]);
         });
     }
 }
