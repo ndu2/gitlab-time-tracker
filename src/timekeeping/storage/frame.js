@@ -138,6 +138,10 @@ class Frame {
         return this._note;
     }
 
+    set note(note) {
+        this._note = note;
+    }
+
     get file() {
         return path.join(this.config.frameDir, this.id + '.json');
     }
