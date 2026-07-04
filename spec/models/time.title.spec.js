@@ -1,6 +1,6 @@
 
 import dayjs from '../../src/core/dayjs.js';
-import Config from '../../src/core/file-config.js';
+import Config from '../../src/core/config.js';
 import Time from '../../src/core/time.js';
 import task from '../../src/core/task.js';
 import { expect } from 'chai';
