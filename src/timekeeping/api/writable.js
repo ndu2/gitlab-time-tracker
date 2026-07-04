@@ -52,6 +52,15 @@ export default Base => class extends Base {
         var spentAt = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-"+date.getUTCDate();
         return this.client.post(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`, {
             body: '/spend '+Time.toHumanReadable(time, this.config.get('hoursPerDay'), '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]'+' '+spentAt + note),
+        }).then(response => {
+            // post/spend command to <gitlaburl>/api/v4/projects/X/issues/Y/notes does not work on task
+            // but it returns HTTP 202. we need to check the result body
+            if(!response.body || response.body.errors ||
+                typeof(response.body.commands_changes) != 'object' ||
+                Object.keys(response.body.commands_changes).length == 0) {
+                throw new Error(`createTime failed: ${JSON.stringify(response.body)} see https://github.com/ndu2/gitlab-time-tracker/issues/33`);
+            }
+            return response;
         });
     }
 };
