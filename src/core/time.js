@@ -9,7 +9,7 @@ const conditionalSimpleRegex = /([0-9]*)\>(.*)/ig;
 const defaultRegex = /(\[\%([^\]]*)\])/ig;
 
 Number.prototype.padLeft = function (n, str) {
-    return Array(n - String(this).length + 1).join(str || '0') + this;
+    return Array(Math.max(0, n - String(this).length + 1)).join(str || '0') + this;
 };
 
 /**
