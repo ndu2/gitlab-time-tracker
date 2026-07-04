@@ -4,6 +4,7 @@ import version from './version.js';
 
 import { program } from 'commander';
 
+import config from './core/commands/config.js';
 import start from './timekeeping/commands/start.js';
 import create from './timekeeping/commands/create.js';
 import status from './timekeeping/commands/status.js';
@@ -15,7 +16,6 @@ import log from './timekeeping/commands/log.js';
 import sync from './timekeeping/commands/sync.js';
 import edit from './timekeeping/commands/edit.js';
 import delCmd from './timekeeping/commands/delete.js';
-import config from './timekeeping/commands/config.js';
 import report from './reporting/commands/report.js';
 
 program
