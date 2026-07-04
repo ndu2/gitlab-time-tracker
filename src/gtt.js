@@ -16,6 +16,7 @@ import log from './timekeeping/commands/log.js';
 import sync from './timekeeping/commands/sync.js';
 import edit from './timekeeping/commands/edit.js';
 import delCmd from './timekeeping/commands/delete.js';
+import archive from './timekeeping/commands/archive.js';
 import report from './reporting/commands/report.js';
 
 program
@@ -31,6 +32,7 @@ program
     .addCommand(sync())
     .addCommand(edit())
     .addCommand(delCmd())
+    .addCommand(archive())
     .addCommand(report())
     .addCommand(config())
     .parse(process.argv);

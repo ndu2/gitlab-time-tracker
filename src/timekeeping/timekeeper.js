@@ -50,6 +50,36 @@ class Timekeeper {
     }
 
     /**
+     * Group all finished, synced frames by year and month (based on
+     * start time), for archiving. Refuses to run while frames are
+     * still waiting to be synced to GitLab.
+     * @returns {Promise<Object>} {year: {month: [frame, ...]}}
+     */
+    async archiveInit() {
+        await this.syncInit();
+
+        if (this.sync.frames.length > 0) {
+            throw new Error('Not all frames are synced yet. Run `gtt sync` first.');
+        }
+
+        let grouped = {};
+
+        await new FrameCollection(this.config).forEach(frame => {
+            if (frame.stop === false) return;
+
+            let year = frame.date.format('YYYY'),
+                month = frame.date.format('MM');
+
+            if (!grouped[year]) grouped[year] = {};
+            if (!grouped[year][month]) grouped[year][month] = [];
+
+            grouped[year][month].push(frame);
+        });
+
+        return grouped;
+    }
+
+    /**
      * Resolve merge_requests and issues
      * respectively.
      * @returns {Promise}
