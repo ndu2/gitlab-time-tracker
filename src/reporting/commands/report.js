@@ -135,19 +135,19 @@ config
 if (program.opts().today)
     config
         .set('from', dayjs().startOf('day'))
-        .set('to', dayjs().endOf('day'));
+        .set('to', dayjs().add(1, 'day').startOf('day'));
 if (program.opts().this_week)
     config
         .set('from', dayjs().startOf('week'))
-        .set('to', dayjs().endOf('week'));
+        .set('to', dayjs().endOf('week').add(1, 'day').startOf('day'));
 if (program.opts().this_month)
     config
         .set('from', dayjs().startOf('month'))
-        .set('to', dayjs().endOf('month'));
+        .set('to', dayjs().endOf('month').add(1, 'day').startOf('day'));
 if (program.opts().last_month)
     config
         .set('from', dayjs().subtract(1, 'months').startOf('month'))
-        .set('to', dayjs().subtract(1, 'months').endOf('month'));
+        .set('to', dayjs().subtract(1, 'months').endOf('month').add(1, 'day').startOf('day'));
 
 Cli.quiet = config.get('quiet');
 Cli.verbose = config.get('_verbose');
