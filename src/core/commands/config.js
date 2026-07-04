@@ -1,6 +1,6 @@
 import {Command} from 'commander';
-import Config from '../../core/file-config.js';
-import Fs from '../../core/filesystem.js';
+import Config from '../file-config.js';
+import Fs from '../filesystem.js';
 
 let config = new Config(process.cwd());
 
