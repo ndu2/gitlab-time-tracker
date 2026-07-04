@@ -29,7 +29,7 @@ function column(str, n) {
  * @param edited
  * @returns {string}
  */
-function formatFrameRow(frame, focus, edited) {
+function formatFrameRow(frame, focus, edited, noteOverride) {
   const startText = frame.start.clone().format("MMMM Do YYYY HH:mm");
   const stopText = frame.stop ? "to " + frame.stop.clone().format("HH:mm") : "(running)";
   const startColor = edited === "start" || edited === "both" ? pc.red : pc.green;
@@ -39,9 +39,8 @@ function formatFrameRow(frame, focus, edited) {
   const issue = `${
     pc.blue((frame.resource.type + " #" + frame.resource.id).padEnd(20))
   }${column(frame.title != null ? frame.title : "", 50)}`;
-  return `${frame.id}  ${start} ${stop}\t${pc.magenta(column(frame.project, 50))}${issue}${
-    frame.note != null ? frame.note : ""
-  }`;
+  const note = noteOverride != null ? noteOverride : (frame.note != null ? frame.note : "");
+  return `${frame.id}  ${start} ${stop}\t${pc.magenta(column(frame.project, 50))}${issue}${note}`;
 }
 
 /**
@@ -62,15 +61,39 @@ function showInteractiveMenu(frames) {
     let cursor = 0;
     // per-frame set of edited field names ('start'/'stop')
     const editedFields = frames.map(() => new Set());
+    // original start/stop values, used to reset a frame's edits
+    const originals = frames.map((frame) => ({
+      start: frame.start.clone(),
+      stop: frame.stop ? frame.stop.clone() : null,
+    }));
+
+    // index of the frame whose note is currently being edited inline, or null
+    let noteEditIndex = null;
+    let noteBuffer = '';
+
+    // adjustment modes, cycled with m
+    const modes = [
+      { amount: SHIFT_MINUTES, moveAdjacent: true, label: '±15 min' },
+      { amount: SHIFT_MINUTE, moveAdjacent: true, label: '±1 min' },
+      { amount: SHIFT_MINUTES, moveAdjacent: false, label: '±15 min, don\'t move adjacent frame' },
+      { amount: SHIFT_MINUTE, moveAdjacent: false, label: '±1 min, don\'t move adjacent frame' },
+    ];
+    let mode = 0;
 
     function render() {
       Cli.out('\x1Bc');
-      Cli.out('Tab/Shift+Tab: switch field   ↑/↓: ±15 min (Shift: ±1 min)   Enter: save all   Esc/q: cancel\n\n');
+      if (noteEditIndex !== null) {
+        Cli.out('Editing note. Enter: confirm   Esc: cancel\n\n\n');
+      } else {
+        Cli.out('←/→ (or Tab/Shift+Tab): switch field   ↑/↓: switch frame   +/-: adjust time   m: cycle mode   r: reset frame   e: edit note (if empty)   w: save all   q: exit (ignored on unsaved changes)   Esc: exit\n');
+        Cli.out(`Mode: ${modes[mode].label}\n\n`);
+      }
       frames.forEach((frame, i) => {
         const focus = fields[cursor][0] === i ? fields[cursor][1] : null;
         const edited = editedFields[i];
         const editedArg = edited.has('start') && edited.has('stop') ? 'both' : edited.has('start') ? 'start' : edited.has('stop') ? 'stop' : null;
-        Cli.out(`${formatFrameRow(frame, focus, editedArg)}\n`);
+        const noteOverride = noteEditIndex === i ? pc.inverse(noteBuffer + ' ') : null;
+        Cli.out(`${formatFrameRow(frame, focus, editedArg, noteOverride)}\n`);
       });
     }
 
@@ -86,35 +109,92 @@ function showInteractiveMenu(frames) {
         process.exit();
       }
 
-      const [frameIdx, field] = fields[cursor];
-      const frame = frames[frameIdx];
-
-      if (key.name === 'tab') {
-        cursor = key.shift ? (cursor - 1 + fields.length) % fields.length : (cursor + 1) % fields.length;
-      } else if (key.name === 'up' || key.name === 'down') {
-        let shift = key.shift ? SHIFT_MINUTE : SHIFT_MINUTES;
-        const delta = key.name === 'up' ? shift : -shift;
-        if (field === 'start') {
-          frame.start = frame.start.clone().add(delta, 'minutes');
-        } else {
-          frame.stop = (frame.stop || frame.start).clone().add(delta, 'minutes');
+      if (noteEditIndex !== null) {
+        if (key.name === 'return') {
+          frames[noteEditIndex].note = noteBuffer;
+          noteEditIndex = null;
+          noteBuffer = '';
+        } else if (key.name === 'escape') {
+          noteEditIndex = null;
+          noteBuffer = '';
+        } else if (key.name === 'backspace') {
+          noteBuffer = noteBuffer.slice(0, -1);
+        } else if (str && !key.ctrl && !key.meta) {
+          noteBuffer += str;
         }
-        editedFields[frameIdx].add(field);
-      } else if (key.name === 'return') {
-        cleanup();
-        try {
-          frames.forEach((frame) => frame.write());
-          resolve();
-        } catch (error) {
-          reject(error);
-        }
-        return;
-      } else if (key.name === 'escape' || str === 'q') {
-        cleanup();
-        resolve();
+        render();
         return;
       }
 
+      const [frameIdx, field] = fields[cursor];
+      const frame = frames[frameIdx];
+
+      if (key.name === 'tab' || key.name === 'left' || key.name === 'right') {
+        const forward = key.name === 'left' ? false : key.name === 'right' ? true : !key.shift;
+        cursor = forward ? (cursor + 1) % fields.length : (cursor - 1 + fields.length) % fields.length;
+      } else if (key.name === 'up' || key.name === 'down') {
+        cursor = key.name === 'down' ? (cursor + 2) % fields.length : (cursor - 2 + fields.length) % fields.length;
+      } else if (key.name === 'r') {
+        frame.start = originals[frameIdx].start.clone();
+        frame.stop = originals[frameIdx].stop ? originals[frameIdx].stop.clone() : null;
+        editedFields[frameIdx].clear();
+      } else if (key.name === 'e') {
+        if (frame.notes.length == 0) {
+          noteEditIndex = frameIdx;
+          noteBuffer = frame.note != null ? frame.note : '';
+        }
+      } else if (str === 'm') {
+        mode = (mode + 1) % modes.length;
+      } else if (str === '+' || str === '-') {
+        const delta = str === '+' ? modes[mode].amount : -modes[mode].amount;
+        if (field === 'start') {
+          const newStart = frame.start.clone().add(delta, 'minutes');
+          if (!frame.stop || !newStart.isAfter(frame.stop)) {
+            const prev = frames[frameIdx - 1];
+            const linked = modes[mode].moveAdjacent && prev && prev.stop && Math.abs(frame.start.diff(prev.stop, 'minutes', true)) < 1;
+            if (linked) {
+              const newPrevStop = prev.stop.clone().add(delta, 'minutes');
+              if (!newPrevStop.isBefore(prev.start)) {
+                prev.stop = newPrevStop;
+                editedFields[frameIdx - 1].add('stop');
+                frame.start = newStart;
+              }
+            } else if (!(prev && prev.stop && newStart.isBefore(prev.stop))) {
+              frame.start = newStart;
+            }
+          }
+        } else {
+          const newStop = (frame.stop || frame.start).clone().add(delta, 'minutes');
+          if (!newStop.isBefore(frame.start)) {
+            const next = frames[frameIdx + 1];
+            const linked = modes[mode].moveAdjacent && next && frame.stop && Math.abs(next.start.diff(frame.stop, 'minutes', true)) < 1;
+            if (linked) {
+              const newNextStart = next.start.clone().add(delta, 'minutes');
+              if (!(next.stop && newNextStart.isAfter(next.stop))) {
+                next.start = newNextStart;
+                editedFields[frameIdx + 1].add('start');
+                frame.stop = newStop;
+              }
+            } else if (!(next && newStop.isAfter(next.start))) {
+              frame.stop = newStop;
+            }
+          }
+        }
+        editedFields[frameIdx].add(field);
+      } else if (key.name === 'w') {
+        frames.forEach((frame) => {
+          frame.write()
+          editedFields[frameIdx].clear();
+        }
+      );
+      } else if (key.name === 'escape' || str === 'q') {
+        if(key.name === 'escape' || editedFields.reduce((a,c)=> a + c.size, 0) == 0)
+        {
+          cleanup();
+          resolve();
+          return;
+        }
+      }
       render();
     }
 
