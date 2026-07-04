@@ -1,4 +1,4 @@
-FROM node:22.16.0-alpine3.21
+FROM node:24.18.0-alpine3.23
 
 RUN addgroup -S gtt && adduser -S gtt -G gtt
 USER gtt
