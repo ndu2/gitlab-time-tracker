@@ -148,7 +148,6 @@ function toHumanReadable(input) {
 
 function getMenuFrames() {
   return timekeeper.all().then(({ frames }) => {
-    frames.sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1));
     if (id) {
       let idx = frames.findIndex((fr) => fr.id == id);
       let following = Number(program.opts().following);
@@ -156,6 +155,7 @@ function getMenuFrames() {
         following = 0;
       }
       if (idx >= 0) {
+        frames.sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1));
         frames = frames.slice(idx, idx + following);
       } else {
         frames = [];
@@ -164,7 +164,11 @@ function getMenuFrames() {
       let from = program.opts().today ? dayjs().startOf('day') : dayjs().startOf('week');
       let to = program.opts().today ? dayjs().endOf('day') : dayjs().endOf('week');
       frames = frames.filter((fr) => !fr.start.isBefore(from) && !fr.start.isAfter(to));
+      frames.sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1));
     } else {
+      let to = dayjs().subtract(2, 'month');
+      frames = frames.filter((fr) => fr.start.isAfter(to));
+      frames.sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1));
       frames = frames.slice(-listSize); // last listSize frames (one page of inquirer)
     }
     return frames;
