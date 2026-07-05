@@ -37,9 +37,10 @@ export default Base => class extends Base {
     }
 
     /**
-     * create time
-     * @param time
-     * @returns {*}
+     * create time with notes using graphql.
+     *
+     * works for issues, tasks, incidents and merge requests (on 19.1.1-ee) to add
+     * spent times with the correct date and a comment
      */
     createTime(time, created_at, note) {
         if(note === null || note === undefined) {
@@ -50,15 +51,30 @@ export default Base => class extends Base {
         }
         var date = new Date(created_at);
         var spentAt = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-"+date.getUTCDate();
-        return this.client.post(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`, {
-            body: '/spend '+Time.toHumanReadable(time, this.config.get('hoursPerDay'), '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]'+' '+spentAt + note),
-        }).then(response => {
-            // post/spend command to <gitlaburl>/api/v4/projects/X/issues/Y/notes does not work on task
-            // but it returns HTTP 202. we need to check the result body
-            if(!response.body || response.body.errors ||
-                typeof(response.body.commands_changes) != 'object' ||
-                Object.keys(response.body.commands_changes).length == 0) {
-                throw new Error(`createTime failed: ${JSON.stringify(response.body)} see https://github.com/ndu2/gitlab-time-tracker/issues/33`);
+        const query = 
+        `mutation($input: CreateNoteInput!) {
+            createNote(input: $input) {
+                note {
+                id
+                body
+                }
+                errors
+            }
+        }`
+        let noteablePath = (this._type == 'merge_requests') ? 'MergeRequest' : 'WorkItem';
+        let request = {
+            "query": query,
+            "variables": {
+                "input": {
+                    "noteableId": `gid://gitlab/${noteablePath}/${this.id}`,
+                    "body": '/spend '+Time.toHumanReadable(time, this.config.get('hoursPerDay'), '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]' + ' ' + spentAt + note),
+                }
+            }
+        };
+        let promise = this.client.graphQL(request);
+        promise.then(response => {
+            if(!response.body || response.body.errors) {
+                throw new Error(`createTime failed: ${JSON.stringify(response.body)}`);
             }
             return response;
         });
