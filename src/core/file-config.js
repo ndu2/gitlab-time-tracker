@@ -41,7 +41,8 @@ class FileConfig extends Config {
         try {
             return readYaml(this.global);
         } catch (e) {
-            Cli.error(`Error parsing configuration: "${this.global}"`, e);
+            e.message = `Error parsing configuration: "${this.global}": ${e.message}`;
+            throw e;
         }
     }
 
@@ -50,24 +51,27 @@ class FileConfig extends Config {
      * @returns {Object}
      */
     parseLocal() {
+        let local;
         try {
-            let local = Object.assign({extend: true}, readYaml(this.local));
-
-            if (local.extend === true) {
-                let global = this.parseGlobal();
-                local = Object.assign(global ? global : {}, local);
-            } else if (local.extend) {
-                try {
-                    local = Object.assign(readYaml(local.extend), local);
-                } catch (e) {
-                    Cli.error(`Error parsing configuration: "${local.extend}"`, e);
-                }
-            }
-
-            return local;
+            local = Object.assign({extend: true}, readYaml(this.local));
         } catch (e) {
-            Cli.error(`Error parsing configuration: "${this.local}"`, e);
+            e.message = `Error parsing configuration: "${this.local}": ${e.message}`;
+            throw e;
         }
+
+        if (local.extend === true) {
+            let global = this.parseGlobal();
+            local = Object.assign(global ? global : {}, local);
+        } else if (local.extend) {
+            try {
+                local = Object.assign(readYaml(local.extend), local);
+            } catch (e) {
+                e.message = `Error parsing configuration: "${local.extend}": ${e.message}`;
+                throw e;
+            }
+        }
+
+        return local;
     }
 
     localExists() {
