@@ -28,7 +28,7 @@ if (!title)
     Cli.error('Wrong or missing title');
 
 timekeeper.start(project, type, title)
-    .then(frame => console.log(`Starting project ${pc.magenta(config.get('project'))} and create ${type} "${pc.blue(title)}" at ${pc.green(dayjs().format('HH:mm'))}`))
+    .then(frame => Cli.out(`Starting project ${pc.magenta(config.get('project'))} and create ${type} "${pc.blue(title)}" at ${pc.green(dayjs().format('HH:mm'))}\n`))
     .catch(error => Cli.error(error));
 }
 );

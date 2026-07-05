@@ -91,7 +91,7 @@ class Output {
      * render to stdout
      */
     toStdOut() {
-        console.log(this.out);
+        process.stdout.write(`${this.out}\n`);
     }
 
     /**
