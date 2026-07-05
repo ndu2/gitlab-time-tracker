@@ -3,6 +3,7 @@ import pc from 'picocolors';
 import {Command} from 'commander';
 import dayjs from '../../core/dayjs.js';
 import Cli from '../../core/cli.js';
+import Args from '../../core/args.js';
 import Config from '../../core/file-config.js';
 import Report from '../api/report.js';
 import Owner from '../../core/owner.js';
@@ -81,14 +82,14 @@ function report() {
 
 // init helpers
 let config = new Config(process.cwd());
-let cli = new Cli(program.args);
+let args = new Args(program.args);
 
 // overwrite config with args and opts
 config
     .set('url', program.opts().url)
     .set('token', program.opts().token)
-    .set('project', cli.project())
-    .set('iids', cli.iids())
+    .set('project', args.project())
+    .set('iids', args.iids())
     .set('from', program.opts().from)
     .set('to', program.opts().to)
     .set('closed', program.opts().closed)
