@@ -19,9 +19,9 @@ timekeeper.cancel()
     .then(frames => {
         frames.forEach(frame => {
             if(!frame.resource.new)
-                return console.log(`Cancel project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))}, started ${pc.green(dayjs(frame.start).fromNow())}`)
+                return Cli.out(`Cancel project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))}, started ${pc.green(dayjs(frame.start).fromNow())}\n`)
 
-            console.log(`Cancel project ${pc.magenta(frame.project)} for new ${frame.resource.type} "${pc.blue((frame.resource.id))}", started ${pc.green(dayjs(frame.start).fromNow())}`)
+            Cli.out(`Cancel project ${pc.magenta(frame.project)} for new ${frame.resource.type} "${pc.blue((frame.resource.id))}", started ${pc.green(dayjs(frame.start).fromNow())}\n`)
         })
     })
     .catch(error => Cli.error(error));

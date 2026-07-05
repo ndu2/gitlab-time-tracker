@@ -19,7 +19,7 @@ function column(str, n) {
 
 function resumeFrame(timekeeper, frame) {
     timekeeper.resume(frame)
-        .then(frame => console.log(`Starting project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))} ${frame.note?frame.note:''} at ${pc.green(dayjs().format('HH:mm'))}`))
+        .then(frame => Cli.out(`Starting project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))} ${frame.note?frame.note:''} at ${pc.green(dayjs().format('HH:mm'))}\n`))
         .catch(error => Cli.error(error));
 }
 

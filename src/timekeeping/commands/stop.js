@@ -20,9 +20,9 @@ timekeeper.stop()
     .then(frames => {
         frames.forEach(frame => {
             if(!frame.resource.new)
-                return console.log(`Stopping project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))}, started ${pc.green(dayjs(frame.start).fromNow())} (id: ${frame.id})`)
+                return Cli.out(`Stopping project ${pc.magenta(frame.project)} ${pc.blue(frame.resource.type)} ${pc.blue(('#' + frame.resource.id))}, started ${pc.green(dayjs(frame.start).fromNow())} (id: ${frame.id})\n`)
 
-            console.log(`Stopping project ${pc.magenta(frame.project)} for new ${frame.resource.type} "${pc.blue((frame.resource.id))}", started ${pc.green(dayjs(frame.start).fromNow())} (id: ${frame.id})`)
+            Cli.out(`Stopping project ${pc.magenta(frame.project)} for new ${frame.resource.type} "${pc.blue((frame.resource.id))}", started ${pc.green(dayjs(frame.start).fromNow())} (id: ${frame.id})\n`)
         });
     })
     .catch(error => Cli.error(error));

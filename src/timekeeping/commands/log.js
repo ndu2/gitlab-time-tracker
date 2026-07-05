@@ -33,12 +33,12 @@ function column(str, n){
   }
 
 const logCSV = (frames, times) => {
-    console.log("frameId, project, issueid, date, starttime, endtime, duration (s), title, note");
+    Cli.out("frameId, project, issueid, date, starttime, endtime, duration (s), title, note\n");
     Object.keys(frames).sort().forEach(date => {
         if (!frames.hasOwnProperty(date)) return;
         frames[date].sort((a, b) => a.start.isBefore(b.start) ? -1 : 1)
         .forEach(frame => {
-            console.log(`${frame.id}, ${frame.project}, ${frame.resource.id}, ${dayjs(date).format('YYYY-MM-DD')}, ${frame.start.clone().format('HH:mm')}, ${frame.stop.clone().format('HH:mm')}, ${frame.duration}, ${frame.title!=null?frame.title:''}, ${frame.note!=null?frame.note:''}`);
+            Cli.out(`${frame.id}, ${frame.project}, ${frame.resource.id}, ${dayjs(date).format('YYYY-MM-DD')}, ${frame.start.clone().format('HH:mm')}, ${frame.stop.clone().format('HH:mm')}, ${frame.duration}, ${frame.title!=null?frame.title:''}, ${frame.note!=null?frame.note:''}\n`);
         });
     });
 };
@@ -61,7 +61,7 @@ const logCli =  (frames, times) => {
         }
         
 
-        console.log(pc.green(`${dayjs(date).format('MMMM Do YYYY')} (${toHumanReadable(times[date])})`) + dayNote);
+        Cli.out(pc.green(`${dayjs(date).format('MMMM Do YYYY')} (${toHumanReadable(times[date])})`) + dayNote + '\n');
         frames[date]
             .sort((a, b) => a.start.isBefore(b.start) ? -1 : 1)
             .forEach(frame => {
@@ -70,8 +70,8 @@ const logCli =  (frames, times) => {
                 let issue = frame.resource.new ? 
                 column(`(new ${frame.resource.type + ' "' + frame.resource.id}")`, 70).bgBlue:
                 `${pc.blue((frame.resource.type + ' #' + frame.resource.id).padEnd(20))}${column(frame.title!=null?frame.title:'', 50)}`;
-                console.log(`  ${frame.id}  ${pc.green(frame.start.clone().format('HH:mm'))} to ${pc.green(frame.stop.clone().format('HH:mm'))}\t${durationText}`+
-                `${pc.magenta(column(frame.project, 50))}${issue}${frame.note!=null?frame.note:''}`);
+                Cli.out(`  ${frame.id}  ${pc.green(frame.start.clone().format('HH:mm'))} to ${pc.green(frame.stop.clone().format('HH:mm'))}\t${durationText}`+
+                `${pc.magenta(column(frame.project, 50))}${issue}${frame.note!=null?frame.note:''}\n`);
             });
     });
 };

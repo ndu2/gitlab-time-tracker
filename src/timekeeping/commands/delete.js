@@ -21,7 +21,7 @@ function delCmd() {
             } else {
                 let frame = Frame.fromFile(config, file).stopMe();
                 Fs.remove(file);
-                console.log(`Deleting record ${pc.magenta(frame.id)}`);
+                Cli.out(`Deleting record ${pc.magenta(frame.id)}\n`);
             }
         }
         );

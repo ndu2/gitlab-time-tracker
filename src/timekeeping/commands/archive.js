@@ -23,7 +23,7 @@ timekeeper.archiveInit()
         let years = year ? Object.keys(grouped).filter(y => y === year) : Object.keys(grouped);
 
         if (years.length === 0) {
-            console.log('Nothing to archive.');
+            Cli.out('Nothing to archive.\n');
             return;
         }
 
@@ -42,7 +42,7 @@ timekeeper.archiveInit()
             zip.write(file);
             frames.forEach(frame => Fs.remove(frame.file));
 
-            console.log(`Archived ${frames.length} record(s) into ${file}`);
+            Cli.out(`Archived ${frames.length} record(s) into ${file}\n`);
         });
     })
     .catch(error => Cli.error(error));

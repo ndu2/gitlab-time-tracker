@@ -39,12 +39,12 @@ timekeeper.list(project, type, program.opts().closed ? 'closed' : 'opened', prog
       style : {compact : true, 'padding-left' : 1}
     });
     if (tasks.length == 0) {
-      console.log("No issues or merge requests found.");
+      cli.out("No issues or merge requests found.\n");
     }
     tasks.forEach(issue => {
       table.push([pc.magenta(issue.iid.toString()), pc.green(issue.title) + "\n" + pc.gray(issue.data.web_url), issue.state])
     })
-    console.log(table.toString());
+    cli.out(`${table.toString()}\n`);
   })
   .catch(error => cli.error(error));
 

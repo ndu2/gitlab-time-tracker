@@ -41,7 +41,7 @@ if (!id)
     Cli.error('Wrong or missing issue/merge_request id');
 
 timekeeper.start(project, type, id, note)
-    .then(frame => console.log(`Starting project ${pc.magenta(config.get('project'))} ${pc.blue(type)} ${pc.blue(('#' + id))} at ${pc.green(dayjs().format('HH:mm'))}`))
+    .then(frame => Cli.out(`Starting project ${pc.magenta(config.get('project'))} ${pc.blue(type)} ${pc.blue(('#' + id))} at ${pc.green(dayjs().format('HH:mm'))}\n`))
     .catch(error => Cli.error(error));
 }
 );
