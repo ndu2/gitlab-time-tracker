@@ -1,5 +1,4 @@
 import {Command} from 'commander';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Fs from '../../core/filesystem.js';
 import Time from '../../core/time.js';
@@ -212,7 +211,7 @@ function showInteractiveMenu(frames) {
   });
 }
 
-function edit() {
+function edit(configLoader) {
   const edit = new Command('edit', 'edit time record by the given id')
     .arguments('[id]')
     .option('-f, --following <number>', 'edit also the following (by ctime) of the given [id]')
@@ -224,7 +223,7 @@ function edit() {
     .option('--week <day>', 'only list entries for the week of this day')
     .action((id, opts ,program) => {
 
-let config = new Config(process.cwd());
+let config = configLoader();
 let timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
 let timekeeper = new Timekeeper(config);
 const listSize = program.opts().listsize;

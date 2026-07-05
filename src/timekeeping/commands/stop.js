@@ -1,20 +1,18 @@
 import {Command} from 'commander';
 import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 
 
-function stop() {
+function stop(configLoader) {
     const stop = new Command('stop', 'stop monitoring time')
     .option('--verbose', 'show verbose output')
     .action((options, program) => {
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(process.cwd()),
-    timekeeper = new Timekeeper(config);
+let timekeeper = new Timekeeper(configLoader());
 
 timekeeper.stop()
     .then(frames => {

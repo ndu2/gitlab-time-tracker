@@ -1,18 +1,17 @@
 import {Command} from 'commander';
 import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 
-function cancel() {
+function cancel(configLoader) {
   const cancel = new Command('cancel', 'cancel and discard active monitoring time')
     .option('--verbose', 'show verbose output')
     .action((options, program) => {
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(process.cwd());
+let config = configLoader();
 let timekeeper = new Timekeeper(config);
 
 timekeeper.cancel()

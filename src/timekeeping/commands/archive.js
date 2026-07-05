@@ -1,12 +1,11 @@
 import fs from 'fs';
 import {Command} from 'commander';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Fs from '../../core/filesystem.js';
 import Zip from '../../core/zip.js';
 import Timekeeper from '../timekeeper.js';
 
-function archive() {
+function archive(configLoader) {
     const archive = new Command('archive', 'archive synced time records into yearly zip files (filesYYYY.zip), one folder per month')
         .option('--year <year>', 'only archive the given year')
         .option('--verbose', 'show verbose output')
@@ -14,7 +13,7 @@ function archive() {
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(process.cwd()),
+let config = configLoader(),
     timekeeper = new Timekeeper(config),
     year = program.opts().year;
 

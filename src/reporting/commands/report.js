@@ -4,7 +4,6 @@ import {Command} from 'commander';
 import dayjs from '../../core/dayjs.js';
 import Cli from '../../core/cli.js';
 import Args from '../../core/args.js';
-import Config from '../../core/file-config.js';
 import Report from '../api/report.js';
 import Owner from '../../core/owner.js';
 import ReportCollection from '../api/reportCollection.js';
@@ -28,7 +27,7 @@ function collect(val, arr) {
 }
 
 
-function report() {
+function report(configLoader) {
     const report = new Command('report', 'generate a report for the given project and issues')
     .arguments('[project] [ids...]')
     .option('-e --type <type>', 'specify the query type: project, user, group')
@@ -81,7 +80,7 @@ function report() {
     .action(async (project, ids, options, program) => {
 
 // init helpers
-let config = new Config(process.cwd());
+let config = configLoader();
 let args = new Args(program.args);
 
 // overwrite config with args and opts

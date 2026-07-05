@@ -1,12 +1,11 @@
 import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
 import {Command} from 'commander';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 
 
-function start() {
+function start(configLoader) {
     const start = new Command('start', 'start monitoring time for the given project and resource id')
     .arguments('[project] [id]')
     .option('-t, --type <type>', 'specify resource type: issue, merge_request')
@@ -18,7 +17,7 @@ function start() {
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(process.cwd()),
+let config = configLoader(),
     timekeeper = new Timekeeper(config),
     type = program.opts().type ? program.opts().type : 'issue',
     id = program.args.length === 1 ? parseInt(program.args[0]) : parseInt(program.args[1]),

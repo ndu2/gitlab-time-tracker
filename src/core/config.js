@@ -10,7 +10,7 @@ const defaults = {
     token: false,
     project: false,
     from: "1970-01-01",
-    to: dayjs().format(),
+    to: dayjs().add(1, 'day').format('YYYY-MM-DD'),
     iids: false,
     closed: false,
     milestone: false,

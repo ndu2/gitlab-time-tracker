@@ -1,13 +1,12 @@
 import {Command} from 'commander';
 import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Time from '../../core/time.js';
 import Timekeeper from '../timekeeper.js';
 import mergeRequest from '../api/mergeRequest.js';
 
-function log() {
+function log(configLoader) {
   const log = new Command('log', 'log recorded time records')
     .option('--verbose', 'show verbose output')
     .option('--hours_per_day <hours>', 'hours per day for human readable time formats')
@@ -17,8 +16,8 @@ function log() {
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(process.cwd()).set('hoursPerDay', program.opts().hours_per_day),
-    timekeeper = new Timekeeper(config),
+let config = configLoader().set('hoursPerDay', program.opts().hours_per_day);
+let timekeeper = new Timekeeper(config),
     timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
 
 function toHumanReadable(input) {

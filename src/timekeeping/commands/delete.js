@@ -1,16 +1,15 @@
 import { Command } from 'commander';
 import Frame from '../storage/frame.js';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Fs from '../../core/filesystem.js';
 import pc from 'picocolors';
 
-function delCmd() {
+function delCmd(configLoader) {
     const delCmd = new Command('delete', 'delete time record by the given id')
         .arguments('[id]')
         .action((id, opts, program) => {
 
-            let config = new Config(process.cwd());
+            let config = configLoader();
 
             if (!id && -Infinity === (id = Fs.newest(config.frameDir).name))
                 Cli.error('No record found.');

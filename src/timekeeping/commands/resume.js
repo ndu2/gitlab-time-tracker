@@ -1,7 +1,6 @@
 import { Command } from 'commander';
 import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 import Fs from '../../core/filesystem.js';
@@ -23,7 +22,7 @@ function resumeFrame(timekeeper, frame) {
         .catch(error => Cli.error(error));
 }
 
-function resume() {
+function resume(configLoader) {
     const resume = new Command('resume', 'resume monitoring time for last stopped record')
         .arguments('[project]')
         .option('--verbose', 'show verbose output')
@@ -32,8 +31,8 @@ function resume() {
 
             Cli.verbose = program.opts().verbose;
 
-            let config = new Config(process.cwd()).set('project', project),
-                timekeeper = new Timekeeper(config);
+            let config = configLoader().set('project', project);
+            let timekeeper = new Timekeeper(config);
 
             if (!config.get('project'))
                 Cli.error('No project set');
