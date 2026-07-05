@@ -2,11 +2,10 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import Config from './config.js';
-import { load as yamlLoad } from 'js-yaml';
+import { load as yamlLoad, dump as yamlDump } from 'js-yaml';
 import hash from 'hash-sum';
 import Fs from './filesystem.js';
 import envPaths from 'env-paths';
-import Cli from './cli.js';
 
 const readYaml = file => yamlLoad(fs.readFileSync(file, 'utf8'));
 
@@ -18,12 +17,16 @@ class FileConfig extends Config {
     /**
      * construct
      * @param workDir
+     * @param load set to false to skip parsing the config files, e.g. when
+     *   recovering from a broken config to still resolve its paths
      */
-    constructor(workDir) {
+    constructor(workDir, recover) {
         super();
-        this.assertGlobalConfig();
+        this.assertGlobalConfig(recover);
         this.workDir = workDir;
-        this.data = Object.assign(this.data, this.localExists() ? this.parseLocal() : this.parseGlobal());
+        if(!recover) {
+            this.data = Object.assign(this.data, this.localExists() ? this.parseLocal() : this.parseGlobal());
+        }
         if (!fs.existsSync(this.frameDir)) fs.mkdirSync(this.frameDir, { recursive: true });
         this.cache = {
             delete: this._cacheDelete,
@@ -89,7 +92,7 @@ class FileConfig extends Config {
         }
     }
 
-    assertGlobalConfig() {
+    assertGlobalConfig(recover) {
         if(!fs.existsSync(this.globalDir) && fs.existsSync(this.oldGlobalDir)) {
             fs.renameSync(this.oldGlobalDir, this.globalDir);
         }
@@ -98,7 +101,7 @@ class FileConfig extends Config {
 
         if (!fs.existsSync(this.globalDir)) fs.mkdirSync(this.globalDir, { recursive: true });
         if (!fs.existsSync(this.cacheDir)) fs.mkdirSync(this.cacheDir, { recursive: true });
-        if (!fs.existsSync(this.global)) fs.appendFileSync(this.global, '');
+        if (recover && !fs.existsSync(this.global)) fs.appendFileSync(this.global, yamlDump(this.data));
     }
 
     assertLocalConfig() {

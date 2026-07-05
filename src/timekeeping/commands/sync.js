@@ -1,10 +1,9 @@
 import {Command} from 'commander';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 import Owner from '../../core/owner.js';
 
-function sync() {
+function sync(configLoader) {
     const sync = new Command('sync', 'sync local time records to GitLab')
     .option('--url <url>', 'URL to GitLabs API')
     .option('--token <token>', 'API access token')
@@ -13,10 +12,10 @@ function sync() {
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(process.cwd())
+let config = configLoader()
         .set('url', program.opts().url)
-        .set('token', program.opts().token),
-timekeeper = new Timekeeper(config),
+        .set('token', program.opts().token);
+let timekeeper = new Timekeeper(config),
 owner = new Owner(config);
 
 timekeeper.syncInit()

@@ -3,11 +3,10 @@ import pc from 'picocolors';
 import Table from 'cli-table';
 
 
-import Config from '../../core/file-config.js';
 import cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 
-function list() {
+function list(configLoader) {
   const list = new Command('list', 'list all open issues or merge requests')
     .arguments('[project]')
     .option('--verbose', 'show verbose output')
@@ -20,10 +19,10 @@ function list() {
     .option('--token <token>', 'API access token')
     .action((aproject, options, program) => {
 
-let config = new Config(process.cwd())
+let config = configLoader()
         .set('url', program.opts().url)
-        .set('token', program.opts().token),
-    timekeeper = new Timekeeper(config),
+        .set('token', program.opts().token);
+let timekeeper = new Timekeeper(config),
     type = program.opts().type ? program.opts().type : 'issue',
     project = program.args[0];
 

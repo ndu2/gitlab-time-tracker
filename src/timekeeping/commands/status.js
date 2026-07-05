@@ -1,12 +1,11 @@
 import {Command} from 'commander';
 import pc from 'picocolors';
 import dayjs from '../../core/dayjs.js';
-import Config from '../../core/file-config.js';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 
 
-function status() {
+function status(configLoader) {
     const status = new Command('status', 'shows if time monitoring is running')
     .option('--verbose', 'show verbose output')
     .option('-s', 'short output')
@@ -14,8 +13,7 @@ function status() {
 
 Cli.verbose = program.opts().verbose;
 
-let config = new Config(process.cwd()),
-    timekeeper = new Timekeeper(config);
+let timekeeper = new Timekeeper(configLoader());
 
 timekeeper.status()
     .then(frames => {

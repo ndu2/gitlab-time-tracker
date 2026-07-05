@@ -1,13 +1,12 @@
 import {Command} from 'commander';
-import Config from '../file-config.js';
 import Fs from '../filesystem.js';
 
-let config = new Config(process.cwd());
-
-function cfgCmd() {
+function cfgCmd(configLoader) {
     const cfgCmd = new Command('config', 'edit the configuration file in your default editor')
     .option('-l, --local', 'edit the local configuration file')
     .action((options, program) => {
+
+let config = configLoader();
 
 if (program.opts().local) {
     config.assertLocalConfig();
