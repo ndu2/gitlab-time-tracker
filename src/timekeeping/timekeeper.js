@@ -9,7 +9,7 @@ const classes = {
     merge_request: MergeRequest
 };
 
-const CURRENT_FILE = 'current.txt';
+const CURRENT_FILE = '~current.tmp';
 
 class Timekeeper {
     constructor(config) {
@@ -19,7 +19,7 @@ class Timekeeper {
 
     /**
      * Path to the pointer file that names the currently
-     * active (not yet stopped) frame, if any.
+     * active (has no contents if stopped)
      */
     _currentFile() {
         return Fs.join(this.config.frameDir, CURRENT_FILE);
@@ -31,8 +31,10 @@ class Timekeeper {
      * lookup instead of scanning every frame file.
      */
     _currentId() {
-        if (!Fs.exists(this._currentFile())) return null;
-
+        if (!Fs.exists(this._currentFile())) {
+            let running = new FrameCollection(this.config).frames.find(frame => frame.stop === false);
+            Fs.writeText(this._currentFile(), running ? running.id : '');
+        }
         let id = Fs.readText(this._currentFile()).trim();
 
         return id || null;
@@ -267,7 +269,7 @@ class Timekeeper {
         if (!id) throw new Error('No projects started.');
 
         let frame = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json')).stopMe();
-        Fs.remove(this._currentFile());
+        Fs.truncate(this._currentFile());
 
         return [frame];
     }
@@ -284,7 +286,7 @@ class Timekeeper {
         let file = Fs.join(this.config.frameDir, id + '.json');
         let frame = Frame.fromFile(this.config, file);
         Fs.remove(file);
-        Fs.remove(this._currentFile());
+        Fs.truncate(this._currentFile());
 
         return [frame];
     }
