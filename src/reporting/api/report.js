@@ -1,8 +1,8 @@
 import dayjs from '../../core/dayjs.js';
 import GitlabClient from '../../core/gitlab-client.js';
 import parallel from '../../core/parallel.js';
-import Issue from './issue.js';
-import MergeRequest from './mergeRequest.js';
+import Issue from '../../core/issue.js';
+import MergeRequest from '../../core/mergeRequest.js';
 import Project from './project.js';
 
 /**
