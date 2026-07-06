@@ -29,18 +29,19 @@ function column(str, n) {
  * @param edited
  * @returns {string}
  */
-function formatFrameRow(frame, focus, edited, noteOverride) {
+function formatFrameRow(frame, focus, editedStart, editedEnd, editedNote, noteOverride) {
   const startText = frame.start.clone().format("MMMM Do YYYY HH:mm");
   const stopText = frame.stop ? "to " + frame.stop.clone().format("HH:mm") : "(running)";
-  const startColor = edited === "start" || edited === "both" ? pc.red : pc.green;
-  const stopColor = edited === "stop" || edited === "both" ? pc.red : pc.green;
+  const startColor = editedStart? pc.red : pc.green;
+  const stopColor = editedEnd ? pc.red : pc.green;
   const start = focus === "start" ? pc.inverse(startColor(startText)) : startColor(startText);
   const stop = focus === "stop" ? pc.inverse(stopColor(stopText)) : stopColor(stopText);
   const issue = `${
     pc.blue((frame.resource.type + " #" + frame.resource.id).padEnd(20))
   }${column(frame.title != null ? frame.title : "", 50)}`;
   const note = noteOverride != null ? noteOverride : (frame.note != null ? frame.note : "");
-  return `${frame.id}  ${start} ${stop}\t${pc.magenta(column(frame.project, 50))}${issue}${note}`;
+  const noteDisplay = editedNote ? pc.red(note) : note;
+  return `${frame.id}  ${start} ${stop}\t${pc.magenta(column(frame.project, 50))}${issue}${noteDisplay}`;
 }
 
 /**
@@ -59,12 +60,13 @@ function showInteractiveMenu(frames) {
     // fields is a flat cycle of [frameIndex, 'start'|'stop'] pairs
     const fields = frames.flatMap((_, i) => [[i, 'start'], [i, 'stop']]);
     let cursor = 0;
-    // per-frame set of edited field names ('start'/'stop')
+    // per-frame set of edited field names ('start'/'stop'/'note')
     const editedFields = frames.map(() => new Set());
-    // original start/stop values, used to reset a frame's edits
+    // original start/stop/note values, used to reset a frame's edits
     const originals = frames.map((frame) => ({
       start: frame.start.clone(),
       stop: frame.stop ? frame.stop.clone() : null,
+      note: frame.note,
     }));
 
     // index of the frame whose note is currently being edited inline, or null
@@ -80,20 +82,19 @@ function showInteractiveMenu(frames) {
     ];
     let mode = 0;
 
-    function render() {
+    function render() { // w write does not really save all, does it?
       Cli.out('\x1Bc');
       if (noteEditIndex !== null) {
         Cli.out('Editing note. Enter: confirm   Esc: cancel\n\n\n');
       } else {
-        Cli.out('←/→ (or Tab/Shift+Tab): switch field   ↑/↓: switch frame   +/-: adjust time   m: cycle mode   r: reset frame   e: edit note (if empty)   w: save all   q: exit (ignored on unsaved changes)   Esc: exit\n');
+        Cli.out('←/→ (or Tab/Shift+Tab): switch field   ↑/↓: switch frame   +/-: adjust time   m: cycle mode   r: reset frame   e: edit note (if not yet synced)   Enter: save selected   w: save all   q: exit (ignored on unsaved changes)   Esc: exit\n');
         Cli.out(`Mode: ${modes[mode].label}\n\n`);
       }
       frames.forEach((frame, i) => {
         const focus = fields[cursor][0] === i ? fields[cursor][1] : null;
         const edited = editedFields[i];
-        const editedArg = edited.has('start') && edited.has('stop') ? 'both' : edited.has('start') ? 'start' : edited.has('stop') ? 'stop' : null;
         const noteOverride = noteEditIndex === i ? pc.inverse(noteBuffer + ' ') : null;
-        Cli.out(`${formatFrameRow(frame, focus, editedArg, noteOverride)}\n`);
+        Cli.out(`${formatFrameRow(frame, focus, edited.has('start'), edited.has('end'), edited.has('note'), noteOverride)}\n`);
       });
     }
 
@@ -137,9 +138,11 @@ function showInteractiveMenu(frames) {
       } else if (key.name === 'r') {
         frame.start = originals[frameIdx].start.clone();
         frame.stop = originals[frameIdx].stop ? originals[frameIdx].stop.clone() : null;
+        frame.note = originals[frameIdx].note;
         editedFields[frameIdx].clear();
       } else if (key.name === 'e') {
         if (frame.notes.length == 0) {
+          editedFields[frameIdx].add('note');
           noteEditIndex = frameIdx;
           noteBuffer = frame.note != null ? frame.note : '';
         }
@@ -182,11 +185,13 @@ function showInteractiveMenu(frames) {
         }
         editedFields[frameIdx].add(field);
       } else if (key.name === 'w') {
-        frames.forEach((frame) => {
+        frames.forEach((frame, i) => {
           frame.write()
-          editedFields[frameIdx].clear();
-        }
-      );
+          editedFields[i].clear();
+        });
+      } else if (key.name === 'return') {
+        frames[frameIdx].write()
+        editedFields[frameIdx].clear();
       } else if (key.name === 'escape' || str === 'q') {
         if(key.name === 'escape' || editedFields.reduce((a,c)=> a + c.size, 0) == 0)
         {
@@ -215,6 +220,8 @@ function edit() {
     .option('-i, --interactive', 'edit start/stop time interactively with keystrokes')
     .option('--today', 'only list entries for today')
     .option('--this_week', 'only list entries for this week')
+    .option('--day <day>', 'only list entries for this day')
+    .option('--week <day>', 'only list entries for the week of this day')
     .action((id, opts ,program) => {
 
 let config = new Config(process.cwd());
@@ -242,9 +249,20 @@ function getMenuFrames() {
       }
     } else if (program.opts().today || program.opts().this_week) {
       let from = program.opts().today ? dayjs().startOf('day') : dayjs().startOf('week');
-      let to = program.opts().today ? dayjs().endOf('day') : dayjs().endOf('week');
+      let to = program.opts().today ? dayjs().add(1, 'day').startOf('day') : dayjs().endOf('week').add(1, 'day').startOf('day');
       frames = frames.filter((fr) => !fr.start.isBefore(from) && !fr.start.isAfter(to));
       frames.sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1));
+    } else if (program.opts().day || program.opts().week) {
+      let userDay = dayjs.utc(program.opts().day ? program.opts().day : program.opts().week);
+      if(!userDay.isValid()) {
+        Cli.error("invalid day.");
+        frames = [];
+      } else {
+        let from = program.opts().day ? userDay.startOf('day') : userDay.startOf('week');
+        let to = program.opts().day ? userDay.add(1, 'day').startOf('day') : userDay.endOf('week').add(1, 'day').startOf('day');
+        frames = frames.filter((fr) => !fr.start.isBefore(from) && !fr.start.isAfter(to));
+        frames.sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1));
+      }
     } else {
       let to = dayjs().subtract(2, 'month');
       frames = frames.filter((fr) => fr.start.isAfter(to));
