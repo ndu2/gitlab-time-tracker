@@ -28,7 +28,7 @@
 
 ### limitations
 
- Time tracking for other work items (e.g. tasks, epics) is currently not supported. See also https://github.com/ndu2/gitlab-time-tracker/issues/33
+Time tracking and reporting for epics is currently not supported.
 
 ## requirements
 
@@ -58,7 +58,7 @@ token: 01234567891011
 
 You will need node and npm to build the project
 
-* [node.js](https://nodejs.org/en/download) version >= 22
+* [node.js](https://nodejs.org/en/download) version 24
 * [npm](https://github.com/npm/npm)
 
 
@@ -196,6 +196,15 @@ gtt edit
 ```
 
 You can omit the id to edit to bring up a list of the latest records to choose from.
+
+
+**In-Console edit records**
+
+```shell
+gtt edit -i
+gtt edit -i --this_week
+gtt edit -i --week 2026-02-04
+```
 
 **Delete a local time record by the given id:**
 
@@ -389,7 +398,7 @@ gtt report --no_warnings
 gtt report --date_format="DD.MM.YYYY HH:mm:ss"
 ```
 
-*Note: [Click here](http://momentjs.com/docs/#/displaying/format/) for a further documentation on the date format.*
+*Note: [Click here](https://day.js.org/docs/en/display/format) for a further documentation on the date format.*
 
 #### Set time format for the report
 
@@ -574,7 +583,7 @@ recordColumns:
 userColumns: true
 
 # Date format
-# Click here for format options: http://momentjs.com/docs/#/displaying/format/
+# Click here for format options: https://day.js.org/docs/en/display/format
 # defaults to DD.MM.YYYY HH:mm:ss
 dateFormat: DD.MM.YYYY HH:mm:ss
 

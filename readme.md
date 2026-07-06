@@ -9,11 +9,11 @@ gtt is a fully featured command line interface for GitLab's time tracking featur
 
 ## About this fork (ndu2)
 
-Shout-out to kris for creating this handy tool. As we use gtt regularly and maintenance on the original repo stopped, I maintain the code base in the foreseeable future on this fork (versions 1.8.x).
+Shout-out to kris for creating this handy tool. As we use gtt regularly and maintenance on the original repo stopped, I maintain the code base in the foreseeable future on this fork (versions 1.8.x and later).
 
 Feel free to contact me or create a Pull Request if you have some patches or proposals.
 
-### Where to get gtt v1.8
+### Where to get gtt
 
 There are various options:
 
@@ -33,7 +33,7 @@ How to install and use gtt? You can find the documentation [here](documentation.
 
 ### limitations
 
-Time tracking for other work items (e.g. tasks, epics) is currently not supported.
+Time tracking and reporting for epics is currently not supported.
 
 
 ## license
