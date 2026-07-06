@@ -1,7 +1,7 @@
 import Fs from '../core/filesystem.js';
 import Frame from './storage/frame.js';
-import Issue from './api/issue.js';
-import MergeRequest from './api/mergeRequest.js';
+import Issue from '../core/issue.js';
+import MergeRequest from '../core/mergeRequest.js';
 import FrameCollection from './storage/frameCollection.js';
 
 const classes = {

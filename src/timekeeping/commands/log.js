@@ -4,7 +4,6 @@ import dayjs from '../../core/dayjs.js';
 import Cli from '../../core/cli.js';
 import Time from '../../core/time.js';
 import Timekeeper from '../timekeeper.js';
-import mergeRequest from '../api/mergeRequest.js';
 
 function log(configLoader) {
   const log = new Command('log', 'log recorded time records')

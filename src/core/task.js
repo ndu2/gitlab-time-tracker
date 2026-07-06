@@ -1,12 +1,8 @@
 import dayjs from './dayjs.js';
 import GitlabClient from './gitlab-client.js';
+import Time from './time.js';
+import DayReport from '../reporting/api/dayReport.js';
 
-/**
- * task model — shared data/getters for issues and merge requests, which differ
- * only by their GitLab resource type. Write ops (make/createTime) and the
- * list() query live in timekeeping/api/*; read/aggregation in reporting/api/*.
- * @param type the GitLab resource type: 'issues' or 'merge_requests'
- */
 class Task {
     constructor(config, data = {}, client = new GitlabClient(config), type) {
         this.config = config;
@@ -17,9 +13,6 @@ class Task {
         this.type = type;
     }
 
-    /*
-     * properties
-     */
     get iid() {
         return this.data.iid;
     }
@@ -99,6 +92,136 @@ class Task {
 
     get _typeSingular() {
         return this.type === 'merge_requests' ? 'Merge Request' : 'Issue';
+    }
+
+    make(project, id, create = false) {
+        let promise = create
+            ? this.client.post(`projects/${encodeURIComponent(project)}/${this._type}`, {title: id})
+            : this.client.get(`projects/${encodeURIComponent(project)}/${this._type}/${id}`);
+
+        return promise.then(response => {
+            this.data = response.body;
+            return this;
+        });
+    }
+
+    getNotes() {
+        let promise = this.client.all(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`);
+        promise.then(notes => this.notes = notes);
+
+        return promise;
+    }
+
+    createTime(time, created_at, note) {
+        if(note === null || note === undefined) {
+            note = '';
+        }
+        else {
+            note = '\n\n' + note;
+        }
+        var date = new Date(created_at);
+        var spentAt = date.getUTCFullYear()+"-"+(date.getUTCMonth()+1)+"-"+date.getUTCDate();
+        const query =
+        `mutation($input: CreateNoteInput!) {
+            createNote(input: $input) {
+                note {
+                id
+                body
+                }
+                errors
+            }
+        }`
+        let noteablePath = (this._type == 'merge_requests') ? 'MergeRequest' : 'WorkItem';
+        let request = {
+            "query": query,
+            "variables": {
+                "input": {
+                    "noteableId": `gid://gitlab/${noteablePath}/${this.id}`,
+                    "body": '/spend '+Time.toHumanReadable(time, this.config.get('hoursPerDay'), '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]' + ' ' + spentAt + note),
+                }
+            }
+        };
+        let promise = this.client.graphQL(request);
+        promise.then(response => {
+            if(!response.body || response.body.errors) {
+                throw new Error(`createTime failed: ${JSON.stringify(response.body)}`);
+            }
+            return response;
+        });
+    }
+
+    getStats() {
+        let promise = this.client.get(`projects/${this.data.project_id}/${this._type}/${this.iid}/time_stats`);
+        promise.then(response => this.stats = response.body);
+
+        return promise;
+    }
+
+    recordTimelogs(timelogs){
+        let spentFreeLabels = this.config.get('freeLabels');
+        if(undefined === spentFreeLabels) {
+            spentFreeLabels = [];
+        }
+        let spentHalfPriceLabels = this.config.get('halfPriceLabels');
+        if(undefined === spentHalfPriceLabels) {
+            spentHalfPriceLabels = [];
+        }
+
+        let free = false;
+        let halfPrice = false;
+        this.labels.forEach(label => {
+                spentFreeLabels.forEach(freeLabel => {
+                    free |= (freeLabel == label);
+                });
+            });
+        this.labels.forEach(label => {
+                spentHalfPriceLabels.forEach(halfPriceLabel => {
+                    halfPrice |= (halfPriceLabel == label);
+                });
+            });
+
+        let chargeRatio = free? 0.0: (halfPrice? 0.5: 1.0);
+
+        let times = [],
+            timeSpent = 0,
+            timeUsers = {},
+            timeFormat = this.config.get('timeFormat', this._type);
+
+        timelogs.forEach(
+            (timelog) => {
+                let spentAt = dayjs(timelog.spentAt);
+                let dateGrp = spentAt.format(this.config.get('dateFormatGroupReport'));
+                if(!this.days[dateGrp])
+                {
+                    this.days[dateGrp] = new DayReport(this.iid, this.title, spentAt, chargeRatio);
+                }
+                if(timelog.note && timelog.note.body) {
+                    this.days[dateGrp].addNote(timelog.note.body);
+                }
+                this.days[dateGrp].addSpent(timelog.timeSpent);
+
+                let time = new Time(null, spentAt, {
+                    author: {username: timelog.user.username},
+                    created_at: timelog.spentAt,
+                    noteable_type: this._typeSingular
+                }, this, this.config);
+                time.seconds = timelog.timeSpent;
+                time.project_namespace = this.project_namespace;
+
+                // only include times by the configured user
+                if (this.config.get('user') && this.config.get('user') !== timelog.user.username) return;
+
+                if (!timeUsers[timelog.user.username]) timeUsers[timelog.user.username] = 0;
+
+                timeSpent += time.seconds;
+                timeUsers[timelog.user.username] += time.seconds;
+
+                times.push(time);
+            });
+
+        Object.entries(timeUsers).forEach(([name, time]) => this[`time_${name}`] = Time.toHumanReadable(time, this.config.get('hoursPerDay'), timeFormat));
+        this.timeSpent = timeSpent;
+        this.times = times;
     }
 }
 
