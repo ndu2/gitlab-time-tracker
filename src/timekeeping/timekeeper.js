@@ -156,8 +156,15 @@ class Timekeeper {
     async _addTime(frame, time) {
         let resource = this.sync.resources[frame.project][frame.resource.type][frame.resource.id];
 
-        await resource.createTime(Math.ceil(time), frame._stop, frame.note);
-        await resource.getNotes();
+        let createdNote = await resource.createTime(Math.ceil(time), frame._stop, frame.note);
+        let noteid = createdNote ?.id?.split('/')?.pop();
+        // fallback, if gitlab does not return the created note
+        if(!isNaN(noteid)) {
+            noteid = parseInt(noteid)
+        } else {
+            await resource.getNotes()
+            noteid = resource.notes[0].id;
+        }
 
         if (frame.resource.new) {
             delete frame.resource.new;
@@ -166,7 +173,7 @@ class Timekeeper {
         }
 
         frame.notes.push({
-            id: resource.notes[0].id,
+            id: noteid,
             time: Math.ceil(time)
         });
 

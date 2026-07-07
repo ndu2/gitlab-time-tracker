@@ -141,12 +141,12 @@ class Task {
                 }
             }
         };
-        let promise = this.client.graphQL(request);
-        promise.then(response => {
-            if(!response.body || response.body.errors) {
+        return this.client.graphQL(request).then(response => {
+            let errors = response.body?.errors ?? response.body?.data?.createNote?.errors;
+            if(!response.body || (errors && errors.length)) {
                 throw new Error(`createTime failed: ${JSON.stringify(response.body)}`);
             }
-            return response;
+            return response.body.data.createNote.note;
         });
     }
 
