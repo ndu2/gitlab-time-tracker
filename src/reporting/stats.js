@@ -69,8 +69,8 @@ export default function calculateStats(config, report) {
                 }
                 times.push(time);
             });
-            totalEstimate += parseInt(issue.stats.time_estimate);
-            totalSpent += parseInt(issue.stats.total_time_spent);
+            totalEstimate += parseFloat(issue.total_estimate);
+            totalSpent += parseFloat(issue.total_spent);
         });
 
         report[type].sort((a, b) => {

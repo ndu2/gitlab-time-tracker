@@ -243,8 +243,6 @@ class Report {
                     timelog[input].iid == data.iid &&
                     timelog[input].projectId == data.project_id));
 
-            await item.getStats();
-
             if (this.config.get('showWithoutTimes') || item.times.length > 0) {
                 collect.push(item);
             }
