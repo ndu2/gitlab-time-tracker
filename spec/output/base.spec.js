@@ -14,7 +14,8 @@ function makeIssue({ iid = 1, labels = [], times = [], days = {}, estimate = 0, 
         labels,
         times,
         days,
-        stats: { time_estimate: estimate, total_time_spent: spent }
+        total_spent : spent,
+        total_estimate : estimate
     };
 }
 

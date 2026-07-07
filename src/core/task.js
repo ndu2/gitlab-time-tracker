@@ -79,11 +79,11 @@ class Task {
     }
 
     get total_spent() {
-        return this.stats ? this.config.toHumanReadable(this.stats.total_time_spent, this._type) : null;
+        return this.data.time_stats ? this.config.toHumanReadable(this.data.time_stats.total_time_spent, this._type) : null;
     }
 
     get total_estimate() {
-        return this.stats ? this.config.toHumanReadable(this.stats.time_estimate, this._type) : null;
+        return this.data.time_stats ? this.config.toHumanReadable(this.data.time_stats.time_estimate, this._type) : null;
     }
 
     get _type() {
@@ -148,13 +148,6 @@ class Task {
             }
             return response;
         });
-    }
-
-    getStats() {
-        let promise = this.client.get(`projects/${this.data.project_id}/${this._type}/${this.iid}/time_stats`);
-        promise.then(response => this.stats = response.body);
-
-        return promise;
     }
 
     recordTimelogs(timelogs){
