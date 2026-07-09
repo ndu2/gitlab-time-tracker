@@ -3,7 +3,8 @@
  * day model of one item
  */
 class DayReport {
-    constructor(iid, title, spentAt, chargeRatio) {
+    constructor(project_id, iid, title, spentAt, chargeRatio) {
+      this.project_id = project_id;
       this.iid = iid;
       this.title = title;
       this.spentAt = spentAt;
@@ -11,6 +12,10 @@ class DayReport {
 
       this.spent = 0;
       this.notes = [];
+    }
+
+    getProjectId() {
+      return this.project_id;
     }
   
     getIid() {

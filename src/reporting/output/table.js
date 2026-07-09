@@ -1,6 +1,7 @@
 import Table from 'cli-table';
 import Output from './base.js';
 import pc from 'picocolors';
+import dayjs from 'dayjs';
 
 const format = {
     headline: h => `\n${pc.bold(pc.underline(h))}\n`,
@@ -58,29 +59,21 @@ class TableOutput extends Output {
 
     makeDailyStats() {
         this.headline('DAILY RECORDS');
-
         var tabledt = new Table({head: ['date', 'time']});
         var tabledit = new Table({head: ['date', 'project', 'iid', 'time']});
-        let days = Object.keys(this.days);
-        days.sort();
-        days.forEach(
-            k => {
-                let day = this.days[k];
-                let refD = this.daysMoment[k].format(this.config.get('dateFormat'));
-                let projects = Object.keys(day);
-                let time = 0;
-                projects.forEach(
-                    p => {
-                    let iids = Object.keys(day[p]);
-                    iids.sort();
-                    iids.forEach(
-                        iid => {
-                            tabledit.push([refD, p, iid, this.config.toHumanReadable(day[p][iid], 'records')]);
-                            time += day[p][iid];
-                        });
-                    });
-                tabledt.push([refD, this.config.toHumanReadable(time)]);
+        let daysNew = Object.keys(this.daysNew);
+        daysNew.sort();
+        daysNew.forEach(k => {
+            let dayReports = this.daysNew[k];
+            // for each day
+            let refD = this.daysMoment[k].format(this.config.get('dateFormat'));
+            let time = 0;
+            dayReports.forEach(dayReport => {
+                tabledit.push([refD, this.report.projects[dayReport.getProjectId()], dayReport.getIid(), this.config.toHumanReadable(dayReport.getSpent(), 'records')]);
+                time += dayReport.getSpent();
             });
+            tabledt.push([refD, this.config.toHumanReadable(time)]);
+        });
         this.write(tabledt.toString());
         this.write(tabledit.toString());
     }
@@ -89,7 +82,19 @@ class TableOutput extends Output {
         this.makeDailyStats();
         this.headline('TIME RECORDS');
         let times = new Table({head: this.config.get('recordColumns').map(c => c.replace('_', ' '))});
-        this.times.forEach(time => times.push(this.prepare(time, this.config.get('recordColumns'))));
+        this.report.timelogs.forEach(timelog =>
+        {
+            let data = {
+                ...timelog.issues,
+                ...timelog.mergeRequests,
+                time: this.config.toHumanReadable(timelog.timeSpent, 'records'),
+                date: dayjs(timelog.spentAt),
+                type: timelog.mergeRequests ? 'Merge Request' : 'Issue',
+                project: timelog.project.name,
+                user: timelog.user.username,
+                note: timelog.note?.body ?? ''};
+            times.push(this.prepare(data, this.config.get('recordColumns')));
+        });
         this.write(times.toString());
     }
 }

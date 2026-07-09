@@ -1,14 +1,12 @@
 import dayjs from './dayjs.js';
 import GitlabClient from './gitlab-client.js';
 import Time from './time.js';
-import DayReport from '../reporting/api/dayReport.js';
 
 class Task {
     constructor(config, data = {}, client = new GitlabClient(config), type) {
         this.config = config;
         this.client = client;
         this.times = [];
-        this.days = {};
         this.data = data;
         this.type = type;
     }
@@ -82,8 +80,16 @@ class Task {
         return this.data.time_stats ? this.config.toHumanReadable(this.data.time_stats.total_time_spent, this._type) : null;
     }
 
+    get total_spent_s() {
+        return this.data.time_stats ? this.data.time_stats.total_time_spent : 0;
+    }
+
     get total_estimate() {
         return this.data.time_stats ? this.config.toHumanReadable(this.data.time_stats.time_estimate, this._type) : null;
+    }
+
+    get total_estimate_s() {
+        return this.data.time_stats ? this.data.time_stats.time_estimate : 0;
     }
 
     get _type() {
@@ -183,15 +189,6 @@ class Task {
         timelogs.forEach(
             (timelog) => {
                 let spentAt = dayjs(timelog.spentAt);
-                let dateGrp = spentAt.format(this.config.get('dateFormatGroupReport'));
-                if(!this.days[dateGrp])
-                {
-                    this.days[dateGrp] = new DayReport(this.iid, this.title, spentAt, chargeRatio);
-                }
-                if(timelog.note && timelog.note.body) {
-                    this.days[dateGrp].addNote(timelog.note.body);
-                }
-                this.days[dateGrp].addSpent(timelog.timeSpent);
 
                 let time = new Time(null, spentAt, {
                     author: {username: timelog.user.username},
@@ -200,6 +197,8 @@ class Task {
                 }, this, this.config);
                 time.seconds = timelog.timeSpent;
                 time.project_namespace = this.project_namespace;
+                time.note = timelog.note && timelog.note.body ? timelog.note.body : null;
+                time.chargeRatio = chargeRatio;
 
                 // only include times by the configured user
                 if (this.config.get('user') && this.config.get('user') !== timelog.user.username) return;

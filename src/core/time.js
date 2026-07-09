@@ -28,6 +28,8 @@ class Time {
         this._date = date;
         this.parent = parent;
         this.config = config;
+        this.note = null;
+        this.chargeRatio = 1.0;
 
         if(!timeString) {
             return;

@@ -1,3 +1,5 @@
+import DayReport from './api/dayReport.js';
+
 /**
  * Aggregate a merged report into the numbers the output formats render:
  * per-user/per-project/per-day spent time, estimate and spent totals,
@@ -33,15 +35,23 @@ export default function calculateStats(config, report) {
             let halfPrice = issue.labels.some(label => spentHalfPriceLabels.includes(label));
 
             // consolidate all issues back in one day
-            Object.keys(issue.days).forEach((key) => {
-                if (!daysNew[key]) {
-                    daysNew[key] = [];
-                }
-                daysNew[key].push(issue.days[key]);
-            });
+            let issueDays = {};
 
             issue.times.forEach(time => {
                 let dateGrp = time.date.format(config.get('dateFormatGroupReport'));
+
+                if (!issueDays[dateGrp]) {
+                    issueDays[dateGrp] = new DayReport(issue.project_id, issue.iid, issue.title, time.date, time.chargeRatio);
+                    if (!daysNew[dateGrp]) {
+                        daysNew[dateGrp] = [];
+                    }
+                    daysNew[dateGrp].push(issueDays[dateGrp]);
+                }
+                if (time.note) {
+                    issueDays[dateGrp].addNote(time.note);
+                }
+                issueDays[dateGrp].addSpent(time.seconds);
+
                 if (!users[time.user]) users[time.user] = 0;
                 if (!projects[time.project_namespace]) projects[time.project_namespace] = 0;
                 if (!days[dateGrp]) {
@@ -69,8 +79,8 @@ export default function calculateStats(config, report) {
                 }
                 times.push(time);
             });
-            totalEstimate += parseFloat(issue.total_estimate);
-            totalSpent += parseFloat(issue.total_spent);
+            totalEstimate += parseFloat(issue.total_estimate_s);
+            totalSpent += parseFloat(issue.total_spent_s);
         });
 
         report[type].sort((a, b) => {

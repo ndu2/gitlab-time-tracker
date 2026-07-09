@@ -570,12 +570,16 @@ mergeRequestColumns:
 
 # Include the given columns in the time record table
 # See --record_columns option for more information
-# defaults to user, date, type, iid, time
+# defaults to user, date, project, type, iid, title, time, note
 recordColumns:
 - user
+- date
+- project
+- type
 - iid
 - title
 - time
+- note
 
 # Add columns for each project member to issue and
 # merge request table, including their total time spent
