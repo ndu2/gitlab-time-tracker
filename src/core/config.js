@@ -19,7 +19,7 @@ const defaults = {
     weeksPerMonth: 4,
     issueColumns: ['iid', 'title', 'spent', 'total_estimate'],
     mergeRequestColumns: ['iid', 'title', 'spent', 'total_estimate'],
-    recordColumns: ['user', 'date', 'type', 'iid', 'time'],
+    recordColumns: ['user', 'date', 'project', 'type', 'iid', 'title', 'time', 'note'],
     userColumns: false,
     dateFormat: 'DD.MM.YYYY HH:mm:ss',
     timeFormat: Time.defaultTimeFormat,

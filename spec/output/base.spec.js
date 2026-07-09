@@ -4,18 +4,19 @@ import Config from '../../src/core/config.js';
 import Output from '../../src/reporting/output/base.js';
 import calculateStats from '../../src/reporting/stats.js';
 
-function makeTime({ user = 'alice', seconds = 0, date = '2026-01-05T10:00:00Z', iid = 1, project = 'group/project' } = {}) {
-    return { user, seconds, iid, project_namespace: project, date: dayjs(date) };
+function makeTime({ user = 'alice', seconds = 0, date = '2026-01-05T10:00:00Z', iid = 1, project = 'group/project', note = null, chargeRatio = 1.0 } = {}) {
+    return { user, seconds, iid, project_namespace: project, date: dayjs(date), note, chargeRatio };
 }
 
-function makeIssue({ iid = 1, labels = [], times = [], days = {}, estimate = 0, spent = 0 } = {}) {
+function makeIssue({ iid = 1, labels = [], times = [], estimate = 0, spent = 0, project_id = 1, title = 'issue' } = {}) {
     return {
         iid,
+        project_id,
+        title,
         labels,
         times,
-        days,
-        total_spent : spent,
-        total_estimate : estimate
+        total_spent_s : spent,
+        total_estimate_s : estimate
     };
 }
 
@@ -105,15 +106,19 @@ describe('calculateStats', () => {
     });
 
     it('consolidates per-day data of all issues', () => {
+        config.set('dateFormatGroupReport', 'YYYY-MM-DD');
+
         const output = calculate([
-            makeIssue({ iid: 1, days: { '2026-01-01': 'a' } }),
-            makeIssue({ iid: 2, days: { '2026-01-01': 'b', '2026-01-02': 'c' } })
+            makeIssue({ iid: 1, times: [makeTime({ date: '2026-01-01T10:00:00Z', note: 'a', seconds: 60 })] }),
+            makeIssue({ iid: 2, times: [
+                makeTime({ date: '2026-01-01T10:00:00Z', note: 'b', seconds: 120 }),
+                makeTime({ date: '2026-01-02T10:00:00Z', note: 'c', seconds: 180 })
+            ] })
         ]);
 
-        expect(output.daysNew).to.deep.equal({
-            '2026-01-01': ['a', 'b'],
-            '2026-01-02': ['c']
-        });
+        expect(Object.keys(output.daysNew)).to.deep.equal(['2026-01-01', '2026-01-02']);
+        expect(output.daysNew['2026-01-01'].map(d => d.getNotes())).to.deep.equal([['a'], ['b']]);
+        expect(output.daysNew['2026-01-02'].map(d => d.getNotes())).to.deep.equal([['c']]);
     });
 });
 

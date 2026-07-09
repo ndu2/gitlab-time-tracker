@@ -139,6 +139,7 @@ class Report {
                     endCursor
                   }
                   nodes {
+                    id
                     user {
                       username
                     }
@@ -152,10 +153,16 @@ class Report {
                     mergeRequests:mergeRequest {
                       iid
                       projectId
+                      title
                     }
                     issues:issue {
                       iid
                       projectId
+                      title
+                    }
+                    project {
+                      id
+                      name
                     }
                   }
                 }
