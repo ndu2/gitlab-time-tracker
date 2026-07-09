@@ -3,7 +3,7 @@ import Cli from '../../core/cli.js';
 import Fs from '../../core/filesystem.js';
 import Time from '../../core/time.js';
 import Frame from '../storage/frame.js';
-import select from '@inquirer/checkbox';
+import select, { Separator } from '@inquirer/select';
 import dayjs from '../../core/dayjs.js';
 import readline from 'readline';
 import Timekeeper from '../timekeeper.js';
@@ -74,14 +74,16 @@ function showInteractiveMenu(frames) {
 
     // adjustment modes, cycled with m
     const modes = [
-      { amount: SHIFT_MINUTES, moveAdjacent: true, label: '±15 min' },
-      { amount: SHIFT_MINUTE, moveAdjacent: true, label: '±1 min' },
-      { amount: SHIFT_MINUTES, moveAdjacent: false, label: '±15 min, don\'t move adjacent frame' },
-      { amount: SHIFT_MINUTE, moveAdjacent: false, label: '±1 min, don\'t move adjacent frame' },
+      { amount: SHIFT_MINUTES, moveAdjacent: true, checkAdjacent: true, label: '±15 min' },
+      { amount: SHIFT_MINUTE, moveAdjacent: true, checkAdjacent: true, label: '±1 min' },
+      { amount: SHIFT_MINUTES, moveAdjacent: false, checkAdjacent: true, label: '±15 min, don\'t move adjacent frame' },
+      { amount: SHIFT_MINUTE, moveAdjacent: false, checkAdjacent: true, label: '±1 min, don\'t move adjacent frame' },
+      { amount: SHIFT_MINUTES, moveAdjacent: false, checkAdjacent: false, label: '±15 min, allow moving over adjacent frame' },
+      { amount: SHIFT_MINUTE, moveAdjacent: false, checkAdjacent: false, label: '±1 min, allow moving over frame' },
     ];
     let mode = 0;
 
-    function render() { // w write does not really save all, does it?
+    function render() {
       Cli.out('\x1Bc');
       if (noteEditIndex !== null) {
         Cli.out('Editing note. Enter: confirm   Esc: cancel\n\n\n');
@@ -93,7 +95,7 @@ function showInteractiveMenu(frames) {
         const focus = fields[cursor][0] === i ? fields[cursor][1] : null;
         const edited = editedFields[i];
         const noteOverride = noteEditIndex === i ? pc.inverse(noteBuffer + ' ') : null;
-        Cli.out(`${formatFrameRow(frame, focus, edited.has('start'), edited.has('end'), edited.has('note'), noteOverride)}\n`);
+        Cli.out(`${formatFrameRow(frame, focus, edited.has('start'), edited.has('stop'), edited.has('note'), noteOverride)}\n`);
       });
     }
 
@@ -161,7 +163,7 @@ function showInteractiveMenu(frames) {
                 editedFields[frameIdx - 1].add('stop');
                 frame.start = newStart;
               }
-            } else if (!(prev && prev.stop && newStart.isBefore(prev.stop))) {
+            } else if (!modes[mode].checkAdjacent || !(prev && prev.stop && newStart.isBefore(prev.stop))) {
               frame.start = newStart;
             }
           }
@@ -177,7 +179,7 @@ function showInteractiveMenu(frames) {
                 editedFields[frameIdx + 1].add('start');
                 frame.stop = newStop;
               }
-            } else if (!(next && newStop.isAfter(next.start))) {
+            } else if (!modes[mode].checkAdjacent || !(next && newStop.isAfter(next.start))) {
               frame.stop = newStop;
             }
           }
@@ -228,10 +230,6 @@ let timeFormat = config.set('timeFormat', program.opts().time_format).get('timeF
 let timekeeper = new Timekeeper(config);
 const listSize = program.opts().listsize;
 
-function toHumanReadable(input) {
-    return Time.toHumanReadable(Math.ceil(input), config.get('hoursPerDay'), timeFormat);
-}
-
 function getMenuFrames() {
   return timekeeper.all().then(({ frames }) => {
     if (id) {
@@ -272,43 +270,55 @@ function getMenuFrames() {
   });
 }
 
-function showNonInteractiveMenu(frames) {
-  let lastFramesDetails = frames.map((frame) => ({
-    name: `  ${formatFrameRow(frame)}`,
-    value: frame.id,
-  }));
+function showNonInteractiveMenu() {
+  function prompt(lastFrameDefault) {
+    return getMenuFrames().then((frames) => {
+      let lastFramesDetails = frames.map((frame) => ({
+        name: `  ${formatFrameRow(frame)}`,
+        value: frame.id,
+      }));
 
-  if (lastFramesDetails.length == 0) {
-    Cli.error("No records found.");
-    return;
+      if (lastFramesDetails.length == 0) {
+        Cli.error("No records found.");
+        return;
+      }
+      if(!lastFrameDefault || !lastFramesDetails.some(frame=>frame.value == lastFrameDefault)) {
+        lastFrameDefault = lastFramesDetails[lastFramesDetails.length - 1].value;
+      }
+      lastFramesDetails.push(new Separator());
+      let exit = {name: "Exit", value: null};
+      lastFramesDetails.push(exit);
+
+      return select({
+        message: "Frame?",
+        default: lastFrameDefault,
+        choices: lastFramesDetails,
+        pageSize: lastFramesDetails.length,
+      }).then((answer) => {
+        if (!answer) {
+          return;
+        }
+        if (!Fs.exists(Fs.join(config.frameDir, answer + ".json"))) {
+          Cli.error("record not found.");
+        } else {
+          Fs.open(Fs.join(config.frameDir, answer + ".json"));
+        }
+        return prompt(answer);
+      });
+    });
   }
 
-  select({
-    message: "Frame?",
-    default: lastFramesDetails[lastFramesDetails.length - 1].value,
-    choices: lastFramesDetails,
-    pageSize: listSize,
-  }).then((answers) => {
-    for (const answer of answers) {
-      if (!Fs.exists(Fs.join(config.frameDir, answer + ".json"))) {
-        Cli.error("record not found.");
-      } else {
-        Fs.open(Fs.join(config.frameDir, answer + ".json"));
-      }
-    }
-  });
+  return prompt(null);
 }
 
 if (!id || program.opts().following) {
-  getMenuFrames()
-    .then((frames) => {
-      if (program.opts().interactive) {
-        return showInteractiveMenu(frames);
-      } else {
-        return showNonInteractiveMenu(frames);
-      }
-    })
-    .catch((error) => Cli.error(error));
+  if (program.opts().interactive) {
+    getMenuFrames()
+      .then((frames) => showInteractiveMenu(frames))
+      .catch((error) => Cli.error(error));
+  } else {
+    showNonInteractiveMenu().catch((error) => Cli.error(error));
+  }
 } else {
   if (!Fs.exists(Fs.join(config.frameDir, id + ".json")))
     Cli.error("No record found.");
