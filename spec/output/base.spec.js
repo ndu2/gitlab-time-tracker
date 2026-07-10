@@ -64,14 +64,11 @@ describe('calculateStats', () => {
         expect(output.stats['total spent']).to.equal('2h 15m');
     });
 
-    it('tracks free and half price time by label', () => {
-        config.set('freeLabels', ['pro bono']);
-        config.set('halfPriceLabels', ['discount']);
-
+    it('tracks free and half price time by chargeRatio, set on each time record by Task.recordTimelogs', () => {
         const output = calculate([
-            makeIssue({ iid: 1, labels: ['pro bono'], times: [makeTime({ seconds: 3600 })] }),
-            makeIssue({ iid: 2, labels: ['discount', 'bug'], times: [makeTime({ seconds: 1800 })] }),
-            makeIssue({ iid: 3, labels: ['bug'], times: [makeTime({ seconds: 60 })] })
+            makeIssue({ iid: 1, times: [makeTime({ seconds: 3600, chargeRatio: 0.0 })] }),
+            makeIssue({ iid: 2, times: [makeTime({ seconds: 1800, chargeRatio: 0.5 })] }),
+            makeIssue({ iid: 3, times: [makeTime({ seconds: 60, chargeRatio: 1.0 })] })
         ]);
 
         expect(output.spentFree).to.equal(3600);
@@ -79,9 +76,9 @@ describe('calculateStats', () => {
         expect(output.spent).to.equal(5460);
     });
 
-    it('treats missing free/half price label config as empty', () => {
+    it('treats full-price (chargeRatio 1.0) time as neither free nor half price', () => {
         const output = calculate([
-            makeIssue({ iid: 1, labels: ['bug'], times: [makeTime({ seconds: 3600 })] })
+            makeIssue({ iid: 1, times: [makeTime({ seconds: 3600, chargeRatio: 1.0 })] })
         ]);
 
         expect(output.spentFree).to.equal(0);

@@ -1,6 +1,7 @@
 import dayjs from './dayjs.js';
 import GitlabClient from './gitlab-client.js';
 import Time from './time.js';
+import chargeRatio from './billing.js';
 
 class Task {
     constructor(config, data = {}, client = new GitlabClient(config), type) {
@@ -157,29 +158,7 @@ class Task {
     }
 
     recordTimelogs(timelogs){
-        let spentFreeLabels = this.config.get('freeLabels');
-        if(undefined === spentFreeLabels) {
-            spentFreeLabels = [];
-        }
-        let spentHalfPriceLabels = this.config.get('halfPriceLabels');
-        if(undefined === spentHalfPriceLabels) {
-            spentHalfPriceLabels = [];
-        }
-
-        let free = false;
-        let halfPrice = false;
-        this.labels.forEach(label => {
-                spentFreeLabels.forEach(freeLabel => {
-                    free |= (freeLabel == label);
-                });
-            });
-        this.labels.forEach(label => {
-                spentHalfPriceLabels.forEach(halfPriceLabel => {
-                    halfPrice |= (halfPriceLabel == label);
-                });
-            });
-
-        let chargeRatio = free? 0.0: (halfPrice? 0.5: 1.0);
+        let ratio = chargeRatio(this.labels, this.config);
 
         let times = [],
             timeSpent = 0,
@@ -198,7 +177,7 @@ class Task {
                 time.seconds = timelog.timeSpent;
                 time.project_namespace = this.project_namespace;
                 time.note = timelog.note && timelog.note.body ? timelog.note.body : null;
-                time.chargeRatio = chargeRatio;
+                time.chargeRatio = ratio;
 
                 // only include times by the configured user
                 if (this.config.get('user') && this.config.get('user') !== timelog.user.username) return;

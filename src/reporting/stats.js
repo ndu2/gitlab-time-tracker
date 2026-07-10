@@ -26,14 +26,8 @@ export default function calculateStats(config, report) {
     let daysMoment = {};
     let daysNew = {};
 
-    let spentFreeLabels = config.get('freeLabels') ?? [];
-    let spentHalfPriceLabels = config.get('halfPriceLabels') ?? [];
-
     ['issues', 'mergeRequests'].forEach(type => {
         report[type].forEach(issue => {
-            let free = issue.labels.some(label => spentFreeLabels.includes(label));
-            let halfPrice = issue.labels.some(label => spentHalfPriceLabels.includes(label));
-
             // consolidate all issues back in one day
             let issueDays = {};
 
@@ -71,10 +65,10 @@ export default function calculateStats(config, report) {
 
                 spent += time.seconds;
 
-                if (free) {
+                if (time.chargeRatio === 0) {
                     spentFree += time.seconds;
                 }
-                if (halfPrice) {
+                if (time.chargeRatio === 0.5) {
                     spentHalfPrice += time.seconds;
                 }
                 times.push(time);
