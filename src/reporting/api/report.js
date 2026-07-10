@@ -5,6 +5,7 @@ import Issue from '../../core/issue.js';
 import MergeRequest from '../../core/mergeRequest.js';
 import Project from './project.js';
 import fetchTimelogs, {timelogsFor} from './timelogs.js';
+import {excludeByLabel, excludeMoved} from './filters.js';
 
 /**
  * report model
@@ -84,9 +85,7 @@ class Report {
     getMergeRequests() {
         let promise = this.client.all(`projects/${this.project.id}/merge_requests${this.params()}`);
         let excludes = this.config.get('excludeByLabels');
-        promise.then(mergeRequests => this.mergeRequests = mergeRequests.filter(mr => (
-            (!excludes || excludes.filter(l=>mr.labels.includes(l)).length==0) // keep all merge requests not including a exclude label
-            )));
+        promise.then(mergeRequests => this.mergeRequests = excludeByLabel(mergeRequests, excludes));
 
         return promise;
     }
@@ -98,10 +97,8 @@ class Report {
     getIssues() {
         let promise = this.client.all(`projects/${this.project.id}/issues${this.params()}`);
         let excludes = this.config.get('excludeByLabels');
-        promise.then(issues => this.issues = issues.filter(issue => (
-            issue.moved_to_id == null && // filter moved issues in any case
-            (!excludes || excludes.filter(l=>issue.labels.includes(l)).length==0) // keep all issues not including a exclude label
-            )));
+        promise.then(issues => this.issues = excludeByLabel(excludeMoved(issues), excludes));
+
         return promise;
     }
 
