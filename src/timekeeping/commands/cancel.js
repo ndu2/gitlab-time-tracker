@@ -5,7 +5,8 @@ import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 
 function cancel(configLoader) {
-  const cancel = new Command('cancel', 'cancel and discard active monitoring time')
+  const cancel = new Command('cancel')
+    .description('cancel and discard active monitoring time')
     .option('--verbose', 'show verbose output')
     .action((options, program) => {
 

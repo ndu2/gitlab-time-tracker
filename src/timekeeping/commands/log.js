@@ -6,7 +6,8 @@ import Time from '../../core/time.js';
 import Timekeeper from '../timekeeper.js';
 
 function log(configLoader) {
-  const log = new Command('log', 'log recorded time records')
+  const log = new Command('log')
+    .description('log recorded time records')
     .option('--verbose', 'show verbose output')
     .option('--hours_per_day <hours>', 'hours per day for human readable time formats')
     .option('--time_format <time_format>', 'time format')

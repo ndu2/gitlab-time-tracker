@@ -7,7 +7,8 @@ import cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
 
 function list(configLoader) {
-  const list = new Command('list', 'list all open issues or merge requests')
+  const list = new Command('list')
+    .description('list all open issues or merge requests')
     .arguments('[project]')
     .option('--verbose', 'show verbose output')
     .option('-c, --closed', 'show closed issues (instead of opened only)')

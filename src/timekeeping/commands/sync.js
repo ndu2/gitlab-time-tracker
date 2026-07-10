@@ -4,7 +4,8 @@ import Timekeeper from '../timekeeper.js';
 import Owner from '../../core/owner.js';
 
 function sync(configLoader) {
-    const sync = new Command('sync', 'sync local time records to GitLab')
+    const sync = new Command('sync')
+    .description('sync local time records to GitLab')
     .option('--url <url>', 'URL to GitLabs API')
     .option('--token <token>', 'API access token')
     .option('--verbose', 'show verbose output')

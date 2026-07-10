@@ -6,7 +6,8 @@ import Timekeeper from '../timekeeper.js';
 
 
 function stop(configLoader) {
-    const stop = new Command('stop', 'stop monitoring time')
+    const stop = new Command('stop')
+    .description('stop monitoring time')
     .option('--verbose', 'show verbose output')
     .action((options, program) => {
 

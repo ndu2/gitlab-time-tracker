@@ -214,7 +214,8 @@ function showInteractiveMenu(frames) {
 }
 
 function edit(configLoader) {
-  const edit = new Command('edit', 'edit time record by the given id')
+  const edit = new Command('edit')
+    .description('edit time record by the given id')
     .arguments('[id]')
     .option('-f, --following <number>', 'edit also the following (by ctime) of the given [id]')
     .option('-n, --listsize <number>', 'list size', 30)

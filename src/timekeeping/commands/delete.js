@@ -5,7 +5,8 @@ import Fs from '../../core/filesystem.js';
 import pc from 'picocolors';
 
 function delCmd(configLoader) {
-    const delCmd = new Command('delete', 'delete time record by the given id')
+    const delCmd = new Command('delete')
+        .description('delete time record by the given id')
         .arguments('[id]')
         .action((id, opts, program) => {
 

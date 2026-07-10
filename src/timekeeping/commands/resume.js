@@ -23,7 +23,8 @@ function resumeFrame(timekeeper, frame) {
 }
 
 function resume(configLoader) {
-    const resume = new Command('resume', 'resume monitoring time for last stopped record')
+    const resume = new Command('resume')
+        .description('resume monitoring time for last stopped record')
         .arguments('[project]')
         .option('--verbose', 'show verbose output')
         .option('--ask', 'ask the activity to resume from the last entries, ignoring project')

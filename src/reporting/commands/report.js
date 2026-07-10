@@ -16,7 +16,8 @@ function collect(val, arr) {
 
 
 function report(configLoader) {
-    const report = new Command('report', 'generate a report for the given project and issues')
+    const report = new Command('report')
+    .description('generate a report for the given project and issues')
     .arguments('[project] [ids...]')
     .option('-e --type <type>', 'specify the query type: project, user, group')
     .option('--subgroups', 'include sub groups')

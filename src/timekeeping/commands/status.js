@@ -6,7 +6,8 @@ import Timekeeper from '../timekeeper.js';
 
 
 function status(configLoader) {
-    const status = new Command('status', 'shows if time monitoring is running')
+    const status = new Command('status')
+    .description('shows if time monitoring is running')
     .option('--verbose', 'show verbose output')
     .option('-s', 'short output')
     .action((options, program) => {
