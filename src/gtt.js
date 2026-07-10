@@ -5,7 +5,7 @@ import version from './version.js';
 import { program } from 'commander';
 
 import Config from './core/file-config.js';
-import Cli from './core/cli.js';
+import Cli, { CliExitError } from './core/cli.js';
 import config from './core/commands/config.js';
 import start from './timekeeping/commands/start.js';
 import create from './timekeeping/commands/create.js';
@@ -35,6 +35,17 @@ function loadConfig(recover = false) {
         Cli.error(`${e.message}`);
     }
 }
+
+// Cli.error() throws CliExitError instead of exiting directly, so it's
+// safe to call in tests. Most command actions are neither async nor
+// awaited by commander, so their error paths never reach a .catch() of
+// their own - this is the one place that actually ends the process.
+process.on('unhandledRejection', error => {
+    if (error instanceof CliExitError) process.exit(error.code);
+
+    console.error(error);
+    process.exit(1);
+});
 
 program
     .version(version)

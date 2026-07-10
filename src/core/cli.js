@@ -8,6 +8,18 @@ let spinnerIndex = 0;
 const spinner = { next: () => spinnerFrames[spinnerIndex++ % spinnerFrames.length] };
 
 /**
+ * thrown by Cli.error - carries the exit code the process should end
+ * with once the caller (or the top-level unhandledRejection handler in
+ * gtt.js) is done unwinding.
+ */
+export class CliExitError extends Error {
+    constructor(message, code = 1) {
+        super(message);
+        this.code = code;
+    }
+}
+
+/**
  * Cli helper
  */
 class Cli {
@@ -206,7 +218,7 @@ class Cli {
         Cli.out(`Error: ${pc.red(message)}` + '\n');
         if (error && Cli.verbose) console.log(error);
 
-        process.exit(1);
+        throw new CliExitError(message, 1);
     }
 
     /**
