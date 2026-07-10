@@ -188,9 +188,9 @@ class Cli {
 
     /**
      * stop a list item with an x
-     * @param message
-     * @param error
-     * @returns {*}
+     * @param {string|Error|false} [message]
+     * @param {Error|false} [error]
+     * @returns {Promise<void>}
      */
     static x(message = false, error = false) {
         Cli.resolve();
@@ -210,9 +210,9 @@ class Cli {
 
     /**
      * show an error message
-     * @param message
-     * @param error
-     * @returns {*}
+     * @param {string|Error} message
+     * @param {Error|false} [error]
+     * @returns {never}
      */
     static error(message, error) {
         Cli.resolve();

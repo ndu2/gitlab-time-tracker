@@ -15,7 +15,7 @@ class Owner {
 
     /**
      * is authorized?
-     * @returns {Promise}
+     * @returns {Promise<void>}
      */
     authorized() {
         if (!this.config.get('_checkToken')) return new Promise(r => r());
@@ -33,7 +33,7 @@ class Owner {
     /**
      * query and set the group
      * @param fullPath group path, e.g. "group/subgroup"
-     * @returns {Promise}
+     * @returns {Promise<void>}
      */
     getGroup(fullPath = this.config.get('project')) {
         return new Promise((resolve, reject) => {
@@ -53,7 +53,7 @@ class Owner {
 
     /**
      * get sub groups
-     * @returns {Promise}
+     * @returns {Promise<void>}
      */
     getSubGroups() {
         return new Promise((resolve, reject) => {

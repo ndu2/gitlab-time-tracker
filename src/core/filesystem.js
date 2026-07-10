@@ -40,15 +40,21 @@ class Filesystem {
         return path.join(...args);
     }
 
+    /**
+     * @param dir
+     * @returns {import('fs').Dirent|null} null when the directory has no files
+     */
     static newest(dir) {
         let files = Filesystem.readDir(dir);
+        if (files.length === 0) return null;
+
         let ctime = file => fs.statSync(path.join(dir, file.name)).ctime;
 
-        return files.reduce((newest, file) => (ctime(file) > ctime(newest) ? file : newest), files[0] ?? -Infinity);
+        return files.reduce((newest, file) => (ctime(file) > ctime(newest) ? file : newest), files[0]);
     }
 
     static all(dir) {
-        let ctime = file => fs.statSync(path.join(dir, file.name)).ctime;
+        let ctime = file => fs.statSync(path.join(dir, file.name)).ctime.getTime();
 
         return Filesystem.readDir(dir).sort((a, b) => ctime(a) - ctime(b));
     }

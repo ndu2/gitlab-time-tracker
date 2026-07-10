@@ -38,8 +38,8 @@ function resume(configLoader) {
             if (!config.get('project'))
                 Cli.error('No project set');
 
-            let lastFrames = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
-            lastFrames = lastFrames.map((file) =>
+            let frameFiles = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
+            let lastFrames = frameFiles.map((file) =>
                 Frame.fromFile(config, Fs.join(config.frameDir, file.name))
             );
             lastFrames = lastFrames.sort((a, b) => dayjs(a.stop || dayjs()).isBefore(dayjs(b.stop || dayjs())) ? 1 : -1);

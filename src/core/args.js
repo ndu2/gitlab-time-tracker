@@ -4,7 +4,8 @@
 class Args {
     constructor(args) {
         this.args = args;
-        this.data = [];
+        /** @type {{project?: string[], iids?: string[]}} */
+        this.data = {};
     }
 
     /**
@@ -16,7 +17,7 @@ class Args {
 
         if (this.data.project) return this.data.project;
 
-        let projects = [...new Set(this.args.filter(arg => isNaN(new Number(arg))))];
+        let projects = [...new Set(this.args.filter(arg => isNaN(Number(arg))))];
         this.args = this.args.filter(arg => !projects.includes(arg));
 
         if(projects.length == 0)

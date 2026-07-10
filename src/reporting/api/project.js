@@ -30,14 +30,14 @@ class Project {
 
     /**
      * set members
-     * @returns {Promise}
+     * @returns {Promise<void>}
      */
     members() {
         return new Promise((resolve, reject) => {
             this.client.get(`projects/${this.id}/members`)
                 .then(response => {
                     this.projectMembers = this.projectMembers.concat(response.body);
-                    return new Promise(r => r());
+                    return Promise.resolve();
                 })
                 .then(() => {
                     if (!this.data.namespace || !this.data.namespace.kind || this.data.namespace.kind !== "group") return resolve();

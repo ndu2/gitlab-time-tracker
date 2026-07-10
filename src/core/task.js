@@ -4,6 +4,9 @@ import Time from './time.js';
 import chargeRatio from './billing.js';
 
 class Task {
+    /** @type {string|undefined} set by Report.process() after fetching the owning project */
+    project_namespace;
+
     constructor(config, data = {}, client = new GitlabClient(config), type) {
         this.config = config;
         this.client = client;

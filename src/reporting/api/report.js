@@ -125,7 +125,7 @@ class Report {
      * process the given input
      * @param input
      * @param model
-     * @param advance
+     * @param {(() => void)|false} [advance]
      * @returns {*|Promise}
      */
     process(input, model, advance = false) {
@@ -164,7 +164,7 @@ class Report {
 
     /**
      * process issues
-     * @param advance
+     * @param {(() => void)|false} [advance]
      * @returns {Promise}
      */
     processIssues(advance = false) {
@@ -173,7 +173,7 @@ class Report {
 
     /**
      * process merge requests
-     * @param advance
+     * @param {(() => void)|false} [advance]
      * @return {Promise}
      */
     processMergeRequests(advance = false) {

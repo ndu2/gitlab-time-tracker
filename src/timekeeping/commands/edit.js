@@ -218,7 +218,7 @@ function edit(configLoader) {
     .description('edit time record by the given id')
     .arguments('[id]')
     .option('-f, --following <number>', 'edit also the following (by ctime) of the given [id]')
-    .option('-n, --listsize <number>', 'list size', 30)
+    .option('-n, --listsize <number>', 'list size', '30')
     .option('-i, --interactive', 'edit start/stop time interactively with keystrokes')
     .option('--today', 'only list entries for today')
     .option('--this_week', 'only list entries for this week')

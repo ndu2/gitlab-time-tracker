@@ -16,11 +16,14 @@ Number.prototype.padLeft = function (n, str) {
  * time model
  */
 class Time {
+    /** @type {string|undefined} set by Task.recordTimelogs from the parent task */
+    project_namespace;
+
     /**
      * construct
      * @param timeString
      * @param note
-     * @param {hasTimes} parent
+     * @param {import('./task.js').default} parent
      * @param config
      */
     constructor(timeString, date = null, note, parent, config) {
@@ -137,18 +140,18 @@ class Time {
         inserts.days_overall = input / secondsInADay;
         inserts.days_overall_comma = inserts.days_overall.toString().replace('.', ',');
         inserts.days = Math.floor(inserts.days_overall);
-        inserts.Days = inserts.days.padLeft(2, 0);
+        inserts.Days = inserts.days.padLeft(2, '0');
         inserts.hours_overall = input / secondsInAnHour;
         inserts.hours_overall_comma = inserts.hours_overall.toString().replace('.', ',');
         inserts.hours = Math.floor((input % secondsInADay) / secondsInAnHour);
-        inserts.Hours = inserts.hours.padLeft(2, 0);
+        inserts.Hours = inserts.hours.padLeft(2, '0');
         inserts.minutes_overall = input / secondsInAMinute;
         inserts.minutes_overall_comma = (inserts.minutes_overall).toString().replace('.', ',');
         inserts.minutes = Math.floor(((input % secondsInADay) % secondsInAnHour) / secondsInAMinute);
-        inserts.Minutes = inserts.minutes.padLeft(2, 0);
+        inserts.Minutes = inserts.minutes.padLeft(2, '0');
         inserts.seconds_overall = input;
         inserts.seconds = ((input % secondsInADay) % secondsInAnHour) % secondsInAMinute;
-        inserts.Seconds = inserts.seconds.padLeft(2, 0);
+        inserts.Seconds = inserts.seconds.padLeft(2, '0');
 
         // rounded
         while ((match = roundedRegex.exec(format)) !== null) {
