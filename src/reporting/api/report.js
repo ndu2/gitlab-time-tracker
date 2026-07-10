@@ -4,6 +4,7 @@ import parallel from '../../core/parallel.js';
 import Issue from '../../core/issue.js';
 import MergeRequest from '../../core/mergeRequest.js';
 import Project from './project.js';
+import fetchTimelogs, {timelogsFor} from './timelogs.js';
 
 /**
  * report model
@@ -113,122 +114,14 @@ class Report {
         return issues.filter(issue => this.config.get('showWithoutTimes') || (issue.times && issue.times.length > 0));
     }
 
-
-
-
     /**
-     * starts loading the timelogs data page after the cursor into the array timelogs and recurse to the next page as soon as results are received
-     * sets this.timelogs when the last page is received.
-     * @param {String} cursor 
-     * @param {Array} timelogs 
+     * fetch every timelog for this project in the configured date range.
+     * @returns {Promise<Array>}
      */
-    getTimelogPage(cursor, timelogs) {
-        if(!timelogs) {
-            timelogs = [];
-        }
+    async getTimelogs() {
+        this.timelogs = await fetchTimelogs(this.client, this.project.data.path_with_namespace, this.config.get('from'), this.config.get('to'));
 
-        const query = `
-        query ($project: ID!, $after: String, $entryPerPage: Int,
-            $startTime:Time, $endTime:Time){
-              project(fullPath: $project) {
-                name
-                timelogs(startTime: $startTime, endTime: $endTime,
-                  first:$entryPerPage, after: $after) {
-                  pageInfo {
-                    hasNextPage
-                    endCursor
-                  }
-                  nodes {
-                    id
-                    user {
-                      username
-                    }
-                    spentAt
-                    timeSpent
-                    summary
-                    note {
-                      body
-                      url
-                    }
-                    mergeRequests:mergeRequest {
-                      iid
-                      projectId
-                      title
-                    }
-                    issues:issue {
-                      iid
-                      projectId
-                      title
-                    }
-                    project {
-                      id
-                      name
-                    }
-                  }
-                }
-              }
-            }
-            `
-
-        let request = {
-            "query": query,
-            "variables": {
-                "project": this.project.data.path_with_namespace,
-                "after": (cursor===undefined)?'':cursor,
-                "entryPerPage": 30,
-                "startTime": this.config.get('from').format("YYYY-M-D"),
-                "endTime": this.config.get('to').format("YYYY-M-D")
-            }
-        };
-
-        let promise = this.client.graphQL(request);
-        promise.then(response => {
-            if (response.body.errors) {
-                this.timelogs = [];
-            } else {
-                if (response.body.data.project.timelogs.nodes) {
-                    // add timelogs
-                    timelogs.push(response.body.data.project.timelogs.nodes);
-                    if (response.body.data.project.timelogs.pageInfo.hasNextPage) {
-                        // get next page
-                        this.getTimelogPage(response.body.data.project.timelogs.pageInfo.endCursor, timelogs);
-                    }
-                    else {
-                        // all pages loaded. combine chunks into single array.
-                        let timelogsAggr =  [];
-                        timelogs.forEach((timelogchunk) => {
-                            timelogchunk.forEach((timelog) => {
-                                timelogsAggr.push(timelog);
-                            });
-                        });
-                        this.timelogs = timelogsAggr;
-                    }
-                }
-                else {
-                    this.timelogs = [];
-                }
-            }
-        }
-        );
-    }
-
-
-    waitForTimelogs(resolve) {
-        if (this.timelogs == null) {
-            setTimeout(this.waitForTimelogs.bind(this), 50, resolve);
-        } else {
-            resolve();
-        }
-
-    }
-
-
-    getTimelogs() {
-        this.getTimelogPage();
-        let prm = new Promise((resolve, reject) => {
-            this.waitForTimelogs(resolve);
-        });
-        return prm;
+        return this.timelogs;
     }
 
     /**
@@ -245,10 +138,7 @@ class Report {
             let item = new model(this.config, data, this.client);
             item.project_namespace = this.projects[item.project_id];
 
-            item.recordTimelogs(this.timelogs.filter(
-                timelog => timelog[input] &&
-                    timelog[input].iid == data.iid &&
-                    timelog[input].projectId == data.project_id));
+            item.recordTimelogs(timelogsFor(this.timelogs, input, data));
 
             if (this.config.get('showWithoutTimes') || item.times.length > 0) {
                 collect.push(item);
