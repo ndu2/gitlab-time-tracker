@@ -36,10 +36,6 @@ class FileConfig extends Config {
     }
 
     assertGlobalConfig(recover) {
-        if(!fs.existsSync(this.globalDir) && fs.existsSync(this.oldGlobalDir)) {
-            fs.renameSync(this.oldGlobalDir, this.globalDir);
-        }
-
         if (!fs.existsSync(this.globalDir)) fs.mkdirSync(this.globalDir, { recursive: true });
         if (recover && !fs.existsSync(this.global)) fs.appendFileSync(this.global, yamlDump(this.data));
     }
@@ -50,10 +46,6 @@ class FileConfig extends Config {
 
     get localConfigFile() {
         return '.gtt.yml';
-    }
-
-    get oldGlobalDir() {
-        return Fs.join(process.env[(process.platform == 'win32') ? 'USERPROFILE' : 'HOME'], '.gtt');
     }
 
     get globalDir() {
