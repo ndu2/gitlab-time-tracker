@@ -4,15 +4,20 @@ import Time from './time.js';
 import chargeRatio from './billing.js';
 
 class Task {
-    /** @type {string|undefined} set by Report.process() after fetching the owning project */
-    project_namespace;
-
-    constructor(config, data = {}, client = new GitlabClient(config), type) {
+    /**
+     * @param config
+     * @param data
+     * @param client
+     * @param type
+     * @param {string} [project_namespace] the owning project's path_with_namespace, if known
+     */
+    constructor(config, data = {}, client = new GitlabClient(config), type, project_namespace) {
         this.config = config;
         this.client = client;
         this.times = [];
         this.data = data;
         this.type = type;
+        this.project_namespace = project_namespace;
     }
 
     get iid() {
@@ -176,11 +181,7 @@ class Task {
                     author: {username: timelog.user.username},
                     created_at: timelog.spentAt,
                     noteable_type: this._typeSingular
-                }, this, this.config);
-                time.seconds = timelog.timeSpent;
-                time.project_namespace = this.project_namespace;
-                time.note = timelog.note && timelog.note.body ? timelog.note.body : null;
-                time.chargeRatio = ratio;
+                }, this, this.config, timelog.timeSpent, timelog.note && timelog.note.body ? timelog.note.body : null, ratio);
 
                 // only include times by the configured user
                 if (this.config.get('user') && this.config.get('user') !== timelog.user.username) return;

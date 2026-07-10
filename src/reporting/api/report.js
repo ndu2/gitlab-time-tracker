@@ -132,8 +132,7 @@ class Report {
         let collect = [];
 
         let promise = parallel(this[input], async data => {
-            let item = new model(this.config, data, this.client);
-            item.project_namespace = this.projects[item.project_id];
+            let item = new model(this.config, data, this.client, this.projects[data.project_id]);
 
             item.recordTimelogs(timelogsFor(this.timelogs, input, data));
 

@@ -4,8 +4,8 @@ import GitlabClient from './gitlab-client.js';
 class Issue extends CoreTask {
     static resoureType = 'issues';
 
-    constructor(config, data, client) {
-        super(config, data, client, Issue.resoureType);
+    constructor(config, data, client, project_namespace) {
+        super(config, data, client, Issue.resoureType, project_namespace);
     }
 
     static list(config, project, state, my, client = new GitlabClient(config)) {

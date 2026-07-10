@@ -16,25 +16,27 @@ Number.prototype.padLeft = function (n, str) {
  * time model
  */
 class Time {
-    /** @type {string|undefined} set by Task.recordTimelogs from the parent task */
-    project_namespace;
-
     /**
      * construct
-     * @param timeString
-     * @param note
+     * @param timeString parsed into seconds if given; otherwise seconds is used as-is
+     * @param date
+     * @param data raw noteable payload (author, created_at, noteable_type)
      * @param {import('./task.js').default} parent
      * @param config
+     * @param {number} [seconds] used when timeString is falsy
+     * @param {string|null} [note]
+     * @param {number} [chargeRatio]
      */
-    constructor(timeString, date = null, note, parent, config) {
-        this.data = note;
+    constructor(timeString, date = null, data, parent, config, seconds, note = null, chargeRatio = 1.0) {
+        this.data = data;
         this._date = date;
         this.parent = parent;
         this.config = config;
-        this.note = null;
-        this.chargeRatio = 1.0;
+        this.note = note;
+        this.chargeRatio = chargeRatio;
 
         if(!timeString) {
+            this.seconds = seconds;
             return;
         }
 
@@ -66,6 +68,10 @@ class Time {
 
     get iid() {
         return this.parent.iid;
+    }
+
+    get project_namespace() {
+        return this.parent.project_namespace;
     }
 
     get time() {
