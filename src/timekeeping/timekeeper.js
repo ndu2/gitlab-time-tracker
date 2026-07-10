@@ -31,7 +31,7 @@ class Timekeeper {
      */
     _currentId() {
         if (!Fs.exists(this._currentFile())) {
-            let running = new FrameCollection(this.config).frames.find(frame => frame.stop === false);
+            let running = new FrameCollection(this.config).frames.find(frame => frame.stop === null);
             Fs.writeText(this._currentFile(), running ? running.id : '');
         }
         let id = Fs.readText(this._currentFile()).trim();
@@ -68,7 +68,7 @@ class Timekeeper {
         let grouped = {};
 
         await new FrameCollection(this.config).forEach(frame => {
-            if (frame.stop === false) return;
+            if (frame.stop === null) return;
 
             let year = frame.date.format('YYYY'),
                 month = frame.date.format('MM');
@@ -204,7 +204,7 @@ class Timekeeper {
 
         await new FrameCollection(this.config)
             .forEach(frame => {
-                if (frame.stop === false) return;
+                if (frame.stop === null) return;
                 let date = frame.date.format('YYYY-MM-DD');
 
                 if (!frames[date]) frames[date] = [];

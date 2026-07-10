@@ -28,7 +28,7 @@ class FrameCollection {
         let arr = [];
 
         this.frames.forEach(frame => {
-            if (frame.stop === false) {
+            if (frame.stop === null) {
                 return false;
             }
 
