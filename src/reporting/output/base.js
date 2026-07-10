@@ -13,6 +13,20 @@ const defaultFormats = {
  * exposes write/headline/toStdOut/toFile. Root of the output-format hierarchy.
  */
 class Output {
+    // assigned in the constructor via Object.assign(this, calculateStats(...))
+    /** @type {Array} */ times;
+    /** @type {Object} */ days;
+    /** @type {Object} */ daysMoment;
+    /** @type {Object} */ daysNew;
+    /** @type {Object<string,string>} */ users;
+    /** @type {Object<string,string>} */ projects;
+    /** @type {Object<string,string>} */ stats;
+    /** @type {number} */ totalEstimate;
+    /** @type {number} */ totalSpent;
+    /** @type {number} */ spent;
+    /** @type {number} */ spentFree;
+    /** @type {number} */ spentHalfPrice;
+
     /**
      * constructor
      * @param config
@@ -29,6 +43,12 @@ class Output {
     set format(value) {
         this.formats = Object.assign(this.formats, value);
     }
+
+    // implemented by each output format (table/csv/markdown/invoice)
+    makeStats() {}
+    makeIssues() {}
+    makeMergeRequests() {}
+    makeRecords() {}
 
     /**
      * print a headline

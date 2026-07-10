@@ -3,10 +3,10 @@ import dayjs from '../core/dayjs.js';
 /**
  * Apply report command options and positional args onto config, including
  * the --today/--this_week/--this_month/--last_month date shortcuts.
- * @param config
+ * @param {import('../core/config.js').default} config
  * @param opts commander's program.opts()
  * @param args Args instance built from program.args
- * @returns {Config}
+ * @returns {import('../core/config.js').default}
  */
 export function buildReportConfig(config, opts, args) {
     config

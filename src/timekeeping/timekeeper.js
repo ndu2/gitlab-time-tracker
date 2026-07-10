@@ -89,8 +89,8 @@ class Timekeeper {
      * phases (resolve/details/update) - callers no longer choreograph them.
      * @param {FrameCollection} frames typically the result of pendingFrames()
      * @param {Object} [hooks]
-     * @param {function(phase: 'resolve'|'details'|'update', total: number)} [hooks.onPhase] called once per phase, before it starts
-     * @param {function()} [hooks.onProgress] called after each frame is resolved/updated
+     * @param {(phase: 'resolve'|'details'|'update', total: number) => void} [hooks.onPhase] called once per phase, before it starts
+     * @param {() => void} [hooks.onProgress] called after each frame is resolved/updated
      * @returns {Promise<FrameCollection>} the frames that were synced
      */
     async sync(frames, {onPhase = () => {}, onProgress = () => {}} = {}) {

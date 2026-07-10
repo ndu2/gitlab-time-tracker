@@ -23,6 +23,13 @@ export class CliExitError extends Error {
  * Cli helper
  */
 class Cli {
+    /** @type {boolean} */
+    static quiet = false;
+    /** @type {boolean} */
+    static verbose = false;
+    /** @type {any} */
+    static active;
+
     /*
      * emojis
      */
@@ -133,7 +140,7 @@ class Cli {
         let left;
 
         if (Cli.active.bar.curr > 0) {
-            let elapsed = Math.ceil((new Date() - Cli.active.started) / 1000);
+            let elapsed = Math.ceil((new Date().getTime() - Cli.active.started.getTime()) / 1000);
             left = ((elapsed / Cli.active.bar.curr) * (Cli.active.bar.total - Cli.active.bar.curr)) / 60;
             left = left < 1 ? `<1` : Math.ceil(left);
         } else {
@@ -223,7 +230,7 @@ class Cli {
 
     /**
      * get a promise (for chaining promises)
-     * @returns {Promise}
+     * @returns {Promise<void>}
      */
     static promise() {
         return new Promise(resolve => {

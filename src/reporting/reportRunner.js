@@ -165,7 +165,7 @@ async function makeOutput(config, master, reporter) {
  * @param config a config built by buildReportConfig
  * @param client GitlabClient
  * @param reporter progress/error reporter, shaped like Cli (list/mark/x/bar/advance/out/error + emoji getters)
- * @returns {Promise<Output>} the rendered output, ready for toFile/toStdOut
+ * @returns {Promise<import('./output/base.js').default>} the rendered output, ready for toFile/toStdOut
  */
 export async function runReport(config, client, reporter = Cli) {
     let owner = new Owner(config, client),
