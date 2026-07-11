@@ -55,24 +55,24 @@ class ProjectReport {
      * query and set merge requests
      * @returns {Promise}
      */
-    getMergeRequests() {
-        let promise = this.client.all(`projects/${this.project.id}/merge_requests${this.params()}`);
+    async getMergeRequests() {
+        let mergeRequests = await this.client.all(`projects/${this.project.id}/merge_requests${this.params()}`);
         let excludes = this.config.get('excludeByLabels');
-        promise.then(mergeRequests => this.mergeRequests = excludeByLabel(mergeRequests, excludes));
+        this.mergeRequests = excludeByLabel(mergeRequests, excludes);
 
-        return promise;
+        return this.mergeRequests;
     }
 
     /**
      * query and set issues
      * @returns {Promise}
      */
-    getIssues() {
-        let promise = this.client.all(`projects/${this.project.id}/issues${this.params()}`);
+    async getIssues() {
+        let issues = await this.client.all(`projects/${this.project.id}/issues${this.params()}`);
         let excludes = this.config.get('excludeByLabels');
-        promise.then(issues => this.issues = excludeByLabel(excludeMoved(issues), excludes));
+        this.issues = excludeByLabel(excludeMoved(issues), excludes);
 
-        return promise;
+        return this.issues;
     }
 
     /**

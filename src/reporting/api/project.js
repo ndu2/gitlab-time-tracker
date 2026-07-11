@@ -32,25 +32,14 @@ class Project {
      * set members
      * @returns {Promise<void>}
      */
-    members() {
-        return new Promise((resolve, reject) => {
-            this.client.get(`projects/${this.id}/members`)
-                .then(response => {
-                    this.projectMembers = this.projectMembers.concat(response.body);
-                    return Promise.resolve();
-                })
-                .then(() => {
-                    if (!this.data.namespace || !this.data.namespace.kind || this.data.namespace.kind !== "group") return resolve();
+    async members() {
+        let response = await this.client.get(`projects/${this.id}/members`);
+        this.projectMembers = this.projectMembers.concat(response.body);
 
-                    this.client.get(`groups/${this.data.namespace.id}/members`)
-                        .then(response => {
-                            this.projectMembers = this.projectMembers.concat(response.body);
-                            resolve();
-                        })
-                        .catch(e => reject(e));
-                })
-                .catch(e => reject(e));
-        });
+        if (!this.data.namespace || !this.data.namespace.kind || this.data.namespace.kind !== "group") return;
+
+        let groupResponse = await this.client.get(`groups/${this.data.namespace.id}/members`);
+        this.projectMembers = this.projectMembers.concat(groupResponse.body);
     }
 
     /*

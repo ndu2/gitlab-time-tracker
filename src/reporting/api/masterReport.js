@@ -37,12 +37,12 @@ class MasterReport {
      * @param input
      * @param model
      * @param {(() => void)|false} [advance]
-     * @returns {*|Promise}
+     * @returns {Promise<void>}
      */
-    process(input, model, advance = false) {
+    async process(input, model, advance = false) {
         let collect = [];
 
-        let promise = parallel(this[input], async data => {
+        await parallel(this[input], async data => {
             let item = new model(this.config, data, this.client, this.projects[data.project_id]);
 
             item.recordTimelogs(timelogsFor(this.timelogs, input, data));
@@ -54,8 +54,7 @@ class MasterReport {
             if (advance) advance();
         }, this.config);
 
-        promise.then(() => this[input] = this.filter(collect));
-        return promise;
+        this[input] = this.filter(collect);
     }
 
     /**

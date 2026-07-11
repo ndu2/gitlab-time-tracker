@@ -17,17 +17,15 @@ class Owner {
      * is authorized?
      * @returns {Promise<void>}
      */
-    authorized() {
-        if (!this.config.get('_checkToken')) return new Promise(r => r());
+    async authorized() {
+        if (!this.config.get('_checkToken')) return;
 
-        return new Promise((resolve, reject) => {
-            this.client.get('broadcast_messages')
-                .then(() => resolve())
-                .catch(e => {
-                    if (e.statusCode === 403) resolve();
-                    reject(e);
-                });
-        });
+        try {
+            await this.client.get('broadcast_messages');
+        } catch (e) {
+            if (e.statusCode === 403) return;
+            throw e;
+        }
     }
 
     /**
@@ -35,40 +33,27 @@ class Owner {
      * @param fullPath group path, e.g. "group/subgroup"
      * @returns {Promise<void>}
      */
-    getGroup(fullPath = this.config.get('project')) {
-        return new Promise((resolve, reject) => {
-            this.client.get(`groups`)
-                .then(groups => {
-                    if (groups.body.length === 0) return reject('Group not found');
-                    groups = groups.body;
+    async getGroup(fullPath = this.config.get('project')) {
+        let groups = await this.client.get(`groups`);
+        if (groups.body.length === 0) throw 'Group not found';
 
-                    let filtered = groups.filter(group => group.full_path === fullPath);
-                    if (filtered.length === 0) return reject('Group not found');
-                    this.groups = this.groups.concat(filtered);
-                    resolve();
-                })
-                .catch(e => reject(e));
-        });
+        let filtered = groups.body.filter(group => group.full_path === fullPath);
+        if (filtered.length === 0) throw 'Group not found';
+        this.groups = this.groups.concat(filtered);
     }
 
     /**
      * get sub groups
      * @returns {Promise<void>}
      */
-    getSubGroups() {
-        return new Promise((resolve, reject) => {
-            this.client.get(`groups`)
-                .then(groups => {
-                    if (groups.body.length === 0) return resolve();
+    async getSubGroups() {
+        let groups = await this.client.get(`groups`);
+        if (groups.body.length === 0) return;
 
-                    let filtered = this._filterGroupsByParents(groups.body, this.groups.map(g => g.id));
-                    if (filtered.length === 0) return resolve();
+        let filtered = this._filterGroupsByParents(groups.body, this.groups.map(g => g.id));
+        if (filtered.length === 0) return;
 
-                    this.groups = this.groups.concat(filtered);
-                    resolve();
-                })
-                .catch(e => reject(e));
-        });
+        this.groups = this.groups.concat(filtered);
     }
 
     _filterGroupsByParents(groups, parents) {

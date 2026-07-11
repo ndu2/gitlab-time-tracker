@@ -129,11 +129,11 @@ class Task {
         });
     }
 
-    getNotes() {
-        let promise = this.client.all(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`);
-        promise.then(notes => this.notes = notes);
+    async getNotes() {
+        let notes = await this.client.all(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`);
+        this.notes = notes;
 
-        return promise;
+        return notes;
     }
 
     createTime(time, created_at, note) {
