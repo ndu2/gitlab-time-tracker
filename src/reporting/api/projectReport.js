@@ -1,7 +1,7 @@
-import GitlabClient from '../../core/gitlab-client.js';
+import GitlabClient from '../../core/api/gitlab-client.js';
 import Project from './project.js';
 import fetchTimelogs from './timelogs.js';
-import {excludeByLabel, excludeMoved} from './filters.js';
+import {excludeByLabel, excludeMoved} from '../filters.js';
 import Config from '../../core/config.js';
 
 /**

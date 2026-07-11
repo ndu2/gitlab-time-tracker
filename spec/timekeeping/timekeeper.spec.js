@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
 import Config from '../../src/core/config.js';
-import Task from '../../src/core/task.js';
+import Task from '../../src/core/api/task.js';
 import Timekeeper from '../../src/timekeeping/timekeeper.js';
 
 function fakeFrames(frames) {

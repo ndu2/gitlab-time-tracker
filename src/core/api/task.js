@@ -1,8 +1,8 @@
-import dayjs from './dayjs.js';
+import dayjs from '../dayjs.js';
 import GitlabClient from './gitlab-client.js';
-import Time from './time.js';
-import chargeRatio from './billing.js';
-import Project from '../reporting/api/project.js';
+import Time from '../time.js';
+import chargeRatio from '../billing.js';
+import Project from '../../reporting/api/project.js';
 
 class Task {
     /**

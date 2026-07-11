@@ -85,7 +85,7 @@ class Time {
         let match, parsed;
 
         if ((match = regex.exec(string)) === null) return false;
-        parsed = Object.fromEntries(mappings.map((key, i) => [key, match[i] === undefined ? 0 : match[i]]));
+        parsed = Object.fromEntries(mappings.map((key, i) => [key, match[i] === undefined ? '0' : match[i]]));
 
         return (parsed.sign ? -1 : 1) * (parseInt(parsed.seconds)
             + (parseInt(parsed.minutes) * 60)
@@ -138,9 +138,9 @@ class Time {
                 decimals = conditionalMatch[1]
             }
 
-            decimals = parseInt(decimals);
-            time = Math.ceil(inserts[match[2]] * Math.pow(10, decimals)) / Math.pow(10, decimals);
-            output = output.replace(match[0], time !== 0 && conditionalMatch ? time + conditionalMatch[2] : time);
+            let iDecimals = parseInt(decimals);
+            time = Math.ceil(inserts[match[2]] * Math.pow(10, iDecimals)) / Math.pow(10, iDecimals);
+            output = output.replace(match[0], (time !== 0 && conditionalMatch ? time + conditionalMatch[2] : time).toString());
         }
 
         // conditionals

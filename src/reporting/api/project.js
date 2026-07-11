@@ -1,4 +1,4 @@
-import GitlabClient from '../../core/gitlab-client.js';
+import GitlabClient from '../../core/api/gitlab-client.js';
 
 /**
  * project model

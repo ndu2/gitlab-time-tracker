@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { excludeByLabel, excludeMoved } from '../../src/reporting/api/filters.js';
+import { excludeByLabel, excludeMoved } from '../../src/reporting/filters.js';
 
 function item(iid, labels = []) {
     return { iid, labels };

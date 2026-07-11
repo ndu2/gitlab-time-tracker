@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { throttledQueue } from 'throttled-queue';
-import parallel from './parallel.js';
+import parallel from '../parallel.js';
 
 /**
  * GitLab REST/GraphQL client: owns the request throttle, single/parallel

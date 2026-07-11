@@ -1,7 +1,7 @@
 import {Command} from 'commander';
 import Cli from '../../core/cli.js';
 import Timekeeper from '../timekeeper.js';
-import Owner from '../../core/owner.js';
+import Owner from '../../core/api/owner.js';
 
 function sync(configLoader) {
     const sync = new Command('sync')

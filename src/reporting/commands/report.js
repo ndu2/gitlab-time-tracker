@@ -2,7 +2,7 @@ import fs from 'fs';
 import {Command} from 'commander';
 import Cli from '../../core/cli.js';
 import Args from '../../core/args.js';
-import GitlabClient from '../../core/gitlab-client.js';
+import GitlabClient from '../../core/api/gitlab-client.js';
 import {buildReportConfig, validateReportConfig} from '../reportConfigBuilder.js';
 import {runReport, Output} from '../reportRunner.js';
 

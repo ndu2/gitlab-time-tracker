@@ -1,8 +1,8 @@
-import GitlabClient from '../../core/gitlab-client.js';
-import parallel from '../../core/parallel.js';
-import Issue from '../../core/issue.js';
-import MergeRequest from '../../core/mergeRequest.js';
-import {timelogsFor} from './timelogs.js';
+import GitlabClient from '../core/api/gitlab-client.js';
+import parallel from '../core/parallel.js';
+import Issue from '../core/api/issue.js';
+import MergeRequest from '../core/api/mergeRequest.js';
+import {timelogsFor} from './api/timelogs.js';
 
 /**
  * aggregates ProjectReports and processes their issues/merge requests
@@ -11,12 +11,10 @@ class MasterReport {
     /**
      * constructor.
      * @param config
-     * @param client
      */
-    constructor(config, client = new GitlabClient(config)) {
+    constructor(config, client) {
         this.config = config;
         this.client = client;
-
         this.projects = {};
         this.issues = [];
         this.mergeRequests = [];
@@ -59,7 +57,7 @@ class MasterReport {
 
     /**
      * merge a project report into this report
-     * @param {import('./projectReport.js').default} report
+     * @param {import('./api/projectReport.js').default} report
      */
     merge(report) {
         this.issues = this.issues.concat(report.issues);

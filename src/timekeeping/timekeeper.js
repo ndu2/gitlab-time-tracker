@@ -1,7 +1,7 @@
 import Fs from '../core/filesystem.js';
 import Frame from './storage/frame.js';
-import Issue from '../core/issue.js';
-import MergeRequest from '../core/mergeRequest.js';
+import Issue from '../core/api/issue.js';
+import MergeRequest from '../core/api/mergeRequest.js';
 import FrameCollection from './storage/frameCollection.js';
 
 const classes = {
@@ -18,25 +18,48 @@ class Timekeeper {
 
     /**
      * Path to the pointer file that names the currently
-     * active (has no contents if stopped)
+     * active frame (has no contents if stopped). config.frameDir
+     * can change after construction (eg. once `project` is set),
+     * so this stays a getter rather than a value cached once.
      */
-    _currentFile() {
+    get currentFile() {
         return Fs.join(this.config.frameDir, CURRENT_FILE);
     }
 
     /**
-     * id of the currently active frame, or null if none is running.
+     * The currently active frame, or null if none is running.
      * Only one frame can be active at a time, so this is a direct
      * lookup instead of scanning every frame file.
+     * @returns {Frame|null}
      */
-    _currentId() {
-        if (!Fs.exists(this._currentFile())) {
+    getCurrentFrame() {
+        if (!Fs.exists(this.currentFile)) {
             let running = new FrameCollection(this.config).frames.find(frame => frame.stop === null);
-            Fs.writeText(this._currentFile(), running ? running.id : '');
+            Fs.writeText(this.currentFile, running ? running.id : '');
+            return running;
         }
-        let id = Fs.readText(this._currentFile()).trim();
+        let id = Fs.readText(this.currentFile).trim();
 
-        return id || null;
+        if (!id) return null;
+
+        let f = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json'));
+        if(f.stop != null) {
+            // lost sync. reset
+            Fs.remove(this.currentFile);
+            let running = new FrameCollection(this.config).frames.find(frame => frame.stop === null);
+            Fs.writeText(this.currentFile, running ? running.id : '');
+            f = running;
+        }
+        return f;
+    }
+
+    /**
+     * Records the given frame as the currently active one, or clears
+     * it when called with null/undefined.
+     * @param {Frame|null} [frame]
+     */
+    setCurrentFrame(frame) {
+        Fs.writeText(this.currentFile, frame ? frame.id : '');
     }
 
     /**
@@ -187,11 +210,11 @@ class Timekeeper {
      * @returns {Promise}
      */
     async status() {
-        let id = this._currentId();
+        let frame = this.getCurrentFrame();
 
-        if (!id) return [];
+        if (!frame) return [];
 
-        return [Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json'))];
+        return [frame];
     }
 
     /**
@@ -259,11 +282,11 @@ class Timekeeper {
     async start(project, type, id, note) {
         this.config.set('project', project);
 
-        if (this._currentId())
+        if (this.getCurrentFrame())
             throw new Error("Already running. Please stop it first with 'gtt stop'.");
 
         let frame = new Frame(this.config, id, type, note).startMe();
-        Fs.writeText(this._currentFile(), frame.id);
+        this.setCurrentFrame(frame);
 
         return frame;
     }
@@ -273,12 +296,12 @@ class Timekeeper {
      * @returns {Promise}
      */
     async stop() {
-        let id = this._currentId();
+        let frame = this.getCurrentFrame();
 
-        if (!id) throw new Error('No projects started.');
+        if (!frame) throw new Error('No projects started.');
 
-        let frame = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json')).stopMe();
-        Fs.truncate(this._currentFile());
+        frame.stopMe();
+        this.setCurrentFrame(null);
 
         return [frame];
     }
@@ -288,14 +311,12 @@ class Timekeeper {
      * @returns {Promise}
      */
     async cancel() {
-        let id = this._currentId();
+        let frame = this.getCurrentFrame();
 
-        if (!id) throw new Error('No projects started.');
+        if (!frame) throw new Error('No projects started.');
 
-        let file = Fs.join(this.config.frameDir, id + '.json');
-        let frame = Frame.fromFile(this.config, file);
-        Fs.remove(file);
-        Fs.truncate(this._currentFile());
+        Fs.remove(Fs.join(this.config.frameDir, frame.id + '.json'));
+        this.setCurrentFrame(null);
 
         return [frame];
     }

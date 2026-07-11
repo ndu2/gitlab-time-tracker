@@ -1,4 +1,4 @@
-import DayReport from './api/dayReport.js';
+import DayReport from './dayReport.js';
 
 /**
  * Aggregate a merged report into the numbers the output formats render:

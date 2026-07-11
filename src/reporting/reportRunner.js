@@ -1,10 +1,10 @@
 import pc from 'picocolors';
 import Cli from '../core/cli.js';
-import Owner from '../core/owner.js';
+import Owner from '../core/api/owner.js';
 import Project from './api/project.js';
 import ProjectReport from './api/projectReport.js';
-import MasterReport from './api/masterReport.js';
-import ReportCollection from './api/reportCollection.js';
+import MasterReport from './masterReport.js';
+import ReportCollection from './reportCollection.js';
 import parallel from '../core/parallel.js';
 
 // output backends are imported lazily so timekeeping commands never pull in

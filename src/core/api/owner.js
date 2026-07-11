@@ -1,5 +1,5 @@
 import GitlabClient from './gitlab-client.js';
-import parallel from './parallel.js';
+import parallel from '../parallel.js';
 
 /**
  * owner model

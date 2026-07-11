@@ -1,4 +1,4 @@
-import parallel from '../../core/parallel.js';
+import parallel from '../core/parallel.js';
 
 class ReportCollection {
     constructor(config) {
