@@ -177,7 +177,7 @@ class Task {
             (timelog) => {
                 let spentAt = dayjs(timelog.spentAt);
 
-                let time = new Time(null, spentAt, {
+                let time = new Time(spentAt, {
                     author: {username: timelog.user.username},
                     created_at: timelog.spentAt,
                     noteable_type: this._typeSingular

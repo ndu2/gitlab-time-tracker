@@ -4,20 +4,26 @@ import Config from '../../src/core/config.js';
 import Output from '../../src/reporting/output/base.js';
 import calculateStats from '../../src/reporting/stats.js';
 
-function makeTime({ user = 'alice', seconds = 0, date = '2026-01-05T10:00:00Z', iid = 1, project = 'group/project', note = null, chargeRatio = 1.0 } = {}) {
-    return { user, seconds, iid, project_namespace: project, date: dayjs(date), note, chargeRatio };
+function makeTime({ user = 'alice', seconds = 0, date = '2026-01-05T10:00:00Z', note = null, chargeRatio = 1.0 } = {}) {
+    return { user, seconds, date: dayjs(date), note, chargeRatio };
 }
 
-function makeIssue({ iid = 1, labels = [], times = [], estimate = 0, spent = 0, project_id = 1, title = 'issue' } = {}) {
-    return {
+function makeIssue({ iid = 1, labels = [], times = [], estimate = 0, spent = 0, project_id = 1, title = 'issue', project_namespace = 'group/project' } = {}) {
+    const issue = {
         iid,
         project_id,
+        project_namespace,
         title,
         labels,
         times,
         total_spent_s : spent,
         total_estimate_s : estimate
     };
+
+    // Time delegates iid/title/project_namespace to its parent Task
+    times.forEach(time => { time.parent = issue; });
+
+    return issue;
 }
 
 describe('calculateStats', () => {
@@ -40,8 +46,8 @@ describe('calculateStats', () => {
                 ]
             }),
             makeIssue({
-                iid: 2, times: [
-                    makeTime({ user: 'alice', seconds: 1800, project: 'group/other' })
+                iid: 2, project_namespace: 'group/other', times: [
+                    makeTime({ user: 'alice', seconds: 1800 })
                 ]
             })
         ]);
@@ -133,5 +139,23 @@ describe('Output.prepare', () => {
         }, ['iid', 'date', 'missing', 'undefined_column', 'labels']);
 
         expect(row).to.deep.equal([7, '2026-01-05', '', '', 'a,b']);
+    });
+
+    it('falls back to obj.parent for a column missing on obj itself - e.g. a Time record deferring to its parent Task', () => {
+        const config = new Config();
+        const output = new Output(config, { issues: [], mergeRequests: [] });
+        const parent = { iid: 42, title: 'Parent title' };
+
+        const row = output.prepare({ parent, seconds: 60 }, ['iid', 'title', 'seconds']);
+
+        expect(row).to.deep.equal([42, 'Parent title', 60]);
+    });
+
+    it('returns empty string when the column is missing on both obj and its parent, or there is no parent', () => {
+        const config = new Config();
+        const output = new Output(config, { issues: [], mergeRequests: [] });
+
+        expect(output.prepare({ parent: {} }, ['title'])).to.deep.equal(['']);
+        expect(output.prepare({}, ['title'])).to.deep.equal(['']);
     });
 });

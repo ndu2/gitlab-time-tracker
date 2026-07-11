@@ -125,23 +125,25 @@ class Output {
     /**
      * prepare the given object by only returning
      * the given columns/properties and formatting
-     * special properties like dayjs instances
+     * special properties like dayjs instances.
      * @param obj
      * @param columns
      * @returns {Array}
      */
     prepare(obj = {}, columns = []) {
         return columns.map(column => {
-            if (dayjs.isDayjs(obj[column]))
-                return obj[column].format(this.config.get('dateFormat'));
+            let value = obj[column];
 
-            if (obj[column] === undefined || obj[column] === null)
+            if (dayjs.isDayjs(value))
+                return value.format(this.config.get('dateFormat'));
+
+            if (value === undefined || value === null)
                 return '';
 
-            if(typeof obj[column] == 'object') {
-                return obj[column].toString()
+            if(typeof value == 'object') {
+                return value.toString()
             }
-            return obj[column];
+            return value;
         });
     }
 }

@@ -47,21 +47,21 @@ export default function calculateStats(config, report) {
                 issueDays[dateGrp].addSpent(time.seconds);
 
                 if (!users[time.user]) users[time.user] = 0;
-                if (!projects[time.project_namespace]) projects[time.project_namespace] = 0;
+                if (!projects[issue.project_namespace]) projects[issue.project_namespace] = 0;
                 if (!days[dateGrp]) {
                     days[dateGrp] = {};
                     daysMoment[dateGrp] = time.date;
                 }
-                if (!days[dateGrp][time.project_namespace]) {
-                    days[dateGrp][time.project_namespace] = {};
+                if (!days[dateGrp][issue.project_namespace]) {
+                    days[dateGrp][issue.project_namespace] = {};
                 }
-                if (!days[dateGrp][time.project_namespace][time.iid]) {
-                    days[dateGrp][time.project_namespace][time.iid] = 0;
+                if (!days[dateGrp][issue.project_namespace][issue.iid]) {
+                    days[dateGrp][issue.project_namespace][issue.iid] = 0;
                 }
 
                 users[time.user] += time.seconds;
-                projects[time.project_namespace] += time.seconds;
-                days[dateGrp][time.project_namespace][time.iid] += time.seconds;
+                projects[issue.project_namespace] += time.seconds;
+                days[dateGrp][issue.project_namespace][issue.iid] += time.seconds;
 
                 spent += time.seconds;
 
