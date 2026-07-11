@@ -222,6 +222,7 @@ function edit(configLoader) {
     .option('-i, --interactive', 'edit start/stop time interactively with keystrokes')
     .option('--today', 'only list entries for today')
     .option('--this_week', 'only list entries for this week')
+    .option('--last_week', 'only list entries for last week')
     .option('--day <day>', 'only list entries for this day')
     .option('--week <day>', 'only list entries for the week of this day')
     .action((id, opts ,program) => {
@@ -245,9 +246,13 @@ function getMenuFrames() {
       } else {
         frames = [];
       }
-    } else if (program.opts().today || program.opts().this_week) {
+    } else if (program.opts().today || program.opts().this_week || program.opts().last_week) {
       let from = program.opts().today ? dayjs().startOf('day') : dayjs().startOf('week');
       let to = program.opts().today ? dayjs().add(1, 'day').startOf('day') : dayjs().endOf('week').add(1, 'day').startOf('day');
+      if(program.opts().last_week) {
+        from = from.subtract(1, 'week');
+        to = to.subtract(1, 'week');
+      }
       frames = frames.filter((fr) => !fr.start.isBefore(from) && !fr.start.isAfter(to));
       frames.sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1));
     } else if (program.opts().day || program.opts().week) {

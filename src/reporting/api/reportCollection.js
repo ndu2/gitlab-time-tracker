@@ -13,13 +13,10 @@ class ReportCollection {
     }
 
     push(report) {
-        if (!this.projectNames.includes(report.project.name)) {
-            this.projectNames.push(report.project.name);
+        if (!this.projectNames.includes(report.project.namespace)) {
+            this.projectNames.push(report.project.namespace);
             this.reports.push(report);
         }
-    }
-    get length() {
-        return this.reports.length;
     }
 }
 

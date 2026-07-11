@@ -4,8 +4,8 @@ import GitlabClient from './gitlab-client.js';
 class MergeRequest extends CoreTask {
     static resoureType = 'merge_requests';
     
-    constructor(config, data, client, project_namespace) {
-        super(config, data, client, MergeRequest.resoureType, project_namespace);
+    constructor(config, data, client, project) {
+        super(config, data, client, MergeRequest.resoureType, project);
     }
 
     static list(config, project, state, my, client = new GitlabClient(config)) {

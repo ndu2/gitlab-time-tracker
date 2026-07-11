@@ -1,7 +1,9 @@
 import pc from 'picocolors';
 import Cli from '../core/cli.js';
 import Owner from '../core/owner.js';
-import Report from './api/report.js';
+import Project from './api/project.js';
+import ProjectReport from './api/projectReport.js';
+import MasterReport from './api/masterReport.js';
 import ReportCollection from './api/reportCollection.js';
 import parallel from '../core/parallel.js';
 
@@ -14,7 +16,8 @@ export const Output = {
     invoice: () => import('./output/invoice.js')
 };
 
-async function resolveProjects(config, client, owner, reports, reporter) {
+async function resolveProjects(config, client, owner, reporter) {
+    let reports = new ReportCollection(config);
     let projectLabels = Array.isArray(config.get('project')) ? config.get('project').join('", "') : config.get('project');
     let projects = Array.isArray(config.get('project')) ? config.get('project') : [config.get('project')];
 
@@ -24,19 +27,20 @@ async function resolveProjects(config, client, owner, reports, reporter) {
         await owner.authorized();
     } catch (error) {
         reporter.x(`Invalid access token!`, error);
+        throw error;
     }
 
     try {
         await parallel(projects, async project => {
             switch (config.get('type')) {
                 case 'project': {
-                    let report = new Report(config, undefined, client);
                     try {
-                        await report.getProject(project);
+                        let p = await Project.create(config, project, client);
+                        let report = new ProjectReport(config, p, client);
+                        reports.push(report);
                     } catch (error) {
                         reporter.x(`Project not found or no access rights "${projectLabels}".`, error);
                     }
-                    reports.push(report);
                     break;
                 }
 
@@ -44,7 +48,10 @@ async function resolveProjects(config, client, owner, reports, reporter) {
                     await owner.getGroup(project);
                     if (config.get('subgroups')) await owner.getSubGroups();
                     await owner.getProjectsByGroup();
-                    owner.projects.forEach(project => reports.push(new Report(config, project, client)));
+                    owner.projects.forEach(p =>  {
+                        let project = new Project(config, p, client);
+                        reports.push(new ProjectReport(config, project, client))
+                    });
                     break;
                 }
             }
@@ -64,8 +71,10 @@ async function resolveProjects(config, client, owner, reports, reporter) {
         }
 
         reporter.mark();
+        return reports;
     } catch (error) {
         reporter.x(`Could not resolve "${projectLabels}"`, error);
+        throw error;
     }
 }
 
@@ -168,14 +177,12 @@ async function makeOutput(config, master, reporter) {
  * @returns {Promise<import('./output/base.js').default>} the rendered output, ready for toFile/toStdOut
  */
 export async function runReport(config, client, reporter = Cli) {
-    let owner = new Owner(config, client),
-        reports = new ReportCollection(config),
-        master = new Report(config, undefined, client);
-
-    await resolveProjects(config, client, owner, reports, reporter);
+    let owner = new Owner(config, client);
+    let reports = await resolveProjects(config, client, owner, reporter);
     await fetchIssues(config, reports, reporter);
     await fetchMergeRequests(config, reports, reporter);
     await fetchTimelogs(reports, reporter);
+    let master = new MasterReport(config, client);
     await mergeReports(reports, master, reporter);
     await processIssues(config, master, reporter);
     await processMergeRequests(config, master, reporter);

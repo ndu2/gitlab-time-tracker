@@ -19,7 +19,7 @@ function report(configLoader) {
     const report = new Command('report')
     .description('generate a report for the given project and issues')
     .arguments('[project] [ids...]')
-    .option('-e --type <type>', 'specify the query type: project, user, group')
+    .option('-e --type <type>', 'specify the query type: project, group')
     .option('--subgroups', 'include sub groups')
     .option('--url <url>', 'URL to GitLabs API')
     .option('--token <token>', 'API access token')
@@ -27,6 +27,7 @@ function report(configLoader) {
     .option('-t --to <to>', 'query times that are equal or smaller than the given date')
     .option('--today', 'ignores --from and --to and queries entries for today')
     .option('--this_week', 'ignores --from and --to and queries entries for this week')
+    .option('--last_week', 'ignores --from and --to and queries entries for last week')
     .option('--this_month', 'ignores --from and --to and queries entries for this month')
     .option('--last_month', 'ignores --from and --to and queries entries for last month')
     .option('-c --closed', 'include closed issues')
@@ -86,20 +87,20 @@ if (config.get('file') && fs.existsSync(config.get('file'))) {
     }
 }
 
-let client = new GitlabClient(config);
-let output = await runReport(config, client, Cli);
-
-// print report
-Cli.list(`${Cli.print}  Printing report`);
-
 try {
+    let client = new GitlabClient(config);
+    let output = await runReport(config, client, Cli);
+
+    // print report
+    Cli.list(`${Cli.print}  Printing report`);
+
     if (config.get('file')) {
         output.toFile(config.get('file'));
     } else {
         output.toStdOut();
     }
 } catch (error) {
-    Cli.x(`could not print report.`, error);
+    Cli.x(`could not create report.`, error);
 }
 
 Cli.mark();

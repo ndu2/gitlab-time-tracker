@@ -64,6 +64,10 @@ export function buildReportConfig(config, opts, args) {
         config
             .set('from', dayjs().startOf('week'))
             .set('to', dayjs().endOf('week').add(1, 'day').startOf('day'));
+    if (opts.last_week)
+        config
+            .set('from', dayjs().startOf('week').subtract(1, 'week'))
+            .set('to', dayjs().endOf('week').subtract(1, 'week').add(1, 'day').startOf('day'));
     if (opts.this_month)
         config
             .set('from', dayjs().startOf('month'))

@@ -6,9 +6,9 @@ import GitlabClient from '../../core/gitlab-client.js';
 class Project {
     /**
      * construct
-     * @param config
+     * @param {import('../../core/config.js').default} config
      * @param data
-     * @param client
+     * @param {GitlabClient} client
      */
     constructor(config, data, client = new GitlabClient(config)) {
         this.config = config;
@@ -19,13 +19,13 @@ class Project {
 
     /**
      * make
-     * @param name
+     * @param {import('../../core/config.js').default} config
+     * @param {GitlabClient} client
+     * @param {string} name
      */
-    make(name) {
-        let promise = this.client.get(`projects/${encodeURIComponent(name)}`);
-        promise.then(project => this.data = project.body);
-
-        return promise;
+    static async create(config, name, client) {
+        let data = await client.get(`projects/${encodeURIComponent(name)}`);
+        return new Project(config, data.body, client);
     }
 
     /**
@@ -60,8 +60,12 @@ class Project {
         return this.data.id;
     }
 
-    get name() {
+    get namespace() {
         return this.data.path_with_namespace;
+    }
+
+    get name() {
+        return this.data.name;
     }
 
     get users() {

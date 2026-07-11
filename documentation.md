@@ -202,7 +202,9 @@ You can omit the id to edit to bring up a list of the latest records to choose f
 
 ```shell
 gtt edit -i
+gtt edit -i --today
 gtt edit -i --this_week
+gtt edit -i --last_week
 gtt edit -i --week 2026-02-04
 ```
 
@@ -327,6 +329,8 @@ There are some quick shorthands:
 gtt report --today
 gtt report --this_week
 gtt report --this_month
+gtt report --last_week
+gtt report --last_month_
 ```
 
 #### Include closed issues/merge requests
@@ -428,9 +432,10 @@ gtt report --record_columns=user --record_columns=date --record_columns=time
 gtt report --issue_columns=iid --issue_columns=title --issue_columns=time_username
 ```
 
-*Note: Available columns to choose from: `id`, `iid`, `title`, `project_id`, 
-`project_namespace`, `description`, `labels`, `milestone`, `assignee`, `author`,
-`closed`, `updated_at`, `created_at`, `due_date`, `state`, `spent`, `total_spent`, `total_estimate`*
+*Note: Available columns to choose from: `id`, `iid`, `title`, `project_id`, `type`,
+`project_namespace`, `project_name`, `description`, `labels`, `milestone`, `assignee`, `author`,
+`closed`, `updated_at`, `created_at`, `due_date`, `state`, `spent`, `total_spent`, `total_estimate`,
+`time_<user>`, `timeSpent`. `total_estimate_s`, `total_spent_s`*
 
 *You can also include columns that show the total time spent by a specific user 
 by following this convention: `time_username`*
@@ -558,6 +563,7 @@ weeksPerMonth: 4
 issueColumns:
 - iid
 - title
+- spent
 - total_estimate
 
 # Include the given columns in the merge request table
@@ -566,6 +572,7 @@ issueColumns:
 mergeRequestColumns:
 - iid
 - title
+- spent
 - total_estimate
 
 # Include the given columns in the time record table

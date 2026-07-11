@@ -20,16 +20,14 @@ class Time {
      * construct
      * @param date
      * @param data raw noteable payload (author, created_at, noteable_type)
-     * @param {import('./task.js').default} parent
      * @param config
      * @param {number} seconds
      * @param {string|null} [note]
      * @param {number} [chargeRatio]
      */
-    constructor(date = null, data, parent, config, seconds, note = null, chargeRatio = 1.0) {
+    constructor(date = null, data, config, seconds, note = null, chargeRatio = 1.0) {
         this.data = data;
         this._date = date;
-        this.parent = parent;
         this.config = config;
         this.note = note;
         this.chargeRatio = chargeRatio;

@@ -20,9 +20,6 @@ function makeIssue({ iid = 1, labels = [], times = [], estimate = 0, spent = 0, 
         total_estimate_s : estimate
     };
 
-    // Time delegates iid/title/project_namespace to its parent Task
-    times.forEach(time => { time.parent = issue; });
-
     return issue;
 }
 
@@ -139,16 +136,6 @@ describe('Output.prepare', () => {
         }, ['iid', 'date', 'missing', 'undefined_column', 'labels']);
 
         expect(row).to.deep.equal([7, '2026-01-05', '', '', 'a,b']);
-    });
-
-    it('falls back to obj.parent for a column missing on obj itself - e.g. a Time record deferring to its parent Task', () => {
-        const config = new Config();
-        const output = new Output(config, { issues: [], mergeRequests: [] });
-        const parent = { iid: 42, title: 'Parent title' };
-
-        const row = output.prepare({ parent, seconds: 60 }, ['iid', 'title', 'seconds']);
-
-        expect(row).to.deep.equal([42, 'Parent title', 60]);
     });
 
     it('returns empty string when the column is missing on both obj and its parent, or there is no parent', () => {

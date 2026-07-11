@@ -2,6 +2,7 @@ import dayjs from './dayjs.js';
 import GitlabClient from './gitlab-client.js';
 import Time from './time.js';
 import chargeRatio from './billing.js';
+import Project from '../reporting/api/project.js';
 
 class Task {
     /**
@@ -9,15 +10,15 @@ class Task {
      * @param data
      * @param client
      * @param type
-     * @param {string} [project_namespace] the owning project's path_with_namespace, if known
+     * @param {Project} [project] the owning project's, if known
      */
-    constructor(config, data = {}, client = new GitlabClient(config), type, project_namespace) {
+    constructor(config, data = {}, client = new GitlabClient(config), type, project) {
         this.config = config;
         this.client = client;
         this.times = [];
         this.data = data;
         this.type = type;
-        this.project_namespace = project_namespace;
+        this.project = project;
     }
 
     get iid() {
@@ -34,6 +35,14 @@ class Task {
 
     get project_id() {
         return this.data.project_id;
+    }
+
+    get project_namespace() {
+        return this.project.namespace;
+    }
+
+    get project_name() {
+        return this.project.name;
     }
 
     get description() {
@@ -181,7 +190,7 @@ class Task {
                     author: {username: timelog.user.username},
                     created_at: timelog.spentAt,
                     noteable_type: this._typeSingular
-                }, this, this.config, timelog.timeSpent, timelog.note && timelog.note.body ? timelog.note.body : null, ratio);
+                }, this.config, timelog.timeSpent, timelog.note && timelog.note.body ? timelog.note.body : null, ratio);
 
                 // only include times by the configured user
                 if (this.config.get('user') && this.config.get('user') !== timelog.user.username) return;

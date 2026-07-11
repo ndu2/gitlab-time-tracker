@@ -83,39 +83,6 @@ class Owner {
         return filtered;
     }
 
-    // /**
-    //  * query and set the user
-    //  * @returns {Promise}
-    //  */
-    // getUser() {
-    //     return new Promise((resolve, reject) => {
-    //         this.get(`users/?username=${encodeURIComponent(this.config.get('project'))}`)
-    //             .then(user => {
-    //                 if (user.body.length === 0) return reject();
-    //                 let filtered = user.body.filter(u => u.username === this.config.get('project'));
-    //                 if (filtered.length === 0) return reject();
-    //                 this.user = filtered[0];
-    //                 resolve();
-    //             })
-    //             .catch(e => reject(e));
-    //     });
-    // }
-    //
-    // /**
-    //  * query and set the projects by a user
-    //  * @returns {Promise}
-    //  */
-    // getProjectsByUser() {
-    //     return new Promise((resolve, reject) => {
-    //         this.get(`users/${this.user.id}/projects`)
-    //             .then(projects => {
-    //                 this.projects = this.projects.concat(projects.body);
-    //                 resolve();
-    //             })
-    //             .catch(e => reject(e));
-    //     });
-    // }
-
     /**
      * query and set the projects by a user
      * @returns {Promise}
