@@ -1,7 +1,6 @@
 import {Command} from 'commander';
 import Cli from '../../core/cli.js';
 import Fs from '../../core/filesystem.js';
-import Time from '../../core/time.js';
 import Frame from '../storage/frame.js';
 import select, { Separator } from '@inquirer/select';
 import dayjs from '../../core/dayjs.js';
@@ -228,7 +227,7 @@ function edit(configLoader) {
     .action((id, opts ,program) => {
 
 let config = configLoader();
-let timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
+config.set('timeFormat', program.opts().time_format);
 let timekeeper = new Timekeeper(config);
 const listSize = program.opts().listsize;
 

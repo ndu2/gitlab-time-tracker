@@ -1,4 +1,3 @@
-import GitlabClient from '../core/api/gitlab-client.js';
 import parallel from '../core/parallel.js';
 import Issue from '../core/api/issue.js';
 import MergeRequest from '../core/api/mergeRequest.js';

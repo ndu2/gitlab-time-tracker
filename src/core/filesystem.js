@@ -20,10 +20,6 @@ class Filesystem {
         return fs.writeFileSync(file, data);
     }
 
-    static truncate(file) {
-        return fs.truncateSync(file);
-    }
-
     static open(file) {
         let editor = process.env.VISUAL;
 
