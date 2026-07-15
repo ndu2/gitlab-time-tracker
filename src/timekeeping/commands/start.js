@@ -6,7 +6,8 @@ import Timekeeper from '../timekeeper.js';
 
 
 function start(configLoader) {
-    const start = new Command('start', 'start monitoring time for the given project and resource id')
+    const start = new Command('start')
+    .description('start monitoring time for the given project and resource id')
     .arguments('[project] [id]')
     .option('-t, --type <type>', 'specify resource type: issue, merge_request')
     .option('-m', 'shorthand for --type=merge_request')

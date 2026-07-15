@@ -15,7 +15,7 @@ class CsvOutput extends Output {
             stats[1].push(time);
         });
 
-        if (this.projects.length > 1) {
+        if (Object.keys(this.projects).length > 1) {
             Object.entries(this.projects).forEach(([name, time]) => {
                 stats[0].push(name);
                 stats[1].push(time);

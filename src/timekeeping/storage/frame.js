@@ -4,41 +4,75 @@ import dayjs from '../../core/dayjs.js';
 import Hashids from 'hashids';
 const hashids = new Hashids();
 
+/** @typedef {import('dayjs').Dayjs} Dayjs */
+/** @typedef {import('../../core/file-config.js').default} Config */
+/**
+ * @typedef {Object} FrameJson
+ * @property {string} id
+ * @property {string} project
+ * @property {{id: string|number, type: string, new?: true}} resource
+ * @property {Array<{id: number, time: number}>} notes
+ * @property {string|false} start
+ * @property {string|false} stop
+ * @property {string|false} timezone
+ * @property {Dayjs|string} [modified]
+ * @property {string|null} [title]
+ * @property {string} [note]
+ */
+
 class Frame {
+    /** @type {string|null} not yet started until startMe()/the start setter runs */
+    _start;
+    /** @type {string|null} still running until stopMe()/the stop setter runs */
+    _stop;
+    /** @type {Dayjs|string|undefined} last-write timestamp, set on every write() */
+    modified;
+
     /**
      * constructor.
-     * @param config
-     * @param id
-     * @param type
-     * @param note
+     * @param {Config} config
+     * @param {string|number} id
+     * @param {string} type
+     * @param {string} [note]
      */
     constructor(config, id, type, note) {
         this.config = config;
         this.project = config.get('project');
         this.resource = {id, type};
 
-        if(typeof id === 'string' || id instanceof String)
+        if(typeof id === 'string' || /** @type {any} */ (id) instanceof String)
             this.resource.new = true;
 
         this.id = Frame.generateId();
-        this._start = false;
-        this._stop = false;
+        this._start = null;
+        this._stop = null;
         this.timezone = config.get('timezone');
         this.notes = [];
         this._note = note;
         this._title = null;
     }
 
+    /**
+     * @param {Config} config
+     * @param {string} file
+     * @returns {Frame}
+     */
     static fromFile(config, file) {
-        return Frame.fromJson(config, JSON.parse(fs.readFileSync(file)));
+        return Frame.fromJson(config, JSON.parse(fs.readFileSync(file, 'utf8')));
     }
 
+    /**
+     * @param {Config} config
+     * @param {FrameJson} json
+     * @returns {Frame}
+     */
     static fromJson(config, json) {
         let frame = new this(config, json.resource.id, json.resource.type, json.note);
         frame.project = json.project;
         frame.id = json.id;
-        frame._start = json.start;
-        frame._stop = json.stop;
+        // older frame files persisted the sentinel as `false`; normalize to null
+        frame._start = json.start || null;
+        frame._stop = json.stop || null;
         frame.notes = json.notes;
         frame.timezone = json.timezone;
         frame.modified = json.modified;
@@ -49,7 +83,7 @@ class Frame {
     }
 
     validate() {
-        if(!dayjs(this._start).isValid())
+        if(!this._start || !dayjs(this._start).isValid())
             throw new Error(`Start date is not in a valid ISO date format!`);
 
         if(this._stop && !dayjs(this._stop).isValid())
@@ -60,7 +94,7 @@ class Frame {
         if(this.timezone)
             return dayjs().tz(this.timezone).format();
 
-        return dayjs();
+        return dayjs().format();
     }
 
     startMe() {
@@ -81,6 +115,7 @@ class Frame {
      * write data to file atomically: write to a temp file in the same
      * directory, then rename over the target so a crash can never leave
      * a partially written or missing frame behind.
+     * @param {boolean} [skipModified]
      */
     write(skipModified) {
         const tmpFile = `${this.file}.tmp`;
@@ -101,6 +136,7 @@ class Frame {
     }
 
     get duration() {
+        // only meaningful once stopped - callers must guard frame.stop === null first
         return dayjs(this.stop).diff(this.start) / 1000;
     }
 
@@ -108,21 +144,25 @@ class Frame {
         return this.start;
     }
 
+    /** @returns {Dayjs} invalid before startMe()/the start setter has run */
     get start() {
         return this.timezone ? dayjs(this._start).tz(this.timezone) : dayjs(this._start);
     }
 
+    /** @param {string|Dayjs} value */
     set start(value) {
         this._start = dayjs.isDayjs(value) ? value.format() : value;
         this.validate();
     }
 
+    /** @returns {Dayjs|null} null while the frame is still running */
     get stop() {
-        return this.timezone ? this._stop ? dayjs(this._stop).tz(this.timezone) : false : (this._stop ? dayjs(this._stop) : false );
+        return this.timezone ? this._stop ? dayjs(this._stop).tz(this.timezone) : null : (this._stop ? dayjs(this._stop) : null);
     }
 
+    /** @param {string|Dayjs|null} value null clears the stop time (still running) */
     set stop(value) {
-        this._stop = value ? (dayjs.isDayjs(value) ? value.format() : value) : false;
+        this._stop = value ? (dayjs.isDayjs(value) ? value.format() : value) : null;
         this.validate();
     }
 
@@ -148,7 +188,7 @@ class Frame {
 
     /**
      * generate a unique id
-     * @returns {number}
+     * @returns {string}
      */
     static generateId() {
         return hashids.encode(new Date().getTime());

@@ -77,4 +77,32 @@ describe('frame class', () => {
         frame.stop = '2026-01-05T11:30:00Z';
         expect(frame.stop.isSame('2026-01-05T11:30:00Z')).to.equal(true);
     });
+
+    it('rejects a frame with no start date at all', () => {
+        const json = {
+            id: 'abc',
+            project: 'group/project',
+            resource: { id: 42, type: 'issue' },
+            notes: [],
+            start: false,
+            stop: false,
+            timezone: 'UTC'
+        };
+
+        expect(() => Frame.fromJson(config, json)).to.throw(/Start date/);
+    });
+
+    it('persists start/stop as strings even without a timezone configured', () => {
+        config.set('timezone', false, true);
+
+        const frame = new Frame(config, 42, 'issue').startMe();
+        frame.stopMe();
+
+        expect(frame._start).to.be.a('string');
+        expect(frame._stop).to.be.a('string');
+
+        const loaded = Frame.fromFile(config, frame.file);
+        expect(loaded.start.isSame(frame.start)).to.equal(true);
+        expect(loaded.stop.isSame(frame.stop)).to.equal(true);
+    });
 });

@@ -8,9 +8,28 @@ let spinnerIndex = 0;
 const spinner = { next: () => spinnerFrames[spinnerIndex++ % spinnerFrames.length] };
 
 /**
+ * thrown by Cli.error - carries the exit code the process should end
+ * with once the caller (or the top-level unhandledRejection handler in
+ * gtt.js) is done unwinding.
+ */
+export class CliExitError extends Error {
+    constructor(message, code = 1) {
+        super(message);
+        this.code = code;
+    }
+}
+
+/**
  * Cli helper
  */
 class Cli {
+    /** @type {boolean} */
+    static quiet = false;
+    /** @type {boolean} */
+    static verbose = false;
+    /** @type {any} */
+    static active;
+
     /*
      * emojis
      */
@@ -121,7 +140,7 @@ class Cli {
         let left;
 
         if (Cli.active.bar.curr > 0) {
-            let elapsed = Math.ceil((new Date() - Cli.active.started) / 1000);
+            let elapsed = Math.ceil((new Date().getTime() - Cli.active.started.getTime()) / 1000);
             left = ((elapsed / Cli.active.bar.curr) * (Cli.active.bar.total - Cli.active.bar.curr)) / 60;
             left = left < 1 ? `<1` : Math.ceil(left);
         } else {
@@ -169,9 +188,9 @@ class Cli {
 
     /**
      * stop a list item with an x
-     * @param message
-     * @param error
-     * @returns {*}
+     * @param {string|Error|false} [message]
+     * @param {Error|false} [error]
+     * @returns {Promise<void>}
      */
     static x(message = false, error = false) {
         Cli.resolve();
@@ -191,9 +210,9 @@ class Cli {
 
     /**
      * show an error message
-     * @param message
-     * @param error
-     * @returns {*}
+     * @param {string|Error} message
+     * @param {Error|false} [error]
+     * @returns {never}
      */
     static error(message, error) {
         Cli.resolve();
@@ -206,12 +225,12 @@ class Cli {
         Cli.out(`Error: ${pc.red(message)}` + '\n');
         if (error && Cli.verbose) console.log(error);
 
-        process.exit(1);
+        throw new CliExitError(message, 1);
     }
 
     /**
      * get a promise (for chaining promises)
-     * @returns {Promise}
+     * @returns {Promise<void>}
      */
     static promise() {
         return new Promise(resolve => {

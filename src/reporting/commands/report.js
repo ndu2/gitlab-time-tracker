@@ -1,22 +1,10 @@
 import fs from 'fs';
-import pc from 'picocolors';
 import {Command} from 'commander';
-import dayjs from '../../core/dayjs.js';
 import Cli from '../../core/cli.js';
 import Args from '../../core/args.js';
-import Report from '../api/report.js';
-import Owner from '../../core/owner.js';
-import ReportCollection from '../api/reportCollection.js';
-import GitlabClient from '../../core/gitlab-client.js';
-import parallel from '../../core/parallel.js';
-// output backends are imported lazily so timekeeping commands never pull in
-// the heavy deps (swissqrbill, markdown-table, csv-string, cli-table)
-const Output = {
-    table: () => import('../output/table.js'),
-    csv: () => import('../output/csv.js'),
-    markdown: () => import('../output/markdown.js'),
-    invoice: () => import('../output/invoice.js')
-};
+import GitlabClient from '../../core/api/gitlab-client.js';
+import {buildReportConfig, validateReportConfig} from '../reportConfigBuilder.js';
+import {runReport, Output} from '../reportRunner.js';
 
 // this collects options
 function collect(val, arr) {
@@ -28,9 +16,10 @@ function collect(val, arr) {
 
 
 function report(configLoader) {
-    const report = new Command('report', 'generate a report for the given project and issues')
+    const report = new Command('report')
+    .description('generate a report for the given project and issues')
     .arguments('[project] [ids...]')
-    .option('-e --type <type>', 'specify the query type: project, user, group')
+    .option('-e --type <type>', 'specify the query type: project, group')
     .option('--subgroups', 'include sub groups')
     .option('--url <url>', 'URL to GitLabs API')
     .option('--token <token>', 'API access token')
@@ -38,6 +27,7 @@ function report(configLoader) {
     .option('-t --to <to>', 'query times that are equal or smaller than the given date')
     .option('--today', 'ignores --from and --to and queries entries for today')
     .option('--this_week', 'ignores --from and --to and queries entries for this week')
+    .option('--last_week', 'ignores --from and --to and queries entries for last week')
     .option('--this_month', 'ignores --from and --to and queries entries for this month')
     .option('--last_month', 'ignores --from and --to and queries entries for last month')
     .option('-c --closed', 'include closed issues')
@@ -79,117 +69,14 @@ function report(configLoader) {
     .option('--invoicePositionExtraValue <number>', 'extra invoice position: value')
     .action(async (project, ids, options, program) => {
 
-// init helpers
-let config = configLoader();
-let args = new Args(program.args);
-
-// overwrite config with args and opts
-config
-    .set('url', program.opts().url)
-    .set('token', program.opts().token)
-    .set('project', args.project())
-    .set('iids', args.iids())
-    .set('from', program.opts().from)
-    .set('to', program.opts().to)
-    .set('closed', program.opts().closed)
-    .set('user', program.opts().user)
-    .set('milestone', program.opts().milestone)
-    .set('includeByLabels', program.opts().include_by_labels)
-    .set('excludeByLabels', program.opts().exclude_by_labels)
-    .set('includeLabels', program.opts().include_labels)
-    .set('excludeLabels', program.opts().exclude_labels)
-    .set('dateFormat', program.opts().date_format)
-    .set('timeFormat', program.opts().time_format)
-    .set('hoursPerDay', program.opts().hours_per_day)
-    .set('output', program.opts().output)
-    .set('file', program.opts().file)
-    .set('query', program.opts().query)
-    .set('report', program.opts().report)
-    .set('recordColumns', program.opts().record_columns)
-    .set('issueColumns', program.opts().issue_columns)
-    .set('mergeRequestColumns', program.opts().merge_request_columns)
-    .set('noHeadlines', program.opts().no_headlines)
-    .set('noWarnings', program.opts().no_warnings)
-    .set('quiet', program.opts().quiet)
-    .set('showWithoutTimes', program.opts().show_without_times)
-    .set('userColumns', program.opts().user_columns)
-    .set('type', program.opts().type)
-    .set('subgroups', program.opts().subgroups)
-    .set('_verbose', program.opts().verbose)
-    .set('invoiceTitle', program.opts().invoiceTitle)
-    .set('invoiceReference', program.opts().invoiceReference)
-    .set('invoiceText', program.opts().invoiceText)
-    .set('invoiceAddress', program.opts().invoiceAddress)
-    .set('invoiceCurrency', program.opts().invoiceCurrency)
-    .set('invoiceCurrencyPerHour', program.opts().invoiceCurrencyPerHour)
-    .set('invoiceVAT', program.opts().invoiceVAT)
-    .set('invoiceDate', program.opts().invoiceDate)
-    .set('invoiceTimeMaxUnit', program.opts().invoiceTimeMaxUnit)
-    .set('invoiceCurrencyMaxUnit', program.opts().invoiceCurrencyMaxUnit)
-    .set('invoicePositionText', program.opts().invoicePositionText)
-    .set('invoicePositionExtra', program.opts().invoicePositionExtra)
-    .set('invoicePositionExtraText', (program.opts().invoicePositionExtraText? program.opts().invoicePositionExtraText: "").split(','))
-    .set('invoicePositionExtraValue', (program.opts().invoicePositionExtraValue? program.opts().invoicePositionExtraValue: "").split(','));
-
-// date shortcuts
-if (program.opts().today)
-    config
-        .set('from', dayjs().startOf('day'))
-        .set('to', dayjs().add(1, 'day').startOf('day'));
-if (program.opts().this_week)
-    config
-        .set('from', dayjs().startOf('week'))
-        .set('to', dayjs().endOf('week').add(1, 'day').startOf('day'));
-if (program.opts().this_month)
-    config
-        .set('from', dayjs().startOf('month'))
-        .set('to', dayjs().endOf('month').add(1, 'day').startOf('day'));
-if (program.opts().last_month)
-    config
-        .set('from', dayjs().subtract(1, 'months').startOf('month'))
-        .set('to', dayjs().subtract(1, 'months').endOf('month').add(1, 'day').startOf('day'));
+let config = buildReportConfig(configLoader(), program.opts(), new Args(program.args));
 
 Cli.quiet = config.get('quiet');
 Cli.verbose = config.get('_verbose');
 
-// check extra Text/value arrays
-if(config.get('invoicePositionExtraText').length != config.get('invoicePositionExtraValue').length) {
-    Cli.error(`invoicePositionExtraText and invoicePositionExtraValue length do not match`);
-}
-
-// create stuff
-let client = new GitlabClient(config),
-    reports = new ReportCollection(config),
-    master = new Report(config, undefined, client),
-    projectLabels = Array.isArray(config.get('project')) ? config.get('project').join('", "') : config.get('project'),
-    projects = Array.isArray(config.get('project')) ? config.get('project') : [config.get('project')],
-    output;
-
-// warnings
-if (config.get('iids').length >= 1 && config.get('query').length > 1) {
-    Cli.warn(`The ids argument is ignored when querying issues and merge requests`);
-}
-if (config.get('iids').length >= 1 && (config.get('type') !== 'project' || projects.length > 1)) {
-    Cli.warn(`The ids argument is ignored when querying multiple projects`);
-}
-if ((config.get('report').includes('issues') && !config.get('query').includes('issues'))) {
-    Cli.warn(`Issues are included in the report but not queried.`);
-}
-if ((config.get('report').includes('merge_requests') && !config.get('query').includes('merge_requests'))) {
-    Cli.warn(`Merge Requests are included in the report but not queried.`);
-}
-if (!config.get('project')) {
-    Cli.error(`Missing project(s) or group(s) namespace. Try this: gtt report "username/project-name"`);
-}
-if (!Output[config.get('output')]) {
-    Cli.error(`The output ${config.get('output')} doesn't exist. Available outputs: ${Object.keys(Output).join(',')}`);
-}
-if (!config.get('from').isValid()) {
-    Cli.error(`FROM is not in a valid ISO date format.`);
-}
-if (!config.get('to').isValid()) {
-    Cli.error(`TO is not a in valid ISO date format.`);
-}
+let {errors, warnings} = validateReportConfig(config, Output);
+warnings.forEach(warning => Cli.warn(warning));
+if (errors.length > 0) Cli.error(errors[0]);
 
 // file prompt
 if (config.get('file') && fs.existsSync(config.get('file'))) {
@@ -200,160 +87,20 @@ if (config.get('file') && fs.existsSync(config.get('file'))) {
     }
 }
 
-// get project(s)
-Cli.list(`${Cli.look}  Resolving "${projectLabels}"`);
-let owner = new Owner(config, client);
-
 try {
-    await owner.authorized();
-} catch (error) {
-    Cli.x(`Invalid access token!`, error);
-}
+    let client = new GitlabClient(config);
+    let output = await runReport(config, client, Cli);
 
-try {
-    await parallel(projects, async project => {
-        switch (config.get('type')) {
-            case 'project': {
-                let report = new Report(config, undefined, client);
-                try {
-                    await report.getProject(project);
-                } catch (error) {
-                    Cli.x(`Project not found or no access rights "${projectLabels}".`, error);
-                }
-                reports.push(report);
-                break;
-            }
+    // print report
+    Cli.list(`${Cli.print}  Printing report`);
 
-            case 'group': {
-                await owner.getGroup(project);
-                if (config.get('subgroups')) await owner.getSubGroups();
-                await owner.getProjectsByGroup();
-                owner.projects.forEach(project => reports.push(new Report(config, project, client)));
-                break;
-            }
-        }
-    }, config, 1);
-
-    config.set('project', projects);
-    Cli.out(`\r${Cli.look}  Selected projects: ${reports.reports.map(r => pc.bold(pc.blue(r.project.name))).join(', ')}\n`);
-
-    // get members and user columns
-    if (config.get('userColumns')) {
-        await reports.forEach(async report => {
-            await report.project.members();
-            let columns = report.project.users.map(user => `time_${user}`);
-
-            config.set('issueColumns', [...new Set(config.get('issueColumns').concat(columns))]);
-            config.set('mergeRequestColumns', [...new Set(config.get('mergeRequestColumns').concat(columns))]);
-        });
-    }
-
-    Cli.mark();
-} catch (error) {
-    Cli.x(`Could not resolve "${projectLabels}"`, error);
-}
-
-// get issues
-if (config.get('query').includes('issues')) {
-    Cli.list(`${Cli.fetch}  Fetching issues`);
-
-    try {
-        await reports.forEach(report => report.getIssues());
-    } catch (error) {
-        Cli.x(`could not fetch issues.`, error);
-    }
-
-    Cli.mark();
-}
-
-// get merge requests
-if (config.get('query').includes('merge_requests')) {
-    Cli.list(`${Cli.fetch}  Fetching merge requests`);
-
-    try {
-        await reports.forEach(report => report.getMergeRequests());
-    } catch (error) {
-        Cli.x(`could not fetch merge requests.`, error);
-    }
-
-    Cli.mark();
-}
-
-// get timelogs
-Cli.list(`${Cli.fetch}  Loading timelogs`);
-
-try {
-    await reports.forEach(report => report.getTimelogs());
-} catch (error) {
-    Cli.x(`could not load timelogs.`, error);
-}
-
-Cli.mark();
-
-// merge reports
-Cli.list(`${Cli.merge}  Merging reports`);
-
-try {
-    await reports.forEach(report => master.merge(report));
-} catch (error) {
-    Cli.x(`could not merge reports.`, error);
-}
-
-Cli.mark();
-
-// process issues
-if (config.get('query').includes('issues') && master.issues.length > 0) {
-    Cli.bar(`${Cli.process}️  Processing issues`, master.issues.length);
-
-    try {
-        await master.processIssues(() => Cli.advance());
-    } catch (error) {
-        Cli.x(`could not process issues.`, error);
-    }
-
-    Cli.mark();
-}
-
-// process merge requests
-if (config.get('query').includes('merge_requests') && master.mergeRequests.length > 0) {
-    Cli.bar(`${Cli.process}️️  Processing merge requests`, master.mergeRequests.length);
-
-    try {
-        await master.processMergeRequests(() => Cli.advance());
-    } catch (error) {
-        Cli.x(`could not process merge requests.`, error);
-    }
-
-    Cli.mark();
-}
-
-// make report
-if (master.issues.length === 0 && master.mergeRequests.length === 0)
-    Cli.error('No issues or merge requests matched your criteria.');
-
-try {
-    let module = await Output[config.get('output')]();
-
-    Cli.list(`${Cli.output}  Making report`);
-    output = new module.default(config, master);
-    output.make();
-} catch (error) {
-    Cli.x(`could not make report.`, error);
-}
-
-Cli.mark();
-
-// print report
-Cli.list(`${Cli.print}  Printing report`);
-
-try {
     if (config.get('file')) {
         output.toFile(config.get('file'));
     } else {
         output.toStdOut();
     }
 } catch (error) {
-    Cli.x(`could not print report.`, error);
+    Cli.x(`could not create report.`, error);
 }
 
 Cli.mark();

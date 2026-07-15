@@ -1,6 +1,6 @@
 {
   "name": "gitlab-time-tracker",
-  "version": "1.9.0-beta0001",
+  "version": "1.9.0-beta0002",
   "type": "module",
   "description": "A command line interface for GitLabs time tracking feature.",
   "bugs": {
@@ -14,11 +14,12 @@
   "scripts": {
     "prebuild": "echo \"let version = '${npm_package_version}'; export default version;\" > src/version.js",
     "test": "NODE_ENV=test mocha 'spec/**/*.spec.js'",
+    "typecheck": "tsc --noEmit",
     "esbuild": "esbuild 'src/gtt.js' --format=cjs --target=node24 --platform=node --bundle --outfile=dist/gtt.cjs --inject:./src/polyfill/import-meta-url.js --define:import.meta.url=import_meta_url",
     "pkg": "pkg dist/gtt.cjs -o out/gtt -c package.json",
     "docker": "docker build . -t gitlab-time-tracker:${npm_package_version} -t gitlab-time-tracker:latest",
-    "build": "npm run-script prebuild && npm run-script test && npm run-script esbuild && npm run-script pkg",
-    "buildAll": "npm run-script prebuild && npm run-script test && npm run-script esbuild && npm run-script pkg && npm run-script docker"
+    "build": "npm run-script prebuild && npm run-script typecheck && npm run-script test && npm run-script esbuild && npm run-script pkg",
+    "buildAll": "npm run-script prebuild && npm run-script typecheck && npm run-script test && npm run-script esbuild && npm run-script pkg && npm run-script docker"
   },
   "bin": {
     "gtt": "dist/gtt.cjs"
@@ -58,10 +59,12 @@
     "throttled-queue": "^3.0.0"
   },
   "devDependencies": {
+    "@types/node": "^26.1.1",
     "@yao-pkg/pkg": "^6.21.0",
     "chai": "^6.2.2",
     "esbuild": "^0.28.1",
     "mocha": "^11.3.0",
-    "sinon": "^22.0.0"
+    "sinon": "^22.0.0",
+    "typescript": "^7.0.2"
   }
 }

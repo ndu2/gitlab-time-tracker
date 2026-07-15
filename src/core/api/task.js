@@ -1,14 +1,24 @@
-import dayjs from './dayjs.js';
+import dayjs from '../dayjs.js';
 import GitlabClient from './gitlab-client.js';
-import Time from './time.js';
+import Time from '../time.js';
+import chargeRatio from '../billing.js';
+import Project from '../../reporting/api/project.js';
 
 class Task {
-    constructor(config, data = {}, client = new GitlabClient(config), type) {
+    /**
+     * @param config
+     * @param data
+     * @param client
+     * @param type
+     * @param {Project} [project] the owning project's, if known
+     */
+    constructor(config, data = {}, client = new GitlabClient(config), type, project) {
         this.config = config;
         this.client = client;
         this.times = [];
         this.data = data;
         this.type = type;
+        this.project = project;
     }
 
     get iid() {
@@ -25,6 +35,14 @@ class Task {
 
     get project_id() {
         return this.data.project_id;
+    }
+
+    get project_namespace() {
+        return this.project.namespace;
+    }
+
+    get project_name() {
+        return this.project.name;
     }
 
     get description() {
@@ -111,11 +129,11 @@ class Task {
         });
     }
 
-    getNotes() {
-        let promise = this.client.all(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`);
-        promise.then(notes => this.notes = notes);
+    async getNotes() {
+        let notes = await this.client.all(`projects/${this.data.project_id}/${this._type}/${this.iid}/notes`);
+        this.notes = notes;
 
-        return promise;
+        return notes;
     }
 
     createTime(time, created_at, note) {
@@ -157,29 +175,7 @@ class Task {
     }
 
     recordTimelogs(timelogs){
-        let spentFreeLabels = this.config.get('freeLabels');
-        if(undefined === spentFreeLabels) {
-            spentFreeLabels = [];
-        }
-        let spentHalfPriceLabels = this.config.get('halfPriceLabels');
-        if(undefined === spentHalfPriceLabels) {
-            spentHalfPriceLabels = [];
-        }
-
-        let free = false;
-        let halfPrice = false;
-        this.labels.forEach(label => {
-                spentFreeLabels.forEach(freeLabel => {
-                    free |= (freeLabel == label);
-                });
-            });
-        this.labels.forEach(label => {
-                spentHalfPriceLabels.forEach(halfPriceLabel => {
-                    halfPrice |= (halfPriceLabel == label);
-                });
-            });
-
-        let chargeRatio = free? 0.0: (halfPrice? 0.5: 1.0);
+        let ratio = chargeRatio(this.labels, this.config);
 
         let times = [],
             timeSpent = 0,
@@ -190,15 +186,11 @@ class Task {
             (timelog) => {
                 let spentAt = dayjs(timelog.spentAt);
 
-                let time = new Time(null, spentAt, {
+                let time = new Time(spentAt, {
                     author: {username: timelog.user.username},
                     created_at: timelog.spentAt,
                     noteable_type: this._typeSingular
-                }, this, this.config);
-                time.seconds = timelog.timeSpent;
-                time.project_namespace = this.project_namespace;
-                time.note = timelog.note && timelog.note.body ? timelog.note.body : null;
-                time.chargeRatio = chargeRatio;
+                }, this.config, timelog.timeSpent, timelog.note && timelog.note.body ? timelog.note.body : null, ratio);
 
                 // only include times by the configured user
                 if (this.config.get('user') && this.config.get('user') !== timelog.user.username) return;

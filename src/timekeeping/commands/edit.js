@@ -1,7 +1,6 @@
 import {Command} from 'commander';
 import Cli from '../../core/cli.js';
 import Fs from '../../core/filesystem.js';
-import Time from '../../core/time.js';
 import Frame from '../storage/frame.js';
 import select, { Separator } from '@inquirer/select';
 import dayjs from '../../core/dayjs.js';
@@ -214,19 +213,21 @@ function showInteractiveMenu(frames) {
 }
 
 function edit(configLoader) {
-  const edit = new Command('edit', 'edit time record by the given id')
+  const edit = new Command('edit')
+    .description('edit time record by the given id')
     .arguments('[id]')
     .option('-f, --following <number>', 'edit also the following (by ctime) of the given [id]')
-    .option('-n, --listsize <number>', 'list size', 30)
+    .option('-n, --listsize <number>', 'list size', '30')
     .option('-i, --interactive', 'edit start/stop time interactively with keystrokes')
     .option('--today', 'only list entries for today')
     .option('--this_week', 'only list entries for this week')
+    .option('--last_week', 'only list entries for last week')
     .option('--day <day>', 'only list entries for this day')
     .option('--week <day>', 'only list entries for the week of this day')
     .action((id, opts ,program) => {
 
 let config = configLoader();
-let timeFormat = config.set('timeFormat', program.opts().time_format).get('timeFormat', 'log');
+config.set('timeFormat', program.opts().time_format);
 let timekeeper = new Timekeeper(config);
 const listSize = program.opts().listsize;
 
@@ -244,9 +245,13 @@ function getMenuFrames() {
       } else {
         frames = [];
       }
-    } else if (program.opts().today || program.opts().this_week) {
+    } else if (program.opts().today || program.opts().this_week || program.opts().last_week) {
       let from = program.opts().today ? dayjs().startOf('day') : dayjs().startOf('week');
       let to = program.opts().today ? dayjs().add(1, 'day').startOf('day') : dayjs().endOf('week').add(1, 'day').startOf('day');
+      if(program.opts().last_week) {
+        from = from.subtract(1, 'week');
+        to = to.subtract(1, 'week');
+      }
       frames = frames.filter((fr) => !fr.start.isBefore(from) && !fr.start.isAfter(to));
       frames.sort((a, b) => (a.start.isBefore(b.start) ? -1 : 1));
     } else if (program.opts().day || program.opts().week) {

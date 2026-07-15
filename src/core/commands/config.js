@@ -2,7 +2,8 @@ import {Command} from 'commander';
 import Fs from '../filesystem.js';
 
 function cfgCmd(configLoader) {
-    const cfgCmd = new Command('config', 'edit the configuration file in your default editor')
+    const cfgCmd = new Command('config')
+    .description('edit the configuration file in your default editor')
     .option('-l, --local', 'edit the local configuration file')
     .action((options, program) => {
 

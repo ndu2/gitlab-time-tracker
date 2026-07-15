@@ -4,20 +4,23 @@ import Config from '../../src/core/config.js';
 import Output from '../../src/reporting/output/base.js';
 import calculateStats from '../../src/reporting/stats.js';
 
-function makeTime({ user = 'alice', seconds = 0, date = '2026-01-05T10:00:00Z', iid = 1, project = 'group/project', note = null, chargeRatio = 1.0 } = {}) {
-    return { user, seconds, iid, project_namespace: project, date: dayjs(date), note, chargeRatio };
+function makeTime({ user = 'alice', seconds = 0, date = '2026-01-05T10:00:00Z', note = null, chargeRatio = 1.0 } = {}) {
+    return { user, seconds, date: dayjs(date), note, chargeRatio };
 }
 
-function makeIssue({ iid = 1, labels = [], times = [], estimate = 0, spent = 0, project_id = 1, title = 'issue' } = {}) {
-    return {
+function makeIssue({ iid = 1, labels = [], times = [], estimate = 0, spent = 0, project_id = 1, title = 'issue', project_namespace = 'group/project' } = {}) {
+    const issue = {
         iid,
         project_id,
+        project_namespace,
         title,
         labels,
         times,
         total_spent_s : spent,
         total_estimate_s : estimate
     };
+
+    return issue;
 }
 
 describe('calculateStats', () => {
@@ -40,8 +43,8 @@ describe('calculateStats', () => {
                 ]
             }),
             makeIssue({
-                iid: 2, times: [
-                    makeTime({ user: 'alice', seconds: 1800, project: 'group/other' })
+                iid: 2, project_namespace: 'group/other', times: [
+                    makeTime({ user: 'alice', seconds: 1800 })
                 ]
             })
         ]);
@@ -64,14 +67,11 @@ describe('calculateStats', () => {
         expect(output.stats['total spent']).to.equal('2h 15m');
     });
 
-    it('tracks free and half price time by label', () => {
-        config.set('freeLabels', ['pro bono']);
-        config.set('halfPriceLabels', ['discount']);
-
+    it('tracks free and half price time by chargeRatio, set on each time record by Task.recordTimelogs', () => {
         const output = calculate([
-            makeIssue({ iid: 1, labels: ['pro bono'], times: [makeTime({ seconds: 3600 })] }),
-            makeIssue({ iid: 2, labels: ['discount', 'bug'], times: [makeTime({ seconds: 1800 })] }),
-            makeIssue({ iid: 3, labels: ['bug'], times: [makeTime({ seconds: 60 })] })
+            makeIssue({ iid: 1, times: [makeTime({ seconds: 3600, chargeRatio: 0.0 })] }),
+            makeIssue({ iid: 2, times: [makeTime({ seconds: 1800, chargeRatio: 0.5 })] }),
+            makeIssue({ iid: 3, times: [makeTime({ seconds: 60, chargeRatio: 1.0 })] })
         ]);
 
         expect(output.spentFree).to.equal(3600);
@@ -79,9 +79,9 @@ describe('calculateStats', () => {
         expect(output.spent).to.equal(5460);
     });
 
-    it('treats missing free/half price label config as empty', () => {
+    it('treats full-price (chargeRatio 1.0) time as neither free nor half price', () => {
         const output = calculate([
-            makeIssue({ iid: 1, labels: ['bug'], times: [makeTime({ seconds: 3600 })] })
+            makeIssue({ iid: 1, times: [makeTime({ seconds: 3600, chargeRatio: 1.0 })] })
         ]);
 
         expect(output.spentFree).to.equal(0);
@@ -136,5 +136,13 @@ describe('Output.prepare', () => {
         }, ['iid', 'date', 'missing', 'undefined_column', 'labels']);
 
         expect(row).to.deep.equal([7, '2026-01-05', '', '', 'a,b']);
+    });
+
+    it('returns empty string when the column is missing on both obj and its parent, or there is no parent', () => {
+        const config = new Config();
+        const output = new Output(config, { issues: [], mergeRequests: [] });
+
+        expect(output.prepare({ parent: {} }, ['title'])).to.deep.equal(['']);
+        expect(output.prepare({}, ['title'])).to.deep.equal(['']);
     });
 });

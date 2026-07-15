@@ -13,6 +13,20 @@ const defaultFormats = {
  * exposes write/headline/toStdOut/toFile. Root of the output-format hierarchy.
  */
 class Output {
+    // assigned in the constructor via Object.assign(this, calculateStats(...))
+    /** @type {Array} */ times;
+    /** @type {Object} */ days;
+    /** @type {Object} */ daysMoment;
+    /** @type {Object} */ daysNew;
+    /** @type {Object<string,string>} */ users;
+    /** @type {Object<string,string>} */ projects;
+    /** @type {Object<string,string>} */ stats;
+    /** @type {number} */ totalEstimate;
+    /** @type {number} */ totalSpent;
+    /** @type {number} */ spent;
+    /** @type {number} */ spentFree;
+    /** @type {number} */ spentHalfPrice;
+
     /**
      * constructor
      * @param config
@@ -29,6 +43,12 @@ class Output {
     set format(value) {
         this.formats = Object.assign(this.formats, value);
     }
+
+    // implemented by each output format (table/csv/markdown/invoice)
+    makeStats() {}
+    makeIssues() {}
+    makeMergeRequests() {}
+    makeRecords() {}
 
     /**
      * print a headline
@@ -105,23 +125,25 @@ class Output {
     /**
      * prepare the given object by only returning
      * the given columns/properties and formatting
-     * special properties like dayjs instances
+     * special properties like dayjs instances.
      * @param obj
      * @param columns
      * @returns {Array}
      */
     prepare(obj = {}, columns = []) {
         return columns.map(column => {
-            if (dayjs.isDayjs(obj[column]))
-                return obj[column].format(this.config.get('dateFormat'));
+            let value = obj[column];
 
-            if (obj[column] === undefined || obj[column] === null)
+            if (dayjs.isDayjs(value))
+                return value.format(this.config.get('dateFormat'));
+
+            if (value === undefined || value === null)
                 return '';
 
-            if(typeof obj[column] == 'object') {
-                return obj[column].toString()
+            if(typeof value == 'object') {
+                return value.toString()
             }
-            return obj[column];
+            return value;
         });
     }
 }

@@ -23,7 +23,8 @@ function resumeFrame(timekeeper, frame) {
 }
 
 function resume(configLoader) {
-    const resume = new Command('resume', 'resume monitoring time for last stopped record')
+    const resume = new Command('resume')
+        .description('resume monitoring time for last stopped record')
         .arguments('[project]')
         .option('--verbose', 'show verbose output')
         .option('--ask', 'ask the activity to resume from the last entries, ignoring project')
@@ -37,8 +38,8 @@ function resume(configLoader) {
             if (!config.get('project'))
                 Cli.error('No project set');
 
-            let lastFrames = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
-            lastFrames = lastFrames.map((file) =>
+            let frameFiles = Fs.all(config.frameDir).slice(-listSize); // last listSize frames (one page of inquirer)
+            let lastFrames = frameFiles.map((file) =>
                 Frame.fromFile(config, Fs.join(config.frameDir, file.name))
             );
             lastFrames = lastFrames.sort((a, b) => dayjs(a.stop || dayjs()).isBefore(dayjs(b.stop || dayjs())) ? 1 : -1);

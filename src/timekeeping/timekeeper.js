@@ -1,7 +1,7 @@
 import Fs from '../core/filesystem.js';
 import Frame from './storage/frame.js';
-import Issue from '../core/issue.js';
-import MergeRequest from '../core/mergeRequest.js';
+import Issue from '../core/api/issue.js';
+import MergeRequest from '../core/api/mergeRequest.js';
 import FrameCollection from './storage/frameCollection.js';
 
 const classes = {
@@ -14,41 +14,65 @@ const CURRENT_FILE = '~current.tmp';
 class Timekeeper {
     constructor(config) {
         this.config = config;
-        this.sync = {};
     }
 
     /**
      * Path to the pointer file that names the currently
-     * active (has no contents if stopped)
+     * active frame (has no contents if stopped). config.frameDir
+     * can change after construction (eg. once `project` is set),
+     * so this stays a getter rather than a value cached once.
      */
-    _currentFile() {
+    get currentFile() {
         return Fs.join(this.config.frameDir, CURRENT_FILE);
     }
 
     /**
-     * id of the currently active frame, or null if none is running.
+     * The currently active frame, or null if none is running.
      * Only one frame can be active at a time, so this is a direct
      * lookup instead of scanning every frame file.
+     * @returns {Frame|null}
      */
-    _currentId() {
-        if (!Fs.exists(this._currentFile())) {
-            let running = new FrameCollection(this.config).frames.find(frame => frame.stop === false);
-            Fs.writeText(this._currentFile(), running ? running.id : '');
+    getCurrentFrame() {
+        if (!Fs.exists(this.currentFile)) {
+            let running = new FrameCollection(this.config).frames.find(frame => frame.stop === null);
+            Fs.writeText(this.currentFile, running ? running.id : '');
+            return running;
         }
-        let id = Fs.readText(this._currentFile()).trim();
+        let id = Fs.readText(this.currentFile).trim();
 
-        return id || null;
+        if (!id) return null;
+
+        let f = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json'));
+        if(f.stop != null) {
+            // lost sync. reset
+            Fs.remove(this.currentFile);
+            let running = new FrameCollection(this.config).frames.find(frame => frame.stop === null);
+            Fs.writeText(this.currentFile, running ? running.id : '');
+            f = running;
+        }
+        return f;
     }
 
     /**
-     * Filter frames that need an update
-     * @returns {Promise}
+     * Records the given frame as the currently active one, or clears
+     * it when called with null/undefined.
+     * @param {Frame|null} [frame]
      */
-    async syncInit() {
-        this.sync.frames = new FrameCollection(this.config);
+    setCurrentFrame(frame) {
+        Fs.writeText(this.currentFile, frame ? frame.id : '');
+    }
 
-        // filter out frames, that don't need an update
-        this.sync.frames.filter(frame => !(Math.ceil(frame.duration) === frame.notes.reduce((n, m) => (n + m.time), 0)));
+    /**
+     * Frames that still need a GitLab time record: their tracked duration
+     * doesn't match what's already been recorded as notes.
+     * @returns {Promise<FrameCollection>}
+     */
+    async pendingFrames() {
+        let frames = new FrameCollection(this.config);
+
+        frames.filter(frame => !(Math.ceil(frame.duration) === frame.notes.reduce((n, m) => (n + m.time), 0)));
+
+        return frames;
     }
 
     /**
@@ -58,16 +82,16 @@ class Timekeeper {
      * @returns {Promise<Object>} {year: {month: [frame, ...]}}
      */
     async archiveInit() {
-        await this.syncInit();
+        let pending = await this.pendingFrames();
 
-        if (this.sync.frames.length > 0) {
+        if (pending.length > 0) {
             throw new Error('Not all frames are synced yet. Run `gtt sync` first.');
         }
 
         let grouped = {};
 
         await new FrameCollection(this.config).forEach(frame => {
-            if (frame.stop === false) return;
+            if (frame.stop === null) return;
 
             let year = frame.date.format('YYYY'),
                 month = frame.date.format('MM');
@@ -82,59 +106,58 @@ class Timekeeper {
     }
 
     /**
-     * Resolve merge_requests and issues
-     * respectively.
-     * @returns {Promise}
+     * Sync the given frames to GitLab: resolve or create their issue/merge
+     * request, refresh the frame title, then push a time record note for
+     * whatever duration hasn't been recorded yet. One call, three internal
+     * phases (resolve/details/update) - callers no longer choreograph them.
+     * @param {FrameCollection} frames typically the result of pendingFrames()
+     * @param {Object} [hooks]
+     * @param {(phase: 'resolve'|'details'|'update', total: number) => void} [hooks.onPhase] called once per phase, before it starts
+     * @param {() => void} [hooks.onProgress] called after each frame is resolved/updated
+     * @returns {Promise<FrameCollection>} the frames that were synced
      */
-    syncResolve(callback) {
-        this.sync.resources = {}
+    async sync(frames, {onPhase = () => {}, onProgress = () => {}} = {}) {
+        if (frames.length === 0) return frames;
 
-        // resolve issues and merge requests
-        return this.sync.frames.forEach(async frame => {
+        let resources = {};
+
+        onPhase('resolve', frames.length);
+        await frames.forEach(async frame => {
             let project = frame.project,
                 type = frame.resource.type,
                 id = frame.resource.id;
-            if(!(project in this.sync.resources))
-            {
-                this.sync.resources[project]=
-                {
-                    issue: {},
-                    merge_request: {}
-                };
+
+            if (!(project in resources)) {
+                resources[project] = {issue: {}, merge_request: {}};
             }
 
-            if(id in this.sync.resources[project][type]) {
+            if (id in resources[project][type]) {
                 return;
             }
-            this.sync.resources[project][type][id] = new classes[type](this.config, {});
+            resources[project][type][id] = new classes[type](this.config, {});
 
             try {
-                await this.sync.resources[project][type][id].make(project, id, frame.resource.new);
+                await resources[project][type][id].make(project, id, frame.resource.new);
             } catch (error) {
                 throw new Error(`Could not resolve ${type} ${id} on "${project}": ${error.message ?? error}`);
             }
 
-            if (callback) callback();
-        })
-    }
+            onProgress();
+        });
 
-    /**
-     * sync details to frames.
-     */
-     syncDetails(callback) {
-        return this.sync.frames.forEach(frame => {
+        onPhase('details', frames.length);
+        await frames.forEach(frame => {
             let project = frame.project,
                 type = frame.resource.type,
                 id = frame.resource.id;
 
-            if(id in this.sync.resources[project][type]) {
-                frame.title = this.sync.resources[project][type][id].data.title;
+            if (id in resources[project][type]) {
+                frame.title = resources[project][type][id].data.title;
             }
         });
-    }
 
-    syncUpdate(callback) {
-        return this.sync.frames.forEach(async frame => {
+        onPhase('update', frames.length);
+        await frames.forEach(async frame => {
             let time = frame.duration,
                 project = frame.project,
                 type = frame.resource.type,
@@ -144,17 +167,19 @@ class Timekeeper {
                 time = Math.ceil(frame.duration) - parseInt(frame.notes.reduce((n, m) => (n + m.time), 0));
 
             try {
-                await this._addTime(frame, time);
+                await this._addTime(resources, frame, time);
             } catch (error) {
                 throw new Error(`Could not update ${type} ${id} on ${project}: ${error.message ?? error}`);
             }
 
-            if (callback) callback();
+            onProgress();
         });
+
+        return frames;
     }
 
-    async _addTime(frame, time) {
-        let resource = this.sync.resources[frame.project][frame.resource.type][frame.resource.id];
+    async _addTime(resources, frame, time) {
+        let resource = resources[frame.project][frame.resource.type][frame.resource.id];
 
         let createdNote = await resource.createTime(Math.ceil(time), frame._stop, frame.note);
         let noteid = createdNote ?.id?.split('/')?.pop();
@@ -185,11 +210,11 @@ class Timekeeper {
      * @returns {Promise}
      */
     async status() {
-        let id = this._currentId();
+        let frame = this.getCurrentFrame();
 
-        if (!id) return [];
+        if (!frame) return [];
 
-        return [Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json'))];
+        return [frame];
     }
 
     /**
@@ -202,7 +227,7 @@ class Timekeeper {
 
         await new FrameCollection(this.config)
             .forEach(frame => {
-                if (frame.stop === false) return;
+                if (frame.stop === null) return;
                 let date = frame.date.format('YYYY-MM-DD');
 
                 if (!frames[date]) frames[date] = [];
@@ -257,11 +282,11 @@ class Timekeeper {
     async start(project, type, id, note) {
         this.config.set('project', project);
 
-        if (this._currentId())
+        if (this.getCurrentFrame())
             throw new Error("Already running. Please stop it first with 'gtt stop'.");
 
         let frame = new Frame(this.config, id, type, note).startMe();
-        Fs.writeText(this._currentFile(), frame.id);
+        this.setCurrentFrame(frame);
 
         return frame;
     }
@@ -271,12 +296,12 @@ class Timekeeper {
      * @returns {Promise}
      */
     async stop() {
-        let id = this._currentId();
+        let frame = this.getCurrentFrame();
 
-        if (!id) throw new Error('No projects started.');
+        if (!frame) throw new Error('No projects started.');
 
-        let frame = Frame.fromFile(this.config, Fs.join(this.config.frameDir, id + '.json')).stopMe();
-        Fs.truncate(this._currentFile());
+        frame.stopMe();
+        this.setCurrentFrame(null);
 
         return [frame];
     }
@@ -286,14 +311,12 @@ class Timekeeper {
      * @returns {Promise}
      */
     async cancel() {
-        let id = this._currentId();
+        let frame = this.getCurrentFrame();
 
-        if (!id) throw new Error('No projects started.');
+        if (!frame) throw new Error('No projects started.');
 
-        let file = Fs.join(this.config.frameDir, id + '.json');
-        let frame = Frame.fromFile(this.config, file);
-        Fs.remove(file);
-        Fs.truncate(this._currentFile());
+        Fs.remove(Fs.join(this.config.frameDir, frame.id + '.json'));
+        this.setCurrentFrame(null);
 
         return [frame];
     }

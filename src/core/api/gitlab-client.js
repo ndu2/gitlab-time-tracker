@@ -1,6 +1,5 @@
-import crypto from 'crypto';
 import { throttledQueue } from 'throttled-queue';
-import parallel from './parallel.js';
+import parallel from '../parallel.js';
 
 /**
  * GitLab REST/GraphQL client: owns the request throttle, single/parallel
@@ -11,7 +10,10 @@ class GitlabClient {
 
     static init(config) {
         if(GitlabClient.throttle == undefined){
-            GitlabClient.throttle = throttledQueue(config.data.throttleMaxRequestsPerInterval, config.data.throttleInterval);
+            GitlabClient.throttle = throttledQueue({
+                maxPerInterval: config.data.throttleMaxRequestsPerInterval,
+                interval: config.data.throttleInterval
+            });
         }
     }
 
@@ -184,7 +186,7 @@ class GitlabClient {
      * @param perPage
      * @returns {Array}
      */
-    static createGetTasks(path, to, from = 2, perPage = this._perPage) {
+    static createGetTasks(path, to, from = 2, perPage) {
         let tasks = [];
 
         for (let i = from; i <= to; i++) {

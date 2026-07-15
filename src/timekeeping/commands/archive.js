@@ -6,7 +6,8 @@ import Zip from '../../core/zip.js';
 import Timekeeper from '../timekeeper.js';
 
 function archive(configLoader) {
-    const archive = new Command('archive', 'archive synced time records into yearly zip files (filesYYYY.zip), one folder per month')
+    const archive = new Command('archive')
+        .description('archive synced time records into yearly zip files (filesYYYY.zip), one folder per month')
         .option('--year <year>', 'only archive the given year')
         .option('--verbose', 'show verbose output')
         .action((options, program) => {

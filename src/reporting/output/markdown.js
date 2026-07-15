@@ -24,7 +24,7 @@ class MarkdownOutput extends Output {
         Object.entries(this.stats).forEach(([name, time]) => stats += `\n* **${name}**: ${time}`);
         stats += `\n`;
 
-        if (this.projects.length > 1) {
+        if (Object.keys(this.projects).length > 1) {
             Object.entries(this.projects).forEach(([name, time]) => stats += `\n* **${pc.red(name)}**: ${time}`);
             stats += `\n`;
         }

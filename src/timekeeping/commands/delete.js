@@ -5,14 +5,18 @@ import Fs from '../../core/filesystem.js';
 import pc from 'picocolors';
 
 function delCmd(configLoader) {
-    const delCmd = new Command('delete', 'delete time record by the given id')
+    const delCmd = new Command('delete')
+        .description('delete time record by the given id')
         .arguments('[id]')
         .action((id, opts, program) => {
 
             let config = configLoader();
 
-            if (!id && -Infinity === (id = Fs.newest(config.frameDir).name))
-                Cli.error('No record found.');
+            if (!id) {
+                let newest = Fs.newest(config.frameDir);
+                if (!newest) Cli.error('No record found.');
+                id = newest.name;
+            }
 
             let file = Fs.join(config.frameDir, id.replace('.json', '') + '.json');
             if (!Fs.exists(file)) {

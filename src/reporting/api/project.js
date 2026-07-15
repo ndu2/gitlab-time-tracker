@@ -1,4 +1,4 @@
-import GitlabClient from '../../core/gitlab-client.js';
+import GitlabClient from '../../core/api/gitlab-client.js';
 
 /**
  * project model
@@ -6,9 +6,9 @@ import GitlabClient from '../../core/gitlab-client.js';
 class Project {
     /**
      * construct
-     * @param config
+     * @param {import('../../core/config.js').default} config
      * @param data
-     * @param client
+     * @param {GitlabClient} client
      */
     constructor(config, data, client = new GitlabClient(config)) {
         this.config = config;
@@ -19,38 +19,27 @@ class Project {
 
     /**
      * make
-     * @param name
+     * @param {import('../../core/config.js').default} config
+     * @param {GitlabClient} client
+     * @param {string} name
      */
-    make(name) {
-        let promise = this.client.get(`projects/${encodeURIComponent(name)}`);
-        promise.then(project => this.data = project.body);
-
-        return promise;
+    static async create(config, name, client) {
+        let data = await client.get(`projects/${encodeURIComponent(name)}`);
+        return new Project(config, data.body, client);
     }
 
     /**
      * set members
-     * @returns {Promise}
+     * @returns {Promise<void>}
      */
-    members() {
-        return new Promise((resolve, reject) => {
-            this.client.get(`projects/${this.id}/members`)
-                .then(response => {
-                    this.projectMembers = this.projectMembers.concat(response.body);
-                    return new Promise(r => r());
-                })
-                .then(() => {
-                    if (!this.data.namespace || !this.data.namespace.kind || this.data.namespace.kind !== "group") return resolve();
+    async members() {
+        let response = await this.client.get(`projects/${this.id}/members`);
+        this.projectMembers = this.projectMembers.concat(response.body);
 
-                    this.client.get(`groups/${this.data.namespace.id}/members`)
-                        .then(response => {
-                            this.projectMembers = this.projectMembers.concat(response.body);
-                            resolve();
-                        })
-                        .catch(e => reject(e));
-                })
-                .catch(e => reject(e));
-        });
+        if (!this.data.namespace || !this.data.namespace.kind || this.data.namespace.kind !== "group") return;
+
+        let groupResponse = await this.client.get(`groups/${this.data.namespace.id}/members`);
+        this.projectMembers = this.projectMembers.concat(groupResponse.body);
     }
 
     /*
@@ -60,8 +49,12 @@ class Project {
         return this.data.id;
     }
 
-    get name() {
+    get namespace() {
         return this.data.path_with_namespace;
+    }
+
+    get name() {
+        return this.data.name;
     }
 
     get users() {

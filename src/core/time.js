@@ -1,16 +1,14 @@
 import dayjs from './dayjs.js';
 
 const defaultTimeFormat = '[%sign][%days>d ][%hours>h ][%minutes>m ][%seconds>s]';
-const mappings = ['complete', 'sign', 'months', 'weeks', 'days', 'hours', 'minutes', 'seconds'];
-const regex = /^(?:([-])\s*)?(?:(\d+)mo\s*)?(?:(\d+)w\s*)?(?:(\d+)d\s*)?(?:(\d+)h\s*)?(?:(\d+)m\s*)?(?:(\d+)s\s*)?$/;
 const conditionalRegex = /(\[\%([^\>\]]*)\>([^\]]*)\])/ig;
 const roundedRegex = /(\[\%([^\>\]]*)\:([^\]]*)\])/ig;
 const conditionalSimpleRegex = /([0-9]*)\>(.*)/ig;
 const defaultRegex = /(\[\%([^\]]*)\])/ig;
 
-Number.prototype.padLeft = function (n, str) {
-    return Array(Math.max(0, n - String(this).length + 1)).join(str || '0') + this;
-};
+function padLeft(value, n, str) {
+    return Array(Math.max(0, n - String(value).length + 1)).join(str || '0') + value;
+}
 
 /**
  * time model
@@ -18,24 +16,20 @@ Number.prototype.padLeft = function (n, str) {
 class Time {
     /**
      * construct
-     * @param timeString
-     * @param note
-     * @param {hasTimes} parent
+     * @param date
+     * @param data raw noteable payload (author, created_at, noteable_type)
      * @param config
+     * @param {number} seconds
+     * @param {string|null} [note]
+     * @param {number} [chargeRatio]
      */
-    constructor(timeString, date = null, note, parent, config) {
-        this.data = note;
+    constructor(date = null, data, config, seconds, note = null, chargeRatio = 1.0) {
+        this.data = data;
         this._date = date;
-        this.parent = parent;
         this.config = config;
-        this.note = null;
-        this.chargeRatio = 1.0;
-
-        if(!timeString) {
-            return;
-        }
-
-        this.seconds = Time.parse(timeString, this._hoursPerDay, this._daysPerWeek, this._weeksPerMonth);
+        this.note = note;
+        this.chargeRatio = chargeRatio;
+        this.seconds = seconds;
     }
 
     /*
@@ -57,25 +51,8 @@ class Time {
         return this.data.noteable_type;
     }
 
-    get project_id() {
-        return this.parent.data.project_id;
-    }
-
-    get iid() {
-        return this.parent.iid;
-    }
-
     get time() {
         return Time.toHumanReadable(this.seconds, this._hoursPerDay, this._timeFormat);
-    }
-
-    /**
-     * Title of the linked Noteable object (Issue/MergeRequest)
-     *
-     * @returns {String|null}
-     */
-    get title() {
-        return this.parent && this.parent.title || null;
     }
 
     get _timeFormat() {
@@ -92,28 +69,6 @@ class Time {
 
     get _weeksPerMonth() {
         return this.config && this.config.get('weeksPerMonth') ? parseInt(this.config.get('weeksPerMonth')) : 4;
-    }
-
-    /**
-     * parse human readable to seconds
-     * @param string
-     * @param hoursPerDay
-     * @param daysPerWeek
-     * @param weeksPerMonth
-     * @returns {*}
-     */
-    static parse(string, hoursPerDay = 8, daysPerWeek = 5, weeksPerMonth = 4) {
-        let match, parsed;
-
-        if ((match = regex.exec(string)) === null) return false;
-        parsed = Object.fromEntries(mappings.map((key, i) => [key, match[i] === undefined ? 0 : match[i]]));
-
-        return (parsed.sign ? -1 : 1) * (parseInt(parsed.seconds)
-            + (parseInt(parsed.minutes) * 60)
-            + (parseInt(parsed.hours) * 60 * 60)
-            + (parseInt(parsed.days) * hoursPerDay * 60 * 60)
-            + (parseInt(parsed.weeks) * daysPerWeek * hoursPerDay * 60 * 60)
-            + (parseInt(parsed.months) * weeksPerMonth * daysPerWeek * hoursPerDay * 60 * 60));
     }
 
     /**
@@ -137,18 +92,18 @@ class Time {
         inserts.days_overall = input / secondsInADay;
         inserts.days_overall_comma = inserts.days_overall.toString().replace('.', ',');
         inserts.days = Math.floor(inserts.days_overall);
-        inserts.Days = inserts.days.padLeft(2, 0);
+        inserts.Days = padLeft(inserts.days, 2, '0');
         inserts.hours_overall = input / secondsInAnHour;
         inserts.hours_overall_comma = inserts.hours_overall.toString().replace('.', ',');
         inserts.hours = Math.floor((input % secondsInADay) / secondsInAnHour);
-        inserts.Hours = inserts.hours.padLeft(2, 0);
+        inserts.Hours = padLeft(inserts.hours, 2, '0');
         inserts.minutes_overall = input / secondsInAMinute;
         inserts.minutes_overall_comma = (inserts.minutes_overall).toString().replace('.', ',');
         inserts.minutes = Math.floor(((input % secondsInADay) % secondsInAnHour) / secondsInAMinute);
-        inserts.Minutes = inserts.minutes.padLeft(2, 0);
+        inserts.Minutes = padLeft(inserts.minutes, 2, '0');
         inserts.seconds_overall = input;
         inserts.seconds = ((input % secondsInADay) % secondsInAnHour) % secondsInAMinute;
-        inserts.Seconds = inserts.seconds.padLeft(2, 0);
+        inserts.Seconds = padLeft(inserts.seconds, 2, '0');
 
         // rounded
         while ((match = roundedRegex.exec(format)) !== null) {
@@ -159,9 +114,9 @@ class Time {
                 decimals = conditionalMatch[1]
             }
 
-            decimals = parseInt(decimals);
-            time = Math.ceil(inserts[match[2]] * Math.pow(10, decimals)) / Math.pow(10, decimals);
-            output = output.replace(match[0], time !== 0 && conditionalMatch ? time + conditionalMatch[2] : time);
+            let iDecimals = parseInt(decimals);
+            time = Math.ceil(inserts[match[2]] * Math.pow(10, iDecimals)) / Math.pow(10, iDecimals);
+            output = output.replace(match[0], (time !== 0 && conditionalMatch ? time + conditionalMatch[2] : time).toString());
         }
 
         // conditionals

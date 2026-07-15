@@ -6,7 +6,8 @@ import Timekeeper from '../timekeeper.js';
 
 
 function create(configLoader) {
-    const create = new Command('create', 'start monitoring time for the given project and create a new issue or merge request with the given title')
+    const create = new Command('create')
+    .description('start monitoring time for the given project and create a new issue or merge request with the given title')
     .arguments('[project] [title]')
     .option('-t, --type <type>', 'specify resource type: issue, merge_request')
     .option('--verbose', 'show verbose output')
