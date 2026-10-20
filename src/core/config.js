@@ -43,6 +43,8 @@ const defaults = {
     throttleMaxRequestsPerInterval: 10,
     throttleInterval: 1000,
     frameDir: undefined,
+    clientPfx: undefined,
+    clientPfxPassphrase: undefined,
 };
 
 /**

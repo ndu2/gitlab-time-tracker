@@ -491,6 +491,8 @@ Here's a sample configuration file including all available options:
 # Make sure there's a trailing slash
 # [required]
 url: http://gitlab.com/api/v4/
+clientPfx: /path/to/your/client-certificate.p12
+clientPfxPassphrase: null
 
 # GitLab personal api token
 # [required]
