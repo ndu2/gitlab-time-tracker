@@ -1,6 +1,6 @@
 {
   "name": "gitlab-time-tracker",
-  "version": "1.9.0-beta0002",
+  "version": "1.9.0-beta0003",
   "type": "module",
   "description": "A command line interface for GitLabs time tracking feature.",
   "bugs": {
@@ -56,7 +56,8 @@
     "progress": "^2.0.3",
     "swissqrbill": "^4.3.0",
     "tempfile": "^6.0.1",
-    "throttled-queue": "^3.0.0"
+    "throttled-queue": "^3.0.0",
+    "undici": "^8.12.3"
   },
   "devDependencies": {
     "@types/node": "^26.1.1",

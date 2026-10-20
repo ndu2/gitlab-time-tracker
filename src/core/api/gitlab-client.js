@@ -1,5 +1,7 @@
 import { throttledQueue } from 'throttled-queue';
 import parallel from '../parallel.js';
+import { fetch, Agent } from 'undici';
+import { readFileSync } from 'node:fs';
 
 /**
  * GitLab REST/GraphQL client: owns the request throttle, single/parallel
@@ -7,6 +9,7 @@ import parallel from '../parallel.js';
  */
 class GitlabClient {
     static throttle;
+    static dispatcher;
 
     static init(config) {
         if(GitlabClient.throttle == undefined){
@@ -14,6 +17,14 @@ class GitlabClient {
                 maxPerInterval: config.data.throttleMaxRequestsPerInterval,
                 interval: config.data.throttleInterval
             });
+        }
+        if(GitlabClient.dispatcher == undefined) {
+            GitlabClient.dispatcher = new Agent({
+                connect: {
+                   pfx: (config.data.clientPfx == undefined) ? undefined : readFileSync(config.data.clientPfx),
+                   passphrase: config.data.clientPfxPassphrase,
+                }
+            })
         }
     }
 
@@ -42,6 +53,7 @@ class GitlabClient {
     post(path, data) {
         return GitlabClient.throttle(async () => {
             const response = await fetch(`${this.url}${path}`, {
+                dispatcher: GitlabClient.dispatcher,
                 method: 'POST',
                 headers: {
                     'PRIVATE-TOKEN': this.token,
@@ -101,6 +113,7 @@ class GitlabClient {
 
         return GitlabClient.throttle(async () => {
             const response = await fetch(`${path}`, {
+                dispatcher: GitlabClient.dispatcher,
                 method: 'POST',
                 headers: {
                     'Authorization': 'Bearer '+this.token,
@@ -129,6 +142,7 @@ class GitlabClient {
 
         return GitlabClient.throttle(async () => {
             const response = await fetch(`${this.url}${path}`, {
+                dispatcher: GitlabClient.dispatcher,
                 headers: {
                     'PRIVATE-TOKEN': this.token
                 }
